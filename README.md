@@ -9,6 +9,8 @@ multi-strategy document reading, and permission-enforced data access.
 Built on the contractor side of the `tenderfy-subbie-portal` prototype — same
 chrome, tokens (`#1D9E75` teal, `#394645` rail), Outfit, Material Symbols.
 
+**Live demo:** <https://daandydoan.github.io/tenderfy-ray-phase1/>
+
 ## Run it
 
 ```bash
