@@ -153,6 +153,34 @@ the §1 argument that one service serves every surface.
 The remaining sidebar entries have no `href` and render with `data-toast`, so
 they say they are not built rather than 404.
 
+## The two marks
+
+Ray has two pieces of artwork, and which one shows is a statement about how much
+room he currently occupies.
+
+| | Mark | Where |
+|---|---|---|
+| `assets/ray.svg` | head only, compact | app header chip, the reopen FAB, an inline panel folded into a dialog |
+| `assets/ray-panel.svg` | full character, paw raised | the rail: its header, empty state, and the byline on every reply |
+
+The rule is that the **full character is earned by having a panel of your own**.
+Where Ray is a control you press he stays a compact glyph; once he has the side
+panel he is a presence, and gets the room. `Panel.mark` is resolved once at
+build time from `this.mode`, because a panel's mode never changes after it is
+constructed.
+
+The supplied artwork is a 60×60 box whose drawing only occupies 46×35.6 of it,
+so at a fixed `20px` square it rendered about a third smaller than the mark it
+replaces, and squashed. The viewBox is tightened to the measured bounds and the
+CSS sets `height` with `width:auto`, so both marks sit at the same optical
+height and neither is distorted. Sizes are 16px (byline), 20px (header), 34px
+(empty state).
+
+> Both marks are drawn with `#222222` outlines, which merge into the dark rail
+> and leave the mid-slate fills doing the work. It is legible, but the character
+> has less definition on dark than on light. Worth a dark-rail variant if Ray's
+> mark is going to carry more weight than this.
+
 ## Naming
 
 The UI calls a conversation a **project**; the code calls it a *thread*

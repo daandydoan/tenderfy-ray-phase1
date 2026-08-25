@@ -269,7 +269,7 @@ h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center
          cursor:pointer;display:flex;align-items:center;gap:7px;z-index:60;
          font:inherit;font-size:13px;font-weight:600;color:var(--ink)}
 .ray-fab:hover{border-color:var(--lighter);box-shadow:0 6px 18px rgba(0,0,0,.14)}
-.ray-fab img{width:24px;height:24px;display:block}
+.ray-fab img{height:24px;width:auto;display:block}
 .ray-fab::after{content:'Ray'}
 
 /* ── Ray: the site rail ────────────────────────────────────────────────
@@ -361,8 +361,8 @@ html.ray-light .ray-panel{
    A title bar for a region of the app, not a branded chat header. The mark
    is present at 20px and nothing else competes with the conversation.    */
 .ray-head{display:flex;align-items:center;gap:9px;padding:0 12px 0 16px;height:52px;flex-shrink:0}
-.ray-mark{width:20px;height:20px;display:block;opacity:.9}
-.ray-mark.lg{width:34px;height:34px;opacity:.85}
+.ray-mark{height:20px;width:auto;display:block;opacity:.9}
+.ray-mark.lg{height:34px;width:auto;opacity:.85}
 .ray-id{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:8px}
 .ray-id span{font-size:12px;font-weight:400;color:var(--light)}
 .ray-hbtn{cursor:pointer;font-size:19px;color:var(--light);border-radius:6px;padding:3px}
@@ -455,7 +455,7 @@ html.ray-light .ray-panel{
 .ray-turn.user{align-items:flex-end}
 .ray-byline{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
             letter-spacing:.02em}
-.ray-byline img{width:16px;height:16px;display:block;opacity:.75}
+.ray-byline img{height:16px;width:auto;display:block;opacity:.75}
 .ray-bubble{line-height:1.68;font-size:14px;overflow-wrap:break-word}
 .ray-bubble.user{border-radius:14px;padding:11px 15px;max-width:88%;line-height:1.55}
 .ray-bubble p{margin:0 0 12px}

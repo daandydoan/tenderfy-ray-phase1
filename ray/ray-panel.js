@@ -23,8 +23,16 @@
 (function (global) {
   'use strict';
 
-  /* Pages live at the root and under pages/ — resolve the artwork once. */
-  const RAY_IMG = (/\/pages\//.test(location.pathname) ? '../' : '') + 'assets/ray.svg';
+  /* Pages live at the root and under pages/ — resolve the artwork once.
+
+     Ray has two marks. The compact one is Ray-as-affordance: the header chip
+     and the reopen button, where he is a control you press. The full character
+     is Ray-as-presence, and only earns the room once he has a side panel of
+     his own — so the rail, its empty state and every reply he signs use it,
+     while an inline panel folded into a dialog keeps the compact mark. */
+  const ART = (/\/pages\//.test(location.pathname) ? '../' : '') + 'assets/';
+  const RAY_IMG = ART + 'ray.svg';
+  const RAY_FULL = ART + 'ray-panel.svg';
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
   const OPEN_KEY = 'ray_rail_open';
@@ -180,6 +188,8 @@
       host.appendChild(el);
       this.el = el;
       this.$ = (n) => el.querySelector(`[data-ray="${n}"]`);
+      /* Set once at build: the mode never changes for a live panel. */
+      this.mark = this.mode === 'inline' ? RAY_IMG : RAY_FULL;
 
       if (this.mode !== 'inline') {
         const fab = document.createElement('button');
@@ -362,7 +372,7 @@
       const head = this.$('head');
       if (this.view === 'list') {
         head.innerHTML = `
-          <img class="ray-mark" src="${RAY_IMG}" alt="">
+          <img class="ray-mark" src="${this.mark}" alt="">
           <div class="ray-title">Projects</div>
           <span class="ms ray-hbtn" data-ray-new title="New project">add</span>
           <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
@@ -813,7 +823,7 @@
       const n = service.registry.countsFor(s, g);
       this.$('body').innerHTML = `
         <div class="ray-empty">
-          <img class="ray-mark lg" src="${RAY_IMG}" alt="">
+          <img class="ray-mark lg" src="${this.mark}" alt="">
           <h3>What's next?</h3>
           <p>Ask me anything across your tenders, documents and Response Library.
              I can see what you have open, and everything I fetch stays inside
@@ -872,7 +882,7 @@
       const el = document.createElement('div');
       el.className = `ray-turn ${role}`;
       el.innerHTML = role === 'assistant'
-        ? `<div class="ray-byline"><img src="${RAY_IMG}" alt="">Ray</div>`
+        ? `<div class="ray-byline"><img src="${this.mark}" alt="">Ray</div>`
           + `<div class="ray-bubble">${html}</div>`
         : `<div class="ray-bubble user">${html}</div>`;
       body.appendChild(el);
