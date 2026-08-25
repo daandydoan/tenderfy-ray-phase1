@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenderfy — Tenders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div id="screen" style="display:none">
+
+<div class="pad">
+  <div class="sect-h">
+    <div><h1>Tenders</h1><p class="sub" style="margin:0" id="count"></p></div>
+    <a class="btn pri"><span class="ms" style="font-size:17px">add</span> New tender</a>
+  </div>
+  <div class="crumbsel">
+    <a class="on">All</a><a>Pending</a><a>In progress</a><a>Draft</a><a>Closed</a>
+  </div>
+  <div class="card"><table class="data" id="tbl"></table></div>
+
+  <div class="card devonly">
+    <h2><span class="ms sec-ic c-red">shield_person</span> Rows withheld from this role</h2>
+    <div id="withheld" class="sub" style="margin:0"></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../data/fixtures.js"></script>
+<script src="../ray/ray-permissions.js"></script>
+<script src="../ray/ray-documents.js"></script>
+<script src="../ray/ray-context.js"></script>
+<script src="../ray/ray-tools.js"></script>
+<script src="../ray/ray-provider.js"></script>
+<script src="../ray/ray-surfaces.js"></script>
+<script src="../ray/ray-core.js"></script>
+<script src="../ray/ray-panel.js"></script>
+<script>window.PAGE = {"nav": "tenders", "crumb": "Tenders", "ray": {"surface": "page", "context": {"pageTitle": "All tenders"}}};</script>
+<script>
+window.onPageReady = function(service, user){
+  const g=service.guard, R=RayPermissions.Repositories, all=RayFixtures.TENDERS.length;
+  const t=R.tenders.list(g);
+  document.getElementById('count').textContent = t.length + ' tenders';
+  document.getElementById('tbl').innerHTML =
+    '<thead><tr><th>Tender</th><th>Reference</th><th>Organisation</th><th>Sector</th><th>Value</th><th>Due</th><th>Status</th></tr></thead><tbody>'
+    + t.map(x=>`<tr class="rowlink" onclick="location.href='tender-detail.html'">
+        <td><b>${x.name}</b></td><td>${x.ref}</td><td>${x.org}</td><td>${x.sector}</td>
+        <td>$${(x.value/1e6).toFixed(1)}M</td>
+        <td><span class="dueflag ${x.id==='t-envind'?'due-soon':''}">${rayDate(x.due)}</span></td>
+        <td><span class="badge ${x.status==='Pending'?'b-amber':x.status==='Draft'?'b-grey':'b-green'}">${x.status}</span></td>
+      </tr>`).join('') + '</tbody>';
+  document.getElementById('withheld').innerHTML =
+    `${all-t.length} of ${all} tenders are filtered out for <b>${user.role}</b> — by business tenancy or by assignment. `
+    + `Ray receives the same filtered list.`;
+};
+</script>
+<script src="../app.js"></script>
+</body>
+</html>

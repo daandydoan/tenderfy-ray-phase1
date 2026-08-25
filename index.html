@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenderfy — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="screen" style="display:none">
+
+<div class="pad">
+  <h1 class="page-h"><span class="pbar"></span>Dashboard</h1>
+
+  <div class="ov-head">
+    <h2>Overview</h2>
+    <div class="ov-dates">
+      <label class="dfield"><input placeholder="Date From"><span class="ms">calendar_today</span></label>
+      <span class="dsep">-</span>
+      <label class="dfield"><input placeholder="Date To"><span class="ms">calendar_today</span></label>
+    </div>
+  </div>
+
+  <div class="ovgrid">
+    <div class="ovcard wide">
+      <div class="v big" id="ovValue">$5,000,010</div>
+      <div class="l">Tender Awarded Contract Value</div>
+    </div>
+    <div class="ovcard">
+      <div class="v teal"><span class="ms">trending_up</span>66.67%</div>
+      <div class="l">Win Rate</div><div class="s">Last Updated 2026-06-26</div>
+    </div>
+    <div class="ovcard">
+      <div class="v teal"><span class="ms">trending_up</span>2</div>
+      <div class="l">Tender Awarded</div><div class="s">Last Updated 2026-05-26</div>
+    </div>
+    <div class="ovcard">
+      <div class="v down"><span class="ms">trending_down</span>1</div>
+      <div class="l">Tender Unsuccessful</div><div class="s">Last Updated 2026-06-15</div>
+    </div>
+    <div class="ovcard">
+      <div class="v" id="ovCount">6</div>
+      <div class="l">Tenders</div><div class="s">Total Submitted</div>
+    </div>
+  </div>
+
+  <div class="dash-cols">
+    <div class="panel">
+      <div class="tabbar">
+        <div class="set">
+          <div class="tb on">My Tasks</div>
+          <div class="tb">Assigned Tasks</div>
+          <div class="tb">Completed Tasks</div>
+        </div>
+        <button class="pri-btn"><span class="ms">swap_vert</span> Priority</button>
+      </div>
+      <table class="tasktbl" id="taskTbl"></table>
+    </div>
+
+    <div class="panel panel-pad">
+      <div class="up-head">
+        <h2>Upcoming Tenders</h2>
+        <span class="up-more" data-toast="Opens the full tender list">Show more</span>
+      </div>
+      <div id="upcoming"></div>
+    </div>
+  </div>
+
+  <button class="devtoggle" onclick="rayToggleDev()">
+    <span class="ms">tune</span><span id="devlabel"></span></button>
+</div>
+</div>
+
+<script src="data/fixtures.js"></script>
+<script src="ray/ray-permissions.js"></script>
+<script src="ray/ray-documents.js"></script>
+<script src="ray/ray-context.js"></script>
+<script src="ray/ray-tools.js"></script>
+<script src="ray/ray-provider.js"></script>
+<script src="ray/ray-surfaces.js"></script>
+<script src="ray/ray-core.js"></script>
+<script src="ray/ray-panel.js"></script>
+<script>window.PAGE = {"nav": "dashboard", "crumb": "Dashboard", "ray": {"surface": "page", "context": {"pageTitle": "Dashboard"}}};</script>
+<script>
+window.onPageReady = function(service, user){
+  const g=service.guard, R=RayPermissions.Repositories;
+  const tenders=R.tenders.list(g);
+  document.getElementById('ovCount').textContent = tenders.length;
+  document.getElementById('ovValue').textContent =
+    '$' + tenders.reduce((n,t)=>n+t.value,0).toLocaleString();
+
+  /* One task group, the way live renders it: a grey band naming the tender,
+     then its rows. */
+  document.getElementById('taskTbl').innerHTML =
+    '<thead><tr><th>Task</th><th>Due date <span class="ms">arrow_downward</span></th><th>Action</th></tr></thead><tbody>'
+    + '<tr class="grp"><td colspan="3">Environmental Industries</td></tr>'
+    + [['Submit tenderer questions','08 Jul 2026'],
+       ['Complete response schedules','22 Jul 2026']].map(t=>`
+      <tr><td><span class="dot"></span><span class="tlink" data-toast="Opens the task">${t[0]}</span></td>
+        <td>${t[1]}</td>
+        <td><div class="tacts">
+          <button class="tact edit" data-toast="Edit task"><span class="ms">edit</span></button>
+          <button class="tact done" data-toast="Mark complete"><span class="ms">check</span></button>
+          <button class="tact del" data-toast="Delete task"><span class="ms">delete</span></button>
+        </div></td></tr>`).join('')
+    + '</tbody>';
+
+  const today = new Date('2026-08-25');
+  document.getElementById('upcoming').innerHTML = tenders.map(t=>{
+    const over = new Date(t.due) < today;
+    return `<div class="up-item">
+      <span class="bag"><span class="ms">work</span></span>
+      <span class="nm">${t.name}<small>${t.org}</small></span>
+      <span class="due ${over?'':'ok'}">${over?'Date Overdue':rayDate(t.due)}</span>
+    </div>`;}).join('');
+
+  document.getElementById('devlabel').textContent =
+    RayShell.devOn() ? 'Hide architecture detail' : 'Show architecture detail';
+};
+</script>
+<script src="app.js"></script>
+</body>
+</html>

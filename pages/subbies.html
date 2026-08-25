@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenderfy — Subcontractors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div id="screen" style="display:none">
+
+<div class="pad">
+  <div class="sect-h">
+    <div><h1>Subcontractors</h1><p class="sub" style="margin:0">4 in your network</p></div>
+    <a class="btn pri"><span class="ms" style="font-size:17px">person_add</span> Invite</a>
+  </div>
+  <div class="card">
+    <table class="data">
+      <thead><tr><th>Company</th><th>Trade</th><th>Requests</th><th>Last quoted</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr class="rowlink"><td><b>Ridgeline Earthworks</b></td><td>Earthworks</td><td>4</td><td>12 Jul 2026</td><td><span class="badge b-green">Active</span></td></tr>
+        <tr class="rowlink"><td><b>Kestrel Traffic</b></td><td>Traffic management</td><td>2</td><td>28 Jun 2026</td><td><span class="badge b-green">Active</span></td></tr>
+        <tr class="rowlink"><td><b>Verdant Revegetation</b></td><td>Revegetation</td><td>6</td><td>04 Jul 2026</td><td><span class="badge b-amber">Awaiting response</span></td></tr>
+        <tr class="rowlink"><td><b>Southbank Hydraulics</b></td><td>Hydraulics</td><td>1</td><td>—</td><td><span class="badge b-grey">Invited</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card devonly">
+    <h2><span class="ms sec-ic c-red">key</span> Tools Ray holds anywhere, for this role</h2>
+    <div id="toolList" class="sub" style="margin:0"></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../data/fixtures.js"></script>
+<script src="../ray/ray-permissions.js"></script>
+<script src="../ray/ray-documents.js"></script>
+<script src="../ray/ray-context.js"></script>
+<script src="../ray/ray-tools.js"></script>
+<script src="../ray/ray-provider.js"></script>
+<script src="../ray/ray-surfaces.js"></script>
+<script src="../ray/ray-core.js"></script>
+<script src="../ray/ray-panel.js"></script>
+<script>window.PAGE = {"nav": "subbies", "crumb": "Subcontractors", "ray": {"surface": "page", "context": {"pageTitle": "Subcontractors"}}};</script>
+<script>
+window.onPageReady = function(service, user){
+  const s=RaySurfaces.resolve('page'), tools=service.registry.forSurface(s,service.guard), all=RayTools.TOOLS.length;
+  document.getElementById('toolList').innerHTML =
+    tools.map(t=>`<span class="badge b-grey" style="margin:0 6px 6px 0"><code>${t.name}</code></span>`).join('')
+    + `<div style="margin-top:10px"><b>${tools.length} of ${all}</b> tools — the same set on every page. `
+    + `The rest are withheld because <b>${user.role}</b> lacks the scope.</div>`;
+};
+</script>
+<script src="../app.js"></script>
+</body>
+</html>

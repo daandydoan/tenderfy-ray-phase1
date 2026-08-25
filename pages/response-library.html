@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenderfy — Response Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div id="screen" style="display:none">
+
+<div class="pad">
+  <div class="sect-h">
+    <div><h1>Response Library</h1><p class="sub" style="margin:0" id="count"></p></div>
+    <a class="btn ray" onclick="RayPanel.open();RayPanel.current.run('Draft a new answer for local content')">
+      <img src="../assets/ray.svg" alt=""> Draft with Ray</a>
+  </div>
+  <div class="crumbsel"><a class="on">All</a><a>Environmental</a><a>Safety</a><a>Experience</a><a>Social</a></div>
+  <div class="lib" id="lib"></div>
+  <div class="card devonly" style="margin-top:16px">
+    <h2><span class="ms sec-ic c-red">lock</span> Write access</h2>
+    <div class="sub" id="writeNote" style="margin:0"></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../data/fixtures.js"></script>
+<script src="../ray/ray-permissions.js"></script>
+<script src="../ray/ray-documents.js"></script>
+<script src="../ray/ray-context.js"></script>
+<script src="../ray/ray-tools.js"></script>
+<script src="../ray/ray-provider.js"></script>
+<script src="../ray/ray-surfaces.js"></script>
+<script src="../ray/ray-core.js"></script>
+<script src="../ray/ray-panel.js"></script>
+<script>window.PAGE = {"nav": "responses", "crumb": "Responses \u2022 Response Library", "ray": {"surface": "response-library", "context": {}}};</script>
+<script>
+/* Library categories are a fixed set, so they get fixed colours — the same
+   rule the rest of the interface follows: same hue, same kind of thing. */
+const CAT = { Environmental:'b-teal', Safety:'b-red', Experience:'b-blue',
+              Social:'b-plum', Commercial:'b-amber' };
+window.onPageReady = function(service, user){
+  const g=service.guard, R=RayPermissions.Repositories, rows=R.responseLibrary.list(g);
+  document.getElementById('count').textContent = rows.length + ' saved answers';
+  document.getElementById('lib').innerHTML = rows.map(r=>`
+    <div class="libc">
+      <h3>${r.question}</h3>
+      <p>${r.answer.slice(0,150)}…</p>
+      <div class="m"><span class="badge ${CAT[r.category]||'b-grey'}">${r.category}</span>
+        <span>${r.words} words</span>
+        ${r.winRate!=null?`<span>${Math.round(r.winRate*100)}% win rate</span>`:''}
+        <span style="margin-left:auto">${r.lastUsed?'Used '+rayDate(r.lastUsed):'Unused'}</span></div>
+    </div>`).join('');
+  const canWrite=g.scopes.includes('response_library.write');
+  document.getElementById('writeNote').innerHTML = canWrite
+    ? `<b>${user.role}</b> holds <code>response_library.write</code>, so Ray may save answers here.`
+    : `<b>${user.role}</b> does not hold <code>response_library.write</code>; the tool is never advertised to the model.`;
+};
+</script>
+<script src="../app.js"></script>
+</body>
+</html>

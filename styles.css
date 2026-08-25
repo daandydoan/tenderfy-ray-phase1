@@ -1,0 +1,895 @@
+/* Tenderfy — Ray Phase 1. Chrome and tokens lifted from the contractor side of
+   tenderfy-subbie-portal so this sits inside the platform's design system. */
+
+:root{
+  --teal:#1D9E75; --teal-bright:#6ADDB5; --teal-tint:rgba(29,158,117,.15);
+  --cta:#38988A; --cta-dark:#2f8276;
+  --nav:#394645; --header:#2E343C;
+  --ink:#2E3C3B; --gray:#596262; --light:#A1ADAB; --lighter:#CBD5D3; --bg-shade:#EAEDEC;
+  --secondary:#FFBC4A; --accent:#F95246;
+  --st-amber-bg:#FAEEDA; --st-amber-tx:#633806;
+  --st-green-bg:#E1F5EE; --st-green-tx:#085041;
+  --st-pink-bg:#FCEBEB; --st-pink-tx:#A32D2D;
+  --page:#F9FAFB; --border:#EAEDEC; --row:#F3F4F6;
+
+  /* ── Entity ramp ────────────────────────────────────────────────────────
+     Tenderfy's own categorical colours — the avatar palette the subbie portal
+     uses to tell one contractor from another. Reused here for anything that
+     needs identity: which tender, which file type, which kind of tool call.
+     Not an invented ramp: same five hues, same job.                        */
+  --e-teal:#38988A;   --e-indigo:#5C6BC0; --e-orange:#EF6C00;
+  --e-brown:#6D4C41;  --e-cyan:#00838F;
+
+  /* Status text colours, lifted from the portal's tender rows. */
+  --st-pending:#C9871F; --st-progress:#1D9E75; --st-review:#5C6BC0;
+
+  /* Neutral steps, so hierarchy comes from shades rather than one grey. */
+  --n-50:#FAFCFB; --n-100:#F3F5F4; --n-200:#E7EBEA; --n-300:#CBD5D3;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:Outfit,system-ui,sans-serif;color:var(--ink);background:var(--page);font-size:14px}
+a{color:inherit;text-decoration:none}
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:20px;
+    line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;
+    word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
+    vertical-align:middle}
+.ms.fill{font-variation-settings:'FILL' 1}
+
+/* ── Contractor chrome ─────────────────────────────────────────────────── */
+.capp{display:flex;height:100vh;--rail-w:0px}
+.c-side{width:87px;background:var(--nav);display:flex;flex-direction:column;align-items:center;
+        padding:24px 0;flex-shrink:0;gap:34px;overflow-y:auto}
+.c-side .clogo{margin-bottom:30px;flex-shrink:0;display:flex;justify-content:center}
+.c-side .clogo img{width:36px;height:56px;object-fit:contain}
+.c-side .cic{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;
+             cursor:pointer;flex-shrink:0;position:relative}
+.c-side .cic .ms{font-size:28px}
+.c-side .cic:hover{color:var(--teal-bright)}
+.c-side .cic.active{color:var(--teal-bright)}
+.c-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.c-header{background:var(--cta);color:#fff;display:flex;align-items:center;justify-content:space-between;
+          padding:0 24px;height:56px;font-size:14px;font-weight:700;flex-shrink:0}
+.c-header .l{display:flex;align-items:center;gap:12px;min-width:0}
+.c-header .l span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-header .r{display:flex;align-items:center;gap:22px;font-weight:700;flex:none}
+.c-header .r .ms{font-size:22px;cursor:pointer}
+.hray{display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.16);
+      border-radius:999px;padding:3px 12px 3px 4px;font-size:12.5px;font-weight:700}
+.hray:hover{background:rgba(255,255,255,.26)}
+.hray img{width:20px;height:20px;display:block}
+.c-header .cava{width:27px;height:27px;border-radius:50%;background:#2E343C;color:#fff;display:flex;
+                align-items:center;justify-content:center;font-size:10px;font-weight:700}
+/* A container, not the viewport: the rail takes up to 640px of the window, so
+   every layout below has to respond to the space actually left to the page. */
+.c-content{flex:1;min-height:0;overflow:auto;container-type:inline-size;container-name:page}
+.pad{padding:24px}
+
+/* Role switcher — a prototype control, not a product surface. It exists so a
+   reviewer can watch the permission layer change what Ray can reach. */
+.whoami{font-weight:600;font-size:13px}
+/* Architecture-proof surfaces. Present in the DOM, shown only in dev. */
+.devonly{display:none}
+html.dev .devonly{display:block}
+html.dev tr.devonly{display:table-row}
+html.dev th.devonly,html.dev td.devonly{display:table-cell}
+.devtoggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--light);
+           cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 0}
+.devtoggle:hover{color:var(--teal)}
+.devtoggle .ms{font-size:15px}
+.rolesel{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border-radius:8px;
+         padding:4px 8px;font-weight:600;font-size:12.5px}
+.rolesel select{background:transparent;border:none;color:#fff;font:inherit;font-weight:700;outline:none;cursor:pointer}
+.rolesel select option{color:var(--ink)}
+
+/* ── Page furniture ────────────────────────────────────────────────────── */
+h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:12px}
+/* The portal identifies an organisation with a round initialled avatar. A
+   tender gets the same treatment, in the same five hues, and Ray's session
+   list reuses it — so both surfaces agree about which job you are looking at. */
+.ava{width:32px;height:32px;border-radius:50%;color:#fff;font-size:12px;font-weight:600;
+     display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--gray)}
+.ava.c-teal{background:var(--e-teal)}     .ava.c-indigo{background:var(--e-indigo)}
+.ava.c-orange{background:var(--e-orange)} .ava.c-brown{background:var(--e-brown)}
+.ava.c-cyan{background:var(--e-cyan)}
+.sub{color:var(--gray);margin:0 0 20px;font-size:13.5px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.card h2{font-size:15px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+/* A section's icon is tinted by its subject, the same ramp the rest of the
+   interface uses — documents blue, dates clay, questions plum, access red. */
+.card h2 .sec-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+                 justify-content:center;font-size:17px;flex:none}
+/* Section icons stay quiet — the portal does not colour its headings. */
+.sec-ic{background:transparent;color:var(--teal);width:auto;height:auto}
+.card h2 .sec-ic{font-size:20px}
+.grid{display:grid;gap:16px}
+/* auto-fit, not a viewport breakpoint: the rail can take 640px of the window,
+   so columns must collapse on the space actually left to the page. */
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+@container page (max-width:760px){.grid.two{grid-template-columns:minmax(0,1fr)}}
+/* ── Dashboard, copied from the live business-admin app ────────────────
+   Measured on stgbusinessadmin.tenderfy.org/dashboard rather than guessed:
+   cards are white at 15px radius with a 0 2px 4px rgba(0,0,0,.16) shadow and
+   no border, laid out on a six-column grid where the contract-value card
+   spans two. Numbers are 32px/24px at weight 400 — the live app does not bold
+   them — over a 16px label and a 12px #C6C6C6 timestamp.                   */
+.page-h{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;
+        color:var(--cta);margin:0 0 18px}
+.page-h .pbar{width:4px;height:20px;border-radius:2px;background:var(--cta)}
+
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+         flex-wrap:wrap;margin-bottom:16px}
+.ov-head h2{font-size:20px;font-weight:600;margin:0}
+.ov-dates{display:flex;align-items:center;gap:10px}
+.dfield{display:flex;align-items:center;gap:8px;border:1px solid var(--lighter);border-radius:6px;
+        padding:9px 12px;background:#fff;min-width:190px}
+.dfield input{border:none;outline:none;font:inherit;font-size:13.5px;color:var(--ink);
+              background:none;width:100%;min-width:0}
+.dfield input::placeholder{color:#A8A8A8}
+.dfield .ms{font-size:18px;color:var(--gray)}
+.dsep{color:var(--gray)}
+
+.ovgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px;margin-bottom:24px}
+@container page (max-width:1180px){.ovgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+                                   .ovcard.wide{grid-column:span 3}}
+@container page (max-width:640px){.ovgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+                                  .ovcard.wide{grid-column:span 2}}
+.ovcard{background:#fff;border-radius:15px;box-shadow:0 2px 4px rgba(0,0,0,.16);
+        padding:18px 20px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.ovcard.wide{grid-column:span 2}
+.ovcard .v{font-size:24px;font-weight:400;color:rgba(0,0,0,.87);display:flex;align-items:center;gap:8px;
+           line-height:1.2;white-space:nowrap}
+.ovcard .v.big{font-size:32px;color:var(--cta)}
+.ovcard .v.teal{color:var(--cta)}
+.ovcard .v.down{color:var(--accent)}
+.ovcard .v .ms{font-size:22px}
+.ovcard .l{font-size:16px;color:rgba(0,0,0,.87);margin-top:10px}
+.ovcard.wide .l{font-weight:600}
+.ovcard .s{font-size:12px;color:#C6C6C6;margin-top:6px}
+
+
+.dash-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:22px;align-items:start}
+@container page (max-width:980px){.dash-cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border-radius:15px;box-shadow:0 2px 4px rgba(0,0,0,.16);overflow:hidden}
+.panel-pad{padding:20px 22px}
+.tabbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+        border-bottom:1px solid var(--border);padding:0 20px}
+.tabbar .set{display:flex}
+.tabbar .tb{padding:16px 14px;font-size:14px;font-weight:600;color:var(--gray);cursor:pointer;
+            border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabbar .tb.on{color:var(--cta);border-bottom-color:var(--cta)}
+.tabbar .pri-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--lighter);
+                 background:#fff;border-radius:8px;padding:8px 14px;font:inherit;font-size:13.5px;
+                 font-weight:600;color:var(--ink);cursor:pointer;flex:none}
+.tabbar .pri-btn .ms{font-size:17px;color:var(--gray)}
+.tasktbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tasktbl th{text-align:left;color:var(--gray);font-weight:600;font-size:12px;letter-spacing:.04em;
+            padding:14px 20px;border-bottom:1px solid var(--border);text-transform:uppercase}
+.tasktbl th .ms{font-size:15px;vertical-align:-3px;color:var(--cta)}
+.tasktbl td{padding:14px 20px;border-bottom:1px solid var(--row);vertical-align:middle}
+.tasktbl tr:last-child td{border-bottom:none}
+.tasktbl tr.grp td{background:var(--row);color:var(--gray);font-size:13px;padding:10px 20px}
+.tasktbl .dot{width:8px;height:8px;border-radius:50%;background:#3EBB84;display:inline-block;
+              margin-right:10px;vertical-align:1px}
+.tasktbl .tlink{color:var(--ink);text-decoration:underline;cursor:pointer}
+.tacts{display:flex;gap:10px}
+.tact{width:30px;height:30px;border-radius:50%;border:none;display:flex;align-items:center;
+      justify-content:center;color:#fff;cursor:pointer}
+.tact .ms{font-size:16px}
+.tact.edit{background:var(--cta)} .tact.done{background:#4FB99A} .tact.del{background:var(--accent)}
+.tasks-empty{padding:60px 20px;text-align:center;color:var(--light);font-size:13.5px}
+
+.up-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.up-head h2{font-size:24px;font-weight:400;color:rgba(0,0,0,.87);margin:0}
+.up-more{font-size:14px;font-weight:600;color:#45A799;cursor:pointer}
+.up-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0}
+.up-item .bag{width:20px;height:20px;border-radius:4px;background:var(--header);color:#fff;flex:none;
+              display:flex;align-items:center;justify-content:center;margin-top:1px}
+.up-item .bag .ms{font-size:13px}
+.up-item .nm{flex:1;min-width:0;font-size:14px;color:rgba(0,0,0,.87);line-height:1.35}
+.up-item .nm small{display:block;font-size:12px;color:var(--light);margin-top:2px}
+.up-item .due{font-size:14px;color:var(--accent);white-space:nowrap;flex:none}
+.up-item .due.ok{color:var(--gray)}
+
+/* ── Dashboard furniture ───────────────────────────────────────────────── */
+/* The portal's stat pill: one bordered strip of cells, the cell you are
+   "on" filled with --header. Replaces the tinted tiles I had here. */
+.stat-pill{display:flex;flex-wrap:wrap;border:1px solid var(--lighter);border-radius:12px;
+           overflow:hidden;background:#fff;margin-bottom:18px}
+.stat-cell{flex:1 1 150px;padding:14px 20px;display:flex;flex-direction:column;gap:4px;
+           border-right:1px solid var(--lighter)}
+.stat-cell:last-child{border-right:none}
+.stat-cell .v{font-size:22px;font-weight:500;color:var(--ink);line-height:1.1}
+.stat-cell .l{font-size:12px;color:#6A7282}
+.stat-cell .d{font-size:11.5px;color:var(--light)}
+.stat-cell.active{background:var(--header)}
+.stat-cell.active .v{color:#fff}
+.stat-cell.active .l,.stat-cell.active .d{color:#D1D5DC}
+.stat-cell .v.warn{color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-bottom:18px}
+.rowlink{cursor:pointer}
+.rowlink:hover td{background:var(--row)}
+.dueflag{font-size:12.5px;font-weight:600;white-space:nowrap}
+.due-soon{color:var(--accent)}
+.bar{height:6px;border-radius:999px;background:var(--n-200);overflow:hidden;width:110px}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:999px}
+.bar.p-amber i{background:var(--secondary)}
+.bar.p-blue i{background:var(--st-review)}
+.bar.p-grey i{background:var(--lighter)}
+.sect-h{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.sect-h h2{margin:0}
+.doc{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--row)}
+.doc:last-child{border-bottom:none}
+.doc .ic{width:36px;height:36px;border-radius:9px;background:var(--n-100);display:flex;align-items:center;
+         justify-content:center;flex:none;color:var(--gray)}
+/* File types read faster by colour than by icon shape alone. */
+.doc .ic.k-pdf{background:var(--st-pink-bg);color:var(--st-pink-tx)}
+.doc .ic.k-docx{background:rgba(92,107,192,.14);color:var(--e-indigo)}
+.doc .ic.k-xlsx{background:var(--st-green-bg);color:var(--st-green-tx)}
+.doc .ic.k-lock{background:var(--st-grey-bg);color:var(--st-grey2-tx)}
+.doc .nm{font-weight:600;font-size:13.5px}
+.doc .mt{font-size:12px;color:var(--light);margin-top:2px}
+.doc .rt{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chk{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:13.5px;border-bottom:1px solid var(--row)}
+.chk:last-child{border-bottom:none}
+.chk .ms{font-size:19px;color:var(--lighter)}
+.chk.done .ms{color:var(--teal)}
+.chk.done span{color:var(--light);text-decoration:line-through}
+.lib{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.libc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px}
+.libc h3{font-size:14px;font-weight:600;margin:0 0 8px;line-height:1.4}
+.libc p{font-size:13px;color:var(--gray);line-height:1.55;margin:0 0 12px}
+.libc .m{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--light)}
+.qrow{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--row);align-items:flex-start}
+.qrow:last-child{border-bottom:none}
+.qn{font-weight:600;color:var(--light);font-size:13px;flex:none;width:26px}
+.qt{flex:1;font-size:13.5px;line-height:1.5}
+.qm{font-size:12px;color:var(--light);margin-top:4px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th{text-align:left;color:var(--gray);font-weight:700;font-size:11.5px;text-transform:uppercase;
+              letter-spacing:.04em;padding:9px 10px;border-bottom:1px solid var(--border);
+              background:var(--n-100)}
+table.data th:first-child{border-radius:8px 0 0 8px}
+table.data th:last-child{border-radius:0 8px 8px 0}
+table.data td{padding:11px 10px;border-bottom:1px solid var(--row);vertical-align:middle}
+table.data tr:last-child td{border-bottom:none}
+table.data tr.locked td{opacity:.55}
+.badge{display:inline-flex;font-size:12px;font-weight:500;padding:4px 10px;border-radius:100px;
+       white-space:nowrap}
+.b-green{background:var(--st-green-bg);color:var(--st-green-tx)}
+.b-amber{background:var(--st-amber-bg);color:var(--st-amber-tx)}
+.b-pink{background:var(--st-pink-bg);color:var(--st-pink-tx)}
+.b-grey{background:var(--st-grey-bg);color:var(--st-grey-tx)}
+/* Library categories borrow the entity ramp, kept at portal weight. */
+.b-teal{background:rgba(56,152,138,.14);color:#26685F}
+.b-blue{background:rgba(92,107,192,.14);color:#414C90}
+.b-plum{background:rgba(109,76,65,.14);color:#553B32}
+.b-red{background:rgba(239,108,0,.14);color:#A34A00}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+     border-radius:12px;border:1px solid var(--light);background:#fff;padding:9px 16px;
+     font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+.btn:hover{border-color:var(--gray)}
+.btn.pri{background:var(--cta);border-color:var(--cta);color:#fff}
+.btn.pri:hover{background:var(--cta-dark);border-color:var(--cta-dark)}
+.btn.ray{background:#fff;border-color:var(--teal);color:var(--teal)}
+.btn.ray:hover{background:var(--teal-tint)}
+.btn.ray img{width:20px;height:20px}
+.field{display:block;margin-bottom:14px}
+.field label{display:block;font-weight:600;font-size:12.5px;margin-bottom:6px}
+.field textarea,.field input{width:100%;border:1px solid var(--lighter);border-radius:8px;padding:10px 12px;
+                             font:inherit;font-size:13.5px;color:var(--ink);resize:vertical}
+.wcount{font-size:11.5px;color:var(--light);margin-top:4px}
+/* Tabs, the portal way: teal text over a 4px bright-green underline. */
+.crumbsel{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:16px;
+          border-bottom:1px solid var(--lighter)}
+.crumbsel a{padding:12px 20px;font-size:14px;font-weight:500;color:var(--gray);cursor:pointer;
+            border-bottom:4px solid transparent;margin-bottom:-1px}
+.crumbsel a:hover{color:var(--ink)}
+.crumbsel a.on{color:var(--teal);border-bottom-color:var(--teal-bright)}
+
+/* ── Ray: the reopen affordance ─────────────────────────────────────────
+   Small and quiet. Ray's presence is the rail and the header chip; this is
+   only the way back when the rail is closed.                              */
+.ray-fab{position:fixed;right:20px;bottom:20px;height:40px;padding:0 14px 0 8px;border-radius:999px;
+         border:1px solid var(--border);background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.10);
+         cursor:pointer;display:flex;align-items:center;gap:7px;z-index:60;
+         font:inherit;font-size:13px;font-weight:600;color:var(--ink)}
+.ray-fab:hover{border-color:var(--lighter);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.ray-fab img{width:24px;height:24px;display:block}
+.ray-fab::after{content:'Ray'}
+
+/* ── Ray: the site rail ────────────────────────────────────────────────
+   The rail is a flex sibling of .c-main, so opening it narrows the page
+   instead of covering it. Width lives on .capp as --rail-w; the panel's own
+   width is fixed so content does not reflow mid-animation.                */
+/* ── Ray's theme ────────────────────────────────────────────────────────
+   The rail carries its own palette, declared once per theme. Dark is the
+   default — it is the one dark surface in the product, on a ground from the
+   portal's own --header family, and it separates the assistant from the
+   document without a border doing all the work. A light set is provided for
+   rooms, projectors and demos where dark does not survive.
+
+   Every rule below the fold reads these tokens and nothing else, so switching
+   themes is a class on <html> and never a second set of rules to maintain.  */
+.ray-panel{
+  --r-bg:#2A3038;      /* the rail ground        */
+  --r-raise:#333A44;   /* fields, hovered rows   */
+  --r-sunk:#242A31;    /* bands behind the body  */
+  --r-line:rgba(255,255,255,.10);
+  --r-line-2:rgba(255,255,255,.16);
+  --r-tx:#E7EBEA;      /* body                   */
+  --r-tx-2:#A8B2B6;    /* secondary              */
+  --r-tx-3:#98A3A9;    /* tertiary — clears 4.5:1 on the ground              */
+  --r-accent:#6ADDB5;  /* --teal-bright          */
+  --r-accent-dim:rgba(106,221,181,.14);
+  --r-user-bg:#333A44;
+  --r-teal-bg:rgba(106,221,181,.14);   --r-teal-tx:#6ADDB5;
+  --r-blue-bg:rgba(129,145,224,.16);   --r-blue-tx:#A7B2EA;
+  --r-amber-bg:rgba(255,188,74,.14);   --r-amber-tx:#F5C879;
+  --r-grey-bg:rgba(255,255,255,.08);   --r-grey-tx:#A8B2B6;
+  --r-clay-tx:#D8A88F;
+  --r-deny-bg:rgba(249,82,70,.12);     --r-deny-bd:rgba(249,82,70,.35);
+  --r-deny-tx:#FFB4AD;
+  --r-credit-bg:rgba(255,188,74,.10);  --r-credit-bd:rgba(255,188,74,.28);
+  --r-low-bg:rgba(249,82,70,.12);      --r-low-bd:rgba(249,82,70,.32);
+  --r-meter:rgba(255,255,255,.10);
+  --r-shadow:rgba(0,0,0,.22);
+}
+/* Light: the portal's own surfaces and status tints. */
+html.ray-light .ray-panel{
+  --r-bg:#fff;
+  --r-raise:#F3F4F6;
+  --r-sunk:#FBFCFC;
+  --r-line:#EAEDEC;
+  --r-line-2:#CBD5D3;
+  --r-tx:#2E3C3B;
+  --r-tx-2:#596262;
+  /* Both darker than the brand mid-tones: on white, --teal reads 3.4:1 and
+     a 12px citation needs 4.5. The accent is only this dark in the rail. */
+  --r-tx-3:#6B7679;
+  --r-accent:#0F7355;
+  --r-accent-dim:rgba(29,158,117,.12);
+  --r-user-bg:rgba(29,158,117,.15);
+  --r-teal-bg:#E1F5EE;  --r-teal-tx:#085041;
+  --r-blue-bg:rgba(92,107,192,.14); --r-blue-tx:#414C90;
+  --r-amber-bg:#FAEEDA; --r-amber-tx:#633806;
+  --r-grey-bg:#EFEFEF;  --r-grey-tx:#5F5E5A;
+  --r-clay-tx:#6D4C41;
+  --r-deny-bg:#FCEBEB;  --r-deny-bd:#F6DCD9; --r-deny-tx:#A32D2D;
+  --r-credit-bg:#FAEEDA; --r-credit-bd:#EFDCB8;
+  --r-low-bg:#FCEBEB;    --r-low-bd:#F6DCD9;
+  --r-meter:rgba(0,0,0,.07);
+  --r-shadow:rgba(0,0,0,.10);
+}
+.ray-panel{display:none;flex-direction:column;overflow:hidden;font-size:14px;
+           background:var(--r-bg);color:var(--r-tx)}
+.ray-panel.mode-rail{border-left:1px solid var(--r-shadow)}
+
+.ray-panel.mode-rail{display:flex;flex:none;width:var(--rail-w);min-width:0;height:100vh;
+           transition:width .2s cubic-bezier(.4,0,.2,1)}
+.ray-panel.mode-rail>*{min-width:420px}
+.ray-panel.mode-rail.wide>*{min-width:640px}
+.ray-panel.mode-rail:not(.open){border-left:none}
+.ray-panel.mode-rail:not(.open)>*{visibility:hidden}
+.c-main{transition:none}
+.ray-panel.mode-inline{display:flex;position:relative;border:1px solid var(--border);border-radius:12px;
+           height:100%;min-height:520px}
+.ray-panel.mode-inline.open,.ray-panel.mode-rail.open{display:flex}
+
+@media(max-width:1180px){
+  .ray-panel.mode-rail{position:fixed;top:0;right:0;bottom:0;z-index:90;
+             width:min(420px,92vw);box-shadow:-12px 0 40px rgba(0,0,0,.18)}
+  .ray-panel.mode-rail:not(.open){display:none}
+  .capp{--rail-w:0px!important}
+}
+
+/* ── Ray: header ───────────────────────────────────────────────────────
+   A title bar for a region of the app, not a branded chat header. The mark
+   is present at 20px and nothing else competes with the conversation.    */
+.ray-head{display:flex;align-items:center;gap:9px;padding:0 12px 0 16px;height:52px;flex-shrink:0}
+.ray-mark{width:20px;height:20px;display:block;opacity:.9}
+.ray-mark.lg{width:34px;height:34px;opacity:.85}
+.ray-id{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:8px}
+.ray-id span{font-size:12px;font-weight:400;color:var(--light)}
+.ray-hbtn{cursor:pointer;font-size:19px;color:var(--light);border-radius:6px;padding:3px}
+.ray-hbtn:hover{color:var(--ink);background:var(--row)}
+.ray-hbtn[data-ray="expand"]{margin-left:auto}
+@media(max-width:1180px){.ray-hbtn[data-ray="expand"]{display:none}}
+
+/* ── Ray: two screens ─────────────────────────────────────────────────
+   A list you choose a session from, and the session itself — Figma's Agents
+   panel pattern. Only one is mounted at a time so a 420px rail never has a
+   tab strip competing with the conversation.                              */
+.ray-panel.view-list .ray-body,
+.ray-panel.view-list .ray-trace,
+.ray-panel.view-list .ray-foot{display:none}
+.ray-panel.view-chat .ray-list{display:none}
+
+.ray-title{font-size:14px;font-weight:600;line-height:1.25;min-width:0;flex:1;
+           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-title span{display:block;font-size:11.5px;font-weight:400;color:var(--light);
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-back{cursor:pointer;font-size:22px;color:var(--gray);margin-left:-4px;border-radius:6px}
+.ray-back:hover{background:var(--row);color:var(--ink)}
+
+/* ── Ray: session list ─────────────────────────────────────────────────── */
+.ray-list{flex:1;min-height:0;overflow:auto;background:#fff}
+.ray-search{display:flex;align-items:center;gap:8px;margin:12px 14px 4px;padding:8px 11px;
+            background:var(--row);border-radius:8px}
+.ray-search .ms{font-size:18px;color:var(--light)}
+.ray-search input{flex:1;border:none;background:none;outline:none;font:inherit;font-size:13px;
+                  color:var(--ink);min-width:0}
+.ray-group{font-size:11.5px;font-weight:600;color:var(--light);padding:10px 14px 6px}
+
+/* ── Ray: session actions ──────────────────────────────────────────────
+   Inline, not a popover: the list scrolls, and a floating menu near the
+   bottom of a 420px rail would clip against the composer.               */
+.ray-rowwrap{position:relative}
+.ray-rowwrap.open{background:#FAFCFB}
+.ray-rowmenu{position:absolute;top:12px;right:10px;width:26px;height:26px;border:none;
+             background:none;border-radius:7px;color:var(--light);cursor:pointer;font-size:18px;
+             display:none;align-items:center;justify-content:center;padding:0}
+.ray-rowwrap:hover .ray-rowmenu,.ray-rowwrap.open .ray-rowmenu{display:flex}
+.ray-rowmenu:hover{background:var(--row);color:var(--ink)}
+.ray-rowwrap:hover .ray-rowage,.ray-rowwrap.open .ray-rowage{visibility:hidden}
+.ray-acts{display:flex;align-items:center;gap:6px;padding:0 14px 12px 60px;flex-wrap:wrap}
+.ray-headbar .ray-acts{padding:10px 16px;border-bottom:1px solid var(--border);background:#FAFCFB}
+.ray-acts.warn .ray-actmsg{font-size:12px;color:var(--st-pink-tx);flex:1;min-width:140px}
+.ray-mini{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--lighter);
+          background:#fff;border-radius:7px;padding:5px 10px;font:inherit;font-size:12px;
+          font-weight:600;color:var(--gray);cursor:pointer}
+.ray-mini:hover{border-color:var(--gray);color:var(--ink)}
+.ray-mini .ms{font-size:15px}
+.ray-mini.pri{background:var(--cta);border-color:var(--cta);color:#fff}
+.ray-mini.pri:hover{background:var(--cta-dark)}
+.ray-mini.danger{background:var(--accent);border-color:var(--accent);color:#fff}
+.ray-mini.danger:hover{filter:brightness(.94)}
+.ray-rename{flex:1;min-width:120px;border:1px solid var(--teal);border-radius:7px;padding:5px 9px;
+            font:inherit;font-size:12.5px;color:var(--ink);outline:none}
+.ray-headbar{flex-shrink:0}
+.ray-row{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;background:none;
+         border:none;font:inherit;cursor:pointer;padding:10px 14px}
+.ray-row:hover{background:#FAFCFB}
+.ray-row.on{background:#F4F8F7}
+.ray-tile{width:36px;height:36px;border-radius:9px;flex:none;display:flex;align-items:center;
+          justify-content:center;background:var(--n-100);color:var(--light)}
+.ray-tile .ms{font-size:18px}
+/* Sessions still record the tender they were started from. Nothing groups on
+   it, but colouring the tile by it makes a long list scannable at a glance. */
+.ray-tile.c-teal{background:var(--e-teal);color:#fff}
+.ray-tile.c-indigo{background:var(--e-indigo);color:#fff}
+.ray-tile.c-orange{background:var(--e-orange);color:#fff}
+.ray-tile.c-brown{background:var(--e-brown);color:#fff}
+.ray-tile.c-cyan{background:var(--e-cyan);color:#fff}
+.ray-row.on{background:var(--n-50)}
+.ray-rowtx{flex:1;min-width:0}
+.ray-rowt{display:block;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35;
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-rows{display:block;font-size:12.5px;color:var(--gray);line-height:1.4;margin-top:2px;
+          display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ray-rowage{font-size:11.5px;color:var(--light);flex:none;padding-top:2px}
+.ray-listempty{padding:20px 16px;font-size:13px;color:var(--light);text-align:center}
+.ray-listempty .ray-act{display:block;margin:12px auto 0}
+
+/* ── Ray: the conversation ─────────────────────────────────────────────
+   Ray's turns are prose set flush in the column — no tinted balloon, no
+   avatar rail. Only the user's own words get a container, because that is
+   the one thing you need to pick out when scanning back.                  */
+.ray-body{flex:1;min-height:0;overflow:auto;padding:22px 20px 8px;display:flex;
+          flex-direction:column;gap:26px}
+.ray-turn{display:flex;flex-direction:column;gap:7px}
+.ray-turn.user{align-items:flex-end}
+.ray-byline{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+            letter-spacing:.02em}
+.ray-byline img{width:16px;height:16px;display:block;opacity:.75}
+.ray-bubble{line-height:1.68;font-size:14px;overflow-wrap:break-word}
+.ray-bubble.user{border-radius:14px;padding:11px 15px;max-width:88%;line-height:1.55}
+.ray-bubble p{margin:0 0 12px}
+.ray-bubble p:last-child{margin-bottom:0}
+.ray-bubble ul{margin:10px 0 0;padding-left:19px}
+.ray-bubble li{margin-bottom:9px}
+.ray-bubble blockquote{margin:0 0 10px;padding:9px 12px;background:#FAFCFB;
+            border-left:2px solid var(--lighter);border-radius:0 8px 8px 0;font-size:13.5px;
+            color:var(--gray)}
+.ray-bubble code{background:var(--row);border-radius:5px;padding:1px 5px;font-size:12.5px}
+
+/* Inline annotations stay quiet — a citation should not shout over prose. */
+.ray-cite{display:inline;font-size:12px;font-weight:500;color:var(--teal);
+          border-bottom:1px dotted rgba(29,158,117,.4);margin-left:2px}
+.ray-note{display:block;font-size:12px;color:var(--light);margin-top:10px}
+.ray-deny{display:block;background:#FEF6F5;color:var(--st-pink-tx);border-radius:10px;
+          border:1px solid #F6DCD9;padding:10px 12px;margin-top:12px;font-size:13px}
+.ray-deny .ms{font-size:15px;margin-right:4px;vertical-align:-2px}
+/* The portal marks the assistant's own output with a bright-green edged card
+   (.msg-card). A draft is exactly that, so it wears the same treatment. */
+.ray-draft{background:#fff;border:1px solid var(--teal-bright);border-radius:14px;
+           padding:14px;margin:8px 0 10px;line-height:1.7}
+/* The catalogue's explanatory lead-in: says what a block is before showing it.
+   Muted and rule-marked so it never reads as part of the block itself. */
+.ray-what{border-left:2px solid var(--lighter);padding:2px 0 2px 12px;margin:0 0 12px;
+          font-size:12.5px;line-height:1.55;color:var(--gray)}
+.ray-libcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:9px}
+.ray-libcard .m{font-size:11.5px;color:var(--light);margin:3px 0 7px}
+.ray-libcard p{font-size:13px;color:var(--gray)}
+.ray-act{border:1px solid var(--lighter);background:#fff;color:var(--ink);border-radius:8px;
+         padding:7px 13px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;margin:8px 6px 0 0}
+.ray-act:hover{border-color:var(--teal);color:var(--teal)}
+.ray-act.ghost{color:var(--gray)}
+.ray-match{background:var(--st-green-bg);color:var(--st-green-tx);border-radius:100px;padding:2px 9px;
+           font-size:11.5px;font-weight:500;white-space:nowrap}
+.ray-gap{background:var(--st-amber-bg);color:var(--st-amber-tx);border-radius:100px;padding:2px 9px;
+         font-size:11.5px;font-weight:500}
+.ray-strat{border-radius:6px;padding:1px 7px;font-size:11px;font-weight:600;white-space:nowrap}
+.s-whole{background:var(--st-green-bg);color:var(--st-green-tx)}
+.s-paged{background:rgba(92,107,192,.14);color:#414C90}
+.s-ocr{background:var(--st-amber-bg);color:var(--st-amber-tx)}
+.s-lazy{background:var(--st-grey-bg);color:var(--st-grey2-tx)}
+.ray-scrollx{overflow-x:auto;margin:8px -20px 10px;padding:0 20px}
+.ray-tbl{width:100%;min-width:330px;border-collapse:collapse;font-size:12.5px;margin:0}
+.ray-tbl th{text-align:left;color:var(--light);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;
+            padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-weight:600}
+.ray-tbl td{padding:8px 8px 8px 0;border-bottom:1px solid var(--row);vertical-align:top;line-height:1.5}
+.ray-tbl td.n,.ray-tbl th.n{white-space:nowrap;color:var(--light)}
+.ray-tbl tr:last-child td{border-bottom:none}
+.ray-older{font-size:12px;color:var(--light);text-align:center;padding:2px 0}
+.ray-older .ms{font-size:14px;margin-right:4px;vertical-align:-2px}
+
+/* ── Ray: blank conversation ───────────────────────────────────────────── */
+.ray-empty{margin:auto 0;padding:0 2px 20px;text-align:left}
+.ray-empty h3{font-size:17px;font-weight:600;margin:12px 0 6px}
+.ray-empty p{font-size:13.5px;line-height:1.6;color:var(--gray);margin:0 0 18px}
+.ray-empty .ray-scope{font-size:11.5px;color:var(--light);margin:16px 0 0}
+.ray-starters{display:flex;flex-direction:column;gap:8px}
+.ray-starter{text-align:left;border:1px solid var(--border);background:#fff;border-radius:10px;
+             padding:11px 13px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;line-height:1.4}
+.ray-starter{background:#fff}
+.ray-starter:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── Ray: thinking ─────────────────────────────────────────────────────
+   Live while the tools run, then folded to one line. The steps stay in the
+   DOM so a reader can reopen them — the sync-up wanted the process visible
+   but not competing with the answer.                                      */
+.ray-think{margin-bottom:12px}
+.ray-thinkhead{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--light);
+               cursor:pointer;user-select:none;padding:1px 0}
+.ray-think.working .ray-thinkhead{cursor:default}
+.ray-thinkhead:hover{color:var(--gray)}
+.ray-thinkhead .ms{font-size:16px}
+.ray-think:not(.working):not(.open) .ray-steps{display:none}
+.ray-steps{font-size:12.5px;margin-top:6px;padding-left:2px;
+           border-left:2px solid var(--border);padding-left:10px}
+.ray-step{display:flex;align-items:flex-start;gap:7px;color:var(--gray);padding:3px 0;line-height:1.5;
+          animation:raystep .18s ease-out}
+@keyframes raystep{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:none}}
+.ray-step .ms{font-size:15px;color:var(--lighter);flex:none}
+/* Tool families, in the portal's own status hues, so a glance down the steps
+   shows the shape of the work: looked up, read, planned, wrote. */
+.ray-step.k-find .ms{color:var(--teal)}
+.ray-step.k-read .ms{color:var(--st-review)}
+.ray-step.k-plan .ms{color:var(--st-pending)}
+.ray-step.k-write .ms{color:var(--e-brown)}
+.ray-step.bad{color:var(--st-pink-tx)}
+.ray-step.bad .ms{color:var(--accent)}
+.ray-step code{background:var(--row);border-radius:5px;padding:0 5px;font-size:11.5px;font-weight:600;
+               color:var(--ink)}
+.ray-work{color:var(--light);padding-top:4px}
+.ray-think .ell{display:inline-block;width:12px;text-align:left;
+                animation:rayell 1.2s steps(4) infinite}
+@keyframes rayell{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+/* The caret that trails a streaming answer. */
+.ray-answer:empty{display:none}
+
+/* ── Ray: trace drawer ────────────────────────────────────────────────
+   Folded away by default so the conversation reads as prose; one quiet line
+   until you want the receipts.                                            */
+.ray-trace{flex-shrink:0;max-height:46%;overflow:auto;padding:0 16px}
+.ray-tracebtn{width:100%;text-align:left;background:none;border:none;font:inherit;font-size:11.5px;
+              color:var(--light);padding:8px 0;cursor:pointer;display:flex;align-items:center;gap:4px}
+.ray-tracebtn:hover{color:var(--gray)}
+.ray-tracebtn .ms{font-size:15px}
+.ray-tracebtn .deny{color:var(--accent)}
+.ray-tracebody{padding:2px 0 12px;border-top:1px solid var(--border)}
+.tsec{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--light);font-weight:700;
+      margin:12px 0 4px}
+.thint{text-transform:none;letter-spacing:0;font-weight:500;color:var(--teal);margin-left:6px}
+.ttbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.ttbl td{padding:5px 0;border-bottom:1px solid var(--row);vertical-align:top}
+.ttbl td.n{text-align:right;color:var(--light);white-space:nowrap;padding-left:10px}
+.ttbl tr.bad td{color:var(--st-pink-tx)}
+.ttbl code{font-size:11px;font-weight:600}
+.ttbl .sub{color:var(--light);font-size:11px;margin-top:1px}
+.tnote{font-size:11px;color:var(--gray);background:#FAFCFB;border:1px solid var(--border);border-radius:8px;
+       padding:7px 9px;margin-top:8px}
+.tnote .ms{font-size:14px;margin-right:3px;color:var(--teal);vertical-align:-2px}
+.tfoot{font-size:11px;color:var(--light);margin-top:12px;padding-top:9px;border-top:1px solid var(--border)}
+.tfoot b{color:var(--gray)}
+.tfoot .save{color:var(--teal);font-weight:700}
+
+/* ── Ray: context chip ─────────────────────────────────────────────────
+   Names what Ray is answering about, and lets the user take it away. Sits
+   directly above the composer so it reads as a property of the message you
+   are about to send, not as page furniture.                               */
+/* Space below the chip, not above it — the chip was sitting flush against the
+   composer's top edge. Collapses when there is no chip, so an empty context
+   area reserves nothing. */
+.ray-ctx{padding:0 0 9px}
+.ray-ctx:empty{display:none}
+.ray-ctxchip{display:inline-flex;align-items:center;gap:5px;max-width:100%;
+             background:var(--st-green-bg);border-radius:100px;padding:5px 5px 5px 10px;
+             font-size:12px;font-weight:500;color:var(--st-green-tx)}
+.ray-ctxchip .ms{font-size:14px;flex:none}
+/* The trail truncates from the front: the leading crumbs are the least
+   specific part, and the leaf is the thing Ray is actually pointed at. */
+.ray-ctxchip .t{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
+.ray-ctxchip .seg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-ctxchip .seg:not(:last-child){flex:0 1 auto;max-width:96px;opacity:.72;font-weight:500}
+.ray-ctxchip .seg:last-child{flex:0 1 auto;min-width:40px}
+.ray-ctxchip .sep{flex:none;opacity:.5;font-weight:400}
+.ray-ctxx{border:none;background:none;padding:2px;margin-left:0;cursor:pointer;color:inherit;
+          opacity:.6;display:flex;align-items:center;border-radius:999px}
+.ray-ctxx:hover{opacity:1;background:rgba(0,0,0,.06)}
+.ray-ctxx .ms{font-size:14px}
+.ray-ctxadd{display:inline-flex;align-items:center;gap:5px;border:1px dashed var(--lighter);
+            background:none;border-radius:999px;padding:5px 12px 5px 10px;font:inherit;
+            font-size:11.5px;color:var(--light);cursor:pointer;max-width:100%;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-ctxadd:hover{border-color:var(--teal);color:var(--teal)}
+/* The glyph reads optically larger than the label beside it, so it takes a
+   little less left padding than the label takes on the right. */
+.ray-ctxadd .ms{font-size:14px;margin-left:-1px}
+
+/* ── Ray: credits ──────────────────────────────────────────────────────
+   Nothing at all until the month's allowance is running down. Per-answer
+   token counts are deliberately absent — metering every reply teaches
+   people to use the assistant less.                                       */
+.ray-credit:empty{display:none}
+.ray-creditbar{background:var(--st-amber-bg);border:1px solid #EFDCB8;border-radius:10px;
+               padding:8px 10px;margin:12px 14px 0}
+.ray-creditbar.low{background:#FEF6F5;border-color:#F6DCD9}
+.ray-creditline{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--st-amber-tx);
+                line-height:1.4}
+.ray-creditbar.low .ray-creditline{color:var(--st-pink-tx)}
+.ray-creditline .ms{font-size:15px;flex:none}
+.ray-creditline span:nth-of-type(2){flex:1;min-width:0}
+.ray-credittop{border:none;background:none;font:inherit;font-size:11.5px;font-weight:700;
+               color:inherit;text-decoration:underline;cursor:pointer;padding:0;flex:none}
+.ray-creditmeter{height:4px;border-radius:999px;background:rgba(0,0,0,.07);margin-top:7px;overflow:hidden}
+.ray-creditmeter i{display:block;height:100%;background:var(--secondary);border-radius:999px}
+.ray-creditbar.low .ray-creditmeter i{background:var(--accent)}
+
+/* ── Ray: attachments ──────────────────────────────────────────────────
+   A message can carry documents. The tray sits above the composer with the
+   context chip, because both describe the message you are about to send.  */
+.ray-atts{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 10px}
+.ray-atts:empty{display:none}
+/* A file reads as an object, not a tag: an icon tile coloured by type, the
+   name over what it is. The same card appears in the tray and under the sent
+   message, so what you attached and what you sent look like the same thing. */
+.ray-attcard{position:relative;display:inline-flex;align-items:center;gap:10px;
+             width:212px;max-width:100%;border:1px solid var(--lighter);border-radius:12px;
+             padding:9px 11px;background:#fff}
+.ray-attcard .ic{width:34px;height:34px;border-radius:8px;flex:none;display:flex;
+                 align-items:center;justify-content:center}
+.ray-attcard .ic .ms{font-size:19px}
+.ray-attcard .ic.k-pdf{background:var(--st-pink-bg);color:var(--st-pink-tx)}
+.ray-attcard .ic.k-docx{background:rgba(92,107,192,.14);color:var(--e-indigo)}
+.ray-attcard .ic.k-xlsx{background:var(--st-green-bg);color:var(--st-green-tx)}
+.ray-attcard .meta{min-width:0;display:flex;flex-direction:column;gap:2px}
+.ray-attcard .nm{font-size:12.5px;font-weight:600;line-height:1.3;
+                 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                 overflow:hidden;word-break:break-word}
+.ray-attcard .sub{font-size:11px;color:var(--light);text-transform:uppercase;letter-spacing:.03em}
+.ray-attx{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;
+          border:1px solid var(--lighter);background:#fff;padding:0;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;color:var(--gray)}
+.ray-attx:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.ray-attx .ms{font-size:13px}
+/* Cards under a sent message: a record of what went with it. */
+.ray-attrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ray-attach{width:32px;height:32px;border-radius:10px;border:1px solid var(--lighter);
+            background:none;cursor:pointer;flex:none;display:flex;align-items:center;
+            justify-content:center;color:var(--gray)}
+.ray-attach:hover{border-color:var(--teal);color:var(--teal)}
+.ray-attach .ms{font-size:18px}
+.ray-attpick{max-height:230px;overflow:auto;border-radius:10px;margin-bottom:8px}
+.ray-attpick:empty{display:none}
+/* The picker's own rows. These used to live with the project drawer that the
+   session list replaced; they belong here now. */
+.ray-pickhead{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+              padding:11px 12px 5px;color:var(--light)}
+.ray-pickrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;
+             border:none;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;padding:8px 12px}
+.ray-pickrow:hover{background:var(--row)}
+.ray-pickrow .ms{font-size:17px;color:var(--light);flex:none}
+.ray-pickrow .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-pickrow .t .s{display:block;font-size:11px;font-weight:400;color:var(--light)}
+.ray-pickrow.up{border-top:1px solid var(--border)}
+.ray-pickrow:disabled{opacity:.5;cursor:default}
+.ray-pickrow:disabled:hover{background:none}
+.ray-pickempty{padding:6px 12px 12px;font-size:12.5px;color:var(--light)}
+/* Saved prompts show their whole instruction, not one truncated line — the
+   text IS the thing you are choosing between. */
+.ray-promptrow{display:flex;align-items:flex-start}
+.ray-promptrow .ray-pickrow{align-items:flex-start}
+.ray-promptrow .ray-pickrow .ms{margin-top:1px}
+.ray-promptrow .t{white-space:normal;overflow:visible}
+.ray-promptrow .t .s{white-space:normal;line-height:1.45;margin-top:2px;
+                     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                     overflow:hidden}
+.ray-promptx{border:none;background:none;padding:8px 10px 0 0;cursor:pointer;color:var(--light);
+             display:flex;align-items:flex-start}
+.ray-promptx:hover{color:var(--accent)}
+.ray-promptx .ms{font-size:15px}
+
+/* ── Ray: composer ─────────────────────────────────────────────────────── */
+/* ── Ray: the composer region ──────────────────────────────────────────
+   Three bands, each visibly its own: the conversation above, the quick
+   prompts, and the input group (context + composer). The rules matter more
+   than they look — without them the suggestions read as part of Ray's last
+   answer rather than as controls.                                         */
+.ray-foot{flex-shrink:0}
+.ray-sec{padding:10px 20px 14px}
+.ray-seclabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;
+              color:var(--light);margin-bottom:7px}
+.ray-composer{display:flex;gap:8px;align-items:flex-end;border-radius:14px;
+              padding:8px 8px 8px 14px;transition:border-color .15s}
+.ray-composer textarea{flex:1;min-width:0;border:none;padding:6px 0;font:inherit;font-size:13.5px;
+                       resize:none;max-height:140px;outline:none;line-height:1.5;background:none}
+.ray-send{background:var(--teal);color:#fff;border:none;border-radius:10px;width:32px;height:32px;
+          padding:0;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
+.ray-send .ms{font-size:18px}
+.ray-send:hover{background:var(--cta-dark)}
+.ray-surfacebar{font-size:11px;color:var(--light);padding:9px 0 0;line-height:1.5}
+.ray-surfacebar b{color:var(--gray);font-weight:600}
+
+.ray-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:#2E343C;
+           color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;
+           transition:.2s;z-index:200}
+.ray-toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ── Ray's dark surface ────────────────────────────────────────────────
+   Placed last on purpose: these override the light rules above at equal
+   specificity, and keeping them in one block means the rail's palette can be
+   read — or replaced — without hunting through the file.                   */
+.ray-head{border-bottom:1px solid var(--r-line);background:var(--r-sunk)}
+.ray-title{color:var(--r-tx)}
+.ray-title span{color:var(--r-tx-3)}
+.ray-back{color:var(--r-tx-2)}
+.ray-back:hover{background:var(--r-raise);color:var(--r-tx)}
+.ray-hbtn{color:var(--r-tx-3)}
+.ray-hbtn:hover{color:var(--r-tx);background:var(--r-raise)}
+.ray-mark{opacity:1}
+
+.ray-body{background:var(--r-bg)}
+.ray-byline{color:var(--r-accent)}
+.ray-bubble{color:var(--r-tx)}
+.ray-bubble.user{background:var(--r-user-bg);color:var(--r-tx)}
+.ray-bubble blockquote{background:var(--r-sunk);border-left-color:var(--r-accent);color:var(--r-tx-2)}
+.ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
+.ray-cite{color:var(--r-accent);border-bottom-color:rgba(106,221,181,.4)}
+.ray-note{color:var(--r-tx-3)}
+.ray-older{color:var(--r-tx-3);background:var(--r-sunk)}
+.ray-deny{background:var(--r-deny-bg);border-color:var(--r-deny-bd);color:var(--r-deny-tx)}
+.ray-draft{background:var(--r-sunk);border-color:var(--r-line-2);color:var(--r-tx)}
+.ray-libcard{background:var(--r-sunk);border-color:var(--r-line);color:var(--r-tx)}
+.ray-libcard .m{color:var(--r-tx-3)}
+.ray-libcard p{color:var(--r-tx-2)}
+.ray-act{background:transparent;border-color:var(--r-line-2);color:var(--r-tx)}
+.ray-act:hover{border-color:var(--r-accent);color:var(--r-accent)}
+.ray-act.ghost{color:var(--r-tx-2)}
+.ray-tbl th{color:var(--r-tx-3);border-bottom-color:var(--r-line)}
+.ray-tbl td{border-bottom-color:var(--r-line)}
+
+/* Badges keep their meaning but re-mix for a dark ground: the portal's tints
+   would vanish, so the hue moves to the text and the fill goes translucent. */
+.ray-strat,.ray-match,.ray-gap{border:1px solid transparent}
+.s-whole,.ray-match{background:var(--r-teal-bg);color:var(--r-teal-tx)}
+.s-paged{background:var(--r-blue-bg);color:var(--r-blue-tx)}
+.s-ocr,.ray-gap{background:var(--r-amber-bg);color:var(--r-amber-tx)}
+.s-lazy{background:var(--r-grey-bg);color:var(--r-grey-tx)}
+
+/* Thinking */
+.ray-thinkhead{color:var(--r-tx-3)}
+.ray-thinkhead:hover{color:var(--r-tx-2)}
+.ray-steps{border-left-color:var(--r-line-2)}
+.ray-step{color:var(--r-tx-2)}
+.ray-step .ms{color:var(--r-tx-3)}
+.ray-step.k-find .ms{color:var(--r-accent)}
+.ray-step.k-read .ms{color:var(--r-blue-tx)}
+.ray-step.k-plan .ms{color:var(--r-amber-tx)}
+.ray-step.k-write .ms{color:var(--r-clay-tx)}
+.ray-step.bad{color:var(--r-deny-tx)}
+.ray-step.bad .ms{color:var(--accent)}
+.ray-step code{background:var(--r-sunk);color:var(--r-tx)}
+.ray-work{color:var(--r-tx-3)}
+
+/* Blank state + session list */
+.ray-empty h3{color:var(--r-tx)}
+.ray-empty p{color:var(--r-tx-2)}
+.ray-empty .ray-scope{color:var(--r-tx-3)}
+.ray-starter{background:var(--r-raise);border-color:var(--r-line);color:var(--r-tx)}
+.ray-starter:hover{border-color:var(--r-accent);color:var(--r-accent);background:var(--r-sunk)}
+.ray-list{background:var(--r-bg)}
+.ray-search{background:var(--r-raise)}
+.ray-search .ms{color:var(--r-tx-3)}
+.ray-search input{color:var(--r-tx)}
+.ray-search input::placeholder{color:var(--r-tx-3)}
+.ray-group{color:var(--r-tx-3)}
+.ray-row:hover{background:var(--r-raise)}
+.ray-row.on{background:var(--r-raise)}
+.ray-rowt{color:var(--r-tx)}
+.ray-rows{color:var(--r-tx-2)}
+.ray-rowage{color:var(--r-tx-3)}
+.ray-tile{background:var(--r-raise);color:var(--r-tx-3)}
+.ray-rowwrap.open{background:var(--r-raise)}
+.ray-rowmenu{color:var(--r-tx-3)}
+.ray-rowmenu:hover{background:var(--r-sunk);color:var(--r-tx)}
+.ray-listempty{color:var(--r-tx-3)}
+.ray-mini{background:transparent;border-color:var(--r-line-2);color:var(--r-tx-2)}
+.ray-mini:hover{border-color:var(--r-tx-2);color:var(--r-tx)}
+.ray-rename{background:var(--r-raise);border-color:var(--r-accent);color:var(--r-tx)}
+.ray-headbar .ray-acts{background:var(--r-sunk);border-bottom-color:var(--r-line)}
+
+/* Trace */
+.ray-trace{background:var(--r-bg)}
+.ray-tracebtn{color:var(--r-tx-3)}
+.ray-tracebtn:hover{color:var(--r-tx-2)}
+.ray-tracebody{border-top-color:var(--r-line)}
+.tsec{color:var(--r-tx-3)}
+.thint{color:var(--r-accent)}
+.ttbl td{border-bottom-color:var(--r-line);color:var(--r-tx-2)}
+.ttbl td.n,.ttbl .sub{color:var(--r-tx-3)}
+.tnote{background:var(--r-sunk);border-color:var(--r-line);color:var(--r-tx-2)}
+.tnote .ms{color:var(--r-accent)}
+.tfoot{color:var(--r-tx-3);border-top-color:var(--r-line)}
+.tfoot b{color:var(--r-tx-2)}
+.tfoot .save{color:var(--r-accent)}
+
+/* Composer band */
+.ray-foot{background:var(--r-sunk);border-top:1px solid var(--r-line)}
+.ray-seclabel{color:var(--r-tx-3)}
+.ray-composer{background:var(--r-raise);border:1px solid var(--r-line-2)}
+.ray-composer:focus-within{border-color:var(--r-accent)}
+.ray-composer textarea{color:var(--r-tx)}
+.ray-composer textarea::placeholder{color:var(--r-tx-3)}
+.ray-surfacebar{color:var(--r-tx-3)}
+.ray-surfacebar b{color:var(--r-tx-2)}
+.ray-ctxchip{background:var(--r-accent-dim);color:var(--r-accent)}
+.ray-ctxadd{border-color:var(--r-line-2);color:var(--r-tx-3)}
+.ray-ctxadd:hover{border-color:var(--r-accent);color:var(--r-accent)}
+.ray-creditbar{background:var(--r-credit-bg);border-color:var(--r-credit-bd)}
+.ray-creditline{color:var(--r-amber-tx)}
+.ray-creditbar.low{background:var(--r-low-bg);border-color:var(--r-low-bd)}
+.ray-creditbar.low .ray-creditline{color:var(--r-deny-tx)}
+.ray-creditmeter{background:var(--r-meter)}
+
+/* The reopen button belongs to the rail, so it follows the rail's theme. */
+.ray-fab{background:var(--r-bg,#fff);border-color:var(--r-line-2,var(--border));color:var(--r-tx,var(--ink))}
+html:not(.ray-light) .ray-fab{border-color:rgba(255,255,255,.16)}
+
+/* ── The theme switch, in the app header ─────────────────────────────── */
+.hthemes{display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.16);
+        border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700}
+.hthemes:hover{background:rgba(255,255,255,.26)}
+.hthemes .ms{font-size:17px}
+.ray-attcard{background:var(--r-raise);border-color:var(--r-line-2);color:var(--r-tx)}
+.ray-attcard .sub{color:var(--r-tx-3)}
+.ray-attcard .ic.k-pdf{background:rgba(249,82,70,.16);color:#FFB4AD}
+.ray-attcard .ic.k-docx{background:rgba(129,145,224,.18);color:#A7B2EA}
+.ray-attcard .ic.k-xlsx{background:rgba(106,221,181,.16);color:var(--r-accent)}
+.ray-attx{background:var(--r-sunk);border-color:var(--r-line-2);color:var(--r-tx-2)}
+.ray-attx:hover{background:var(--r-tx);border-color:var(--r-tx);color:var(--r-bg)}
+.ray-attrow .ray-attcard{background:var(--r-sunk)}
+.ray-attach{border-color:var(--r-line-2);color:var(--r-tx-3)}
+.ray-attach:hover{border-color:var(--r-accent);color:var(--r-accent)}
+.ray-attpick{background:var(--r-sunk);border:1px solid var(--r-line)}
+.ray-attpick .ray-pickhead{color:var(--r-tx-3)}
+.ray-attpick .ray-pickrow{color:var(--r-tx)}
+.ray-attpick .ray-pickrow:hover{background:var(--r-raise)}
+.ray-attpick .ray-pickrow .ms{color:var(--r-tx-3)}
+.ray-attpick .ray-pickrow .t .s{color:var(--r-tx-3)}
+.ray-attpick .ray-pickrow.up{border-top-color:var(--r-line)}
+.ray-attpick .ray-pickempty{color:var(--r-tx-3)}
+.ray-promptrow .ray-promptx{color:var(--r-tx-3)}
+.ray-promptrow .ray-promptx:hover{color:var(--accent)}
+.ray-what{border-left-color:var(--r-line-2);color:var(--r-tx-2)}
