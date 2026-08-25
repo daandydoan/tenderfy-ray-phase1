@@ -227,7 +227,7 @@ Ray is a **region of the application**, not a widget a page owns.
   throttles deeply nested timers there to once a minute, and a half-written
   answer waiting on the user's return is worse than no animation at all.
 * **The composer region is its own band.** Below the conversation the rail
-  splits off a labelled *Context* section holding the chip and the composer,
+  splits off a labelled *Reference* section holding the chip and the composer,
   over a tinted ground with a hairline rule, so the input never reads as part of
   Ray's last answer. Each part hides itself when it has nothing to show: no
   context label without a chip, no credit notice under 60%. Suggested prompts
@@ -247,6 +247,12 @@ Ray is a **region of the application**, not a widget a page owns.
   context card as *read these first*, and the provider searches them instead of
   the tender at large. Attachments belong to the **message**, not the session:
   they ride with one turn, are recorded on it, and the tray clears.
+
+  The tray sits **below** the composer. Cards are the tallest thing in that
+  band, and above the field they pushed the reference chip away from the label
+  it belongs to. It is capped at two rows and scrolls after that — the footer
+  does not shrink, so an unbounded tray would eat the conversation a card at a
+  time.
 * **Saved prompts.** The bookmark beside the attach button holds reusable
   instructions — the "save prompt" feature the Document Workspace already has,
   carried into Ray. Picking one **fills the composer rather than sending it**: a

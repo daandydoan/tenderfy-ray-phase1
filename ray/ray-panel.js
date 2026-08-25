@@ -157,9 +157,8 @@
         <div class="ray-foot">
           <div class="ray-credit" data-ray="credit"></div>
           <div class="ray-sec input">
-            <div class="ray-seclabel" data-ray="ctxlabel">Context</div>
+            <div class="ray-seclabel" data-ray="ctxlabel">Reference</div>
             <div class="ray-ctx" data-ray="ctx"></div>
-            <div class="ray-atts" data-ray="atts"></div>
             <div class="ray-attpick" data-ray="attpick"></div>
             <div class="ray-attpick" data-ray="prompts"></div>
             <form class="ray-composer" data-ray="composer">
@@ -170,6 +169,10 @@
               <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
               <button type="submit" class="ray-send" title="Send"><span class="ms">arrow_upward</span></button>
             </form>
+            <!-- Attachment cards sit UNDER the composer: they are the tallest
+                 thing in this band, and above the field they pushed the
+                 reference chip away from the label it belongs to. -->
+            <div class="ray-atts" data-ray="atts"></div>
             <input type="file" multiple hidden data-ray="file">
             <div class="ray-surfacebar" data-ray="surfacebar"></div>
           </div>
@@ -506,6 +509,9 @@
     }
 
     /* ── Attachments ─────────────────────────────────────────────────────
+       Rendered below the composer. "Reference" is the page or field Ray is
+       pointed at; attachments are files sent with one message. Two different
+       things, so they do not share a row.
        A message can carry documents. The picker offers the tender's own files,
        guard-filtered — a document you may not read is never offered, so the
        permission model holds at the point of attachment rather than at the
@@ -654,10 +660,14 @@
       } catch (err) { toast(err.reason || err.message); }
     }
 
-    /* ── Context chip ────────────────────────────────────────────────────
+    /* ── Reference chip ──────────────────────────────────────────────────
        What Ray is being told to look at, named and dismissible — the Figma
        selection pattern the sync-up asked for. Dismissing does not shrink what
-       Ray may reach; it stops the page being assumed.                      */
+       Ray may reach; it stops the page being assumed.
+
+       Called "reference" in the UI, not "context": context already means the
+       assembled prompt in §2, and having one word for both made every
+       conversation about it ambiguous.                                     */
     /** A trail, not a label: where you are, then what Ray is pointed at inside
      *  it. The root comes from the page's own breadcrumb so the chip and the
      *  header agree; the leaves come from the context, because they are the
@@ -700,11 +710,11 @@
           + `<span class="seg">${esc(seg)}</span>`).join('');
       box.innerHTML = off
         ? `<button class="ray-ctxadd" data-ray-ctx-on>
-             <span class="ms">add</span>Add ${esc(label.text)} as context</button>`
+             <span class="ms">add</span>Add ${esc(label.text)} as reference</button>`
         : `<span class="ray-ctxchip" title="Ray is answering about ${esc(label.trail.join(' › '))}. Dismiss to ask something general.">
              <span class="ms">${label.icon}</span>
              <span class="t">${trail}</span>
-             <button class="ray-ctxx" data-ray-ctx-off title="Stop using this as context">
+             <button class="ray-ctxx" data-ray-ctx-off title="Stop using this as a reference">
                <span class="ms">close</span></button>
            </span>`;
     }

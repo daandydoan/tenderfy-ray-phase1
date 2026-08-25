@@ -56,11 +56,12 @@ The back chevron shows the session list, which ships with two demo sessions:
   refusal*, *Thinking block* — and each block says what it is and when Ray uses
   it before showing itself. Scroll it; nobody has to drive.
 
-Two more things surface as you go: the **context chip** above the composer names
-what Ray is pointed at (the tender, the open document, the field you are
+Two more things surface as you go: the **reference chip** above the composer
+names what Ray is pointed at (the tender, the open document, the field you are
 editing) and can be dismissed with its × to ask something general; and after a
 substantial question the **credit notice** appears, because the demo starts just
-under its 60% threshold.
+under its 60% threshold. Files you attach appear as cards **below** the
+composer.
 
 The rail is **dark by default**; the switch in the app header flips it to light
 instantly, for demos in rooms where dark does not project well.

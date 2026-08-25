@@ -660,14 +660,21 @@ html.ray-light .ray-panel{
 /* ── Ray: attachments ──────────────────────────────────────────────────
    A message can carry documents. The tray sits above the composer with the
    context chip, because both describe the message you are about to send.  */
-.ray-atts{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 10px}
+/* Capped: the footer does not shrink, so an unbounded tray would eat the
+   conversation a card at a time. Two rows, then it scrolls. */
+.ray-atts{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 0;
+          max-height:150px;overflow-y:auto}
 .ray-atts:empty{display:none}
 /* A file reads as an object, not a tag: an icon tile coloured by type, the
    name over what it is. The same card appears in the tray and under the sent
    message, so what you attached and what you sent look like the same thing. */
 .ray-attcard{position:relative;display:inline-flex;align-items:center;gap:10px;
-             width:212px;max-width:100%;border:1px solid var(--lighter);border-radius:12px;
+             width:calc(50% - 4px);min-width:168px;max-width:100%;flex:0 1 auto;
+             border:1px solid var(--lighter);border-radius:12px;
              padding:9px 11px;background:#fff}
+/* Under a sent message the cards size to their content instead of halving the
+   width — there is no tray to keep tidy, and a lone card should not be huge. */
+.ray-attrow .ray-attcard{width:auto;min-width:0;max-width:240px}
 .ray-attcard .ic{width:34px;height:34px;border-radius:8px;flex:none;display:flex;
                  align-items:center;justify-content:center}
 .ray-attcard .ic .ms{font-size:19px}
