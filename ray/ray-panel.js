@@ -66,11 +66,13 @@
         : this.opts.open != null ? this.opts.open
         : store.get(OPEN_KEY, false);
       this.wide = this.mode !== 'inline' && store.get(WIDE_KEY, false);
-      /* How the panel presents itself. Ray opens as a dialog — a chat you
-         summoned — and is promoted to the rail when you want him alongside the
-         work. Inline embeds have no say: they are already inside something. */
+      /* How the panel presents itself. Ray opens **expanded**, as the rail:
+         this is a demo of an agent that works alongside you, and opening
+         collapsed sells that short. Collapsing to the dialog is a deliberate
+         act, and it sticks. Inline embeds have no say — they are already
+         inside something. */
       this.form = this.mode === 'inline' ? 'rail'
-        : store.getStr(FORM_KEY, 'dialog') === 'rail' ? 'rail' : 'dialog';
+        : store.getStr(FORM_KEY, 'rail') === 'dialog' ? 'dialog' : 'rail';
       this.view = 'chat';            // 'list' | 'chat' — Figma's two screens
       this.query = '';               // session search
       this.attachments = [];         // files pinned to the next message

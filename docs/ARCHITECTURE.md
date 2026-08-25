@@ -166,10 +166,13 @@ panel**, not two panels.
 | Mark | compact head | full character |
 | Controls | `open_in_full` → rail | `close_fullscreen` → dialog, plus widen |
 
-Ray **opens as the dialog** — that is the form the co-pilot has today, and it
-asks for nothing from the page. Promotion to the rail is the user saying they
-want him alongside the work rather than over it. The choice persists in
-`ray_form`, so Ray comes back the way you left him.
+Ray **opens as the rail**. The dialog is the form the co-pilot has today and it
+asks for nothing from the page, which made it the tempting default — but this is
+a demo of an agent that works *alongside* you, and opening collapsed sells that
+short before anyone has clicked anything. Collapsing to the dialog is therefore
+a deliberate act. Either way the choice persists in `ray_form`, so Ray comes
+back the way you left him, and only a visitor with nothing stored gets the
+default.
 
 `setForm()` swaps a class, re-runs `applyLayout()`, repaints the header, and
 repaints the history. **Nothing about the conversation moves** — same panel,
