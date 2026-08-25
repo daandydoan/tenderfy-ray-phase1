@@ -17,6 +17,17 @@ chrome, tokens (`#1D9E75` teal, `#394645` rail), Outfit, Material Symbols.
 python3 serve.py
 ```
 
+Before pushing a change that has to reach the live demo, stamp the asset URLs:
+
+```bash
+python3 stamp.py
+```
+
+GitHub Pages sends no cache-busting headers, so a browser that has already
+seen the site will keep running the old `ray-panel.js`. `stamp.py` appends a
+content hash to every local `.css`/`.js` reference, so a URL changes exactly
+when its file does. It is idempotent — running it twice rewrites nothing.
+
 Then open <http://localhost:4173>. No build step, no dependencies, no API key —
 the model provider is mocked behind the same interface the real one implements.
 
