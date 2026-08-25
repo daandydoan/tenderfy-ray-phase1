@@ -29,10 +29,12 @@ streaming in with its citations. Click that line to reopen the steps.
 
 The back chevron shows the session list, which ships with two demo sessions:
 
-* **Guided demo — the Phase 1 requirements** — the one to present. The **Demo**
-  button in the app header runs it one click at a time: the question types
-  itself into the composer and sends, and a toast names the requirement each
-  step covers. Eight steps, mapped to the brief:
+* **Guided demo — the Phase 1 requirements** — the one to present. **Click the
+  chat field** and the next question types itself in and sends; the placeholder
+  says which step is next, and a toast names the requirement it covers. (The
+  **Demo** button in the header does the same thing, and shows the counter.)
+  Clicking is ignored while you have something typed, so the field stays usable
+  for real questions. Eight steps, mapped to the brief:
 
   | | Step | Shows |
   |---|---|---|

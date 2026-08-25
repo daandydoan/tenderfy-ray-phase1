@@ -198,6 +198,12 @@
       });
 
       el.addEventListener('click', (e) => {
+        /* Clicking into the composer can mean "run the next scripted step" —
+           the shell decides, and only ever when the field is empty, so typing
+           your own question is never hijacked. */
+        if (e.target.matches('[data-ray="input"]') && global.rayComposerActivate) {
+          global.rayComposerActivate(this);
+        }
         if (e.target.closest('[data-ray="close"]')) { this.hide(); return; }
         if (e.target.closest('[data-ray="expand"]')) { this.toggleWide(); return; }
         const act = e.target.closest('[data-ray-action]');
@@ -740,8 +746,9 @@
       /* `session` is still undefined on the first paint, which render() does
          before bindSession(); an unstarted thread is the right answer then. */
       const started = this.session ? this.session.history().length : 0;
-      this.$('input').placeholder = s.id === 'edit-dialog'
-        ? 'Ask Ray to draft, tighten or reuse…'
+      const hint = global.rayComposerHint && global.rayComposerHint(this);
+      this.$('input').placeholder = hint ? hint
+        : s.id === 'edit-dialog' ? 'Ask Ray to draft, tighten or reuse…'
         : started ? 'Reply to Ray…' : 'Ask Ray anything…';
       this.paintContext();
       this.paintCredits();

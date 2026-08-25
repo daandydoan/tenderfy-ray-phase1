@@ -227,6 +227,33 @@
       : `${DEMO[demoStep].ref} · ${DEMO[demoStep].label}`;
   }
 
+  /** True when the panel is sitting in the guided-demo session with steps
+   *  still to run. Everything below keys off this, so the behaviour never
+   *  leaks into a session the user is actually working in. */
+  function inDemo(panel) {
+    if (!panel || demoStep >= DEMO.length) return false;
+    const svc = global.ray;
+    if (!svc) return false;
+    const rec = svc.threadIndex.get(svc.user.id, panel.threadId);
+    return !!rec && rec.title === DEMO_TITLE;
+  }
+
+  /* The composer says what clicking it will do. */
+  global.rayComposerHint = function (panel) {
+    return inDemo(panel) && !demoBusy
+      ? `Click to run step ${demoStep + 1} of ${DEMO.length} — ${DEMO[demoStep].label}`
+      : null;
+  };
+
+  /* Clicking an empty composer in the demo session runs the next step. The
+     empty check matters: it leaves the field usable for a real question, and
+     for editing a prompt pulled from the library. */
+  global.rayComposerActivate = function (panel) {
+    if (demoBusy || !inDemo(panel)) return;
+    if ((panel.$('input').value || '').trim()) return;
+    global.rayDemoStep();
+  };
+
   /** The flow runs in its own session, so it can be restarted cleanly without
    *  touching the catalogue session beside it. */
   function demoSession(service, fresh) {
@@ -265,6 +292,7 @@
     } catch (err) { console.error('Demo step failed:', err); }
     demoBusy = false;
     paintDemo();
+    if (global.RayPanel.current) global.RayPanel.current.paintSurface();
   };
 
   /* ── Demo seeding ──────────────────────────────────────────────────────

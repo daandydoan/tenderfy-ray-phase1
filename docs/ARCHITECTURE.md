@@ -120,10 +120,17 @@ prototype hit three times before the cause was named.
 
 The prototype seeds exactly two, doing different jobs:
 
-* **Guided demo** — empty until the header's *Demo* button fills it, one
-  requirement per click. Each step types its question into the composer and
-  sends, so the tool calls, thinking and streaming all actually happen. The
-  eight steps map one-to-one onto the Phase 1 brief (§1 ×3, §2, §3 ×3, §4).
+* **Guided demo** — empty until it is run, one requirement per click. The
+  trigger is the **composer itself**: clicking an empty chat field in this
+  session types the next question in and sends it, and the placeholder names
+  the step. The header button does the same and carries the counter. Each step
+  runs for real, so the tool calls, thinking and streaming all happen. The eight
+  steps map one-to-one onto the Phase 1 brief (§1 ×3, §2, §3 ×3, §4).
+
+  Two guards keep it from leaking: the panel only asks the shell what a click
+  means, and the shell only answers when the active session *is* the demo
+  session, steps remain, and the composer is **empty** — so typing a real
+  question, or editing one pulled from the prompt library, is never hijacked.
 * **UI elements** — a reference, not a staged exchange. Each turn is labelled
   with the block it demonstrates and each block explains itself before showing
   itself, so the session reads as documentation of Ray's vocabulary. The
