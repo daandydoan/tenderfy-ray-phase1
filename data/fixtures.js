@@ -209,8 +209,8 @@
       text: '<div class="ray-what">A fact lifted straight from a document. One or two '
         + 'sentences, then a citation chip naming the file and page. This is most of '
         + 'what Ray returns.</div>'
-        + 'Tenders close at 2:00pm AEST on <b>29 July 2026</b>.'
-        + '\n<span class="ray-cite">Request for Tender.pdf p.3</span>' },
+        + 'The answer sits here, in a sentence or two, with the source named underneath.'
+        + '\n<span class="ray-cite">Document name.pdf p.12</span>' },
 
     { role: 'user', text: 'Long answer' },
     { role: 'assistant',
@@ -218,47 +218,47 @@
         + 'bulleted findings each carrying their own citation, and a closing note in '
         + 'grey saying what it cost to produce — how much was read, not how many '
         + 'tokens were spent.</div>'
-        + '<b>What matters most</b>\n'
-        + '<ul><li>A finding, stated plainly, with the evidence attached. '
-        + '<span class="ray-cite">Request for Tender.pdf p.91</span></li>'
-        + '<li>A second finding. Bold is used for the part that changes a decision — '
-        + '<b>$20M → $25M</b> — not for emphasis generally. '
-        + '<span class="ray-cite">Scope of Works — Addendum 2.docx p.2</span></li>'
-        + '<li>A third. Bullets stay to one idea each. '
-        + '<span class="ray-cite">Site Survey (scanned).pdf p.17 (OCR)</span></li></ul>'
+        + '<b>A heading, when the answer has parts</b>\n'
+        + '<ul><li>A finding, stated plainly, with its evidence attached. '
+        + '<span class="ray-cite">Document name.pdf p.4</span></li>'
+        + '<li>Bold marks the part that <b>changes a decision</b> — a figure, a date, a '
+        + 'threshold — not emphasis generally. '
+        + '<span class="ray-cite">Another document.docx p.9</span></li>'
+        + '<li>One idea per bullet; the citation says where it came from. '
+        + '<span class="ray-cite">A scanned file.pdf p.17 (OCR)</span></li></ul>'
         + '\n<span class="ray-note">The closing note: what was opened, and what that '
         + 'avoided opening.</span>' },
 
     { role: 'user', text: 'Table' },
     { role: 'assistant',
       text: '<div class="ray-what">For comparing things — documents against strategies, '
-        + 'questions against library answers. Numeric columns never wrap; the whole '
-        + 'table scrolls sideways inside the rail rather than squeezing.</div>'
-        + '<table class="ray-tbl"><thead><tr><th>Document</th><th class="n">Pages</th>'
-        + '<th>Strategy</th><th>Why</th></tr></thead><tbody>'
-        + '<tr><td>A large text-layer PDF</td><td class="n">148p</td>'
+        + 'questions against saved answers. Numeric columns never wrap; the whole table '
+        + 'scrolls sideways inside the rail rather than squeezing.</div>'
+        + '<table class="ray-tbl"><thead><tr><th>Item</th><th class="n">Size</th>'
+        + '<th>Label</th><th>Reason</th></tr></thead><tbody>'
+        + '<tr><td>First row</td><td class="n">148p</td>'
         + '<td><span class="ray-strat s-paged">Page-by-page</span></td>'
-        + '<td>outline first, then only the pages that matter</td></tr>'
-        + '<tr><td>A small document</td><td class="n">11p</td>'
+        + '<td>a short line explaining the label</td></tr>'
+        + '<tr><td>Second row</td><td class="n">11p</td>'
         + '<td><span class="ray-strat s-whole">Whole file</span></td>'
-        + '<td>small enough to hold in context in one pass</td></tr>'
-        + '<tr><td>A scan with no text layer</td><td class="n">34p</td>'
+        + '<td>a short line explaining the label</td></tr>'
+        + '<tr><td>Third row</td><td class="n">34p</td>'
         + '<td><span class="ray-strat s-ocr">OCR</span></td>'
-        + '<td>rasterised pages, OCR’d on demand and cached</td></tr>'
+        + '<td>a short line explaining the label</td></tr>'
         + '</tbody></table>' },
 
     { role: 'user', text: 'Badges' },
     { role: 'assistant',
       text: '<div class="ray-what">Small pills that classify a row. Reading strategies '
-        + 'use one set; Response Library coverage uses another. They carry meaning, so '
-        + 'the same colour always means the same kind of thing.</div>'
+        + 'use one set; saved-answer coverage uses another. They carry meaning, so the '
+        + 'same colour always means the same kind of thing.</div>'
         + '<b>Reading strategy</b>\n'
         + '<span class="ray-strat s-whole">Whole file</span> '
         + '<span class="ray-strat s-paged">Page-by-page</span> '
         + '<span class="ray-strat s-ocr">OCR</span> '
         + '<span class="ray-strat s-lazy">On demand</span>'
-        + '\n\n<b>Library coverage</b>\n'
-        + '<span class="ray-match">Library match · 81% win</span> '
+        + '\n\n<b>Coverage</b>\n'
+        + '<span class="ray-match">Match found</span> '
         + '<span class="ray-gap">No match</span>' },
 
     { role: 'user', text: 'Draft block' },
@@ -268,17 +268,17 @@
         + 'below it act on the page, not the conversation.</div>'
         + '<div class="ray-draft">The drafted text sits in its own block. It is Ray’s '
         + 'output rather than Ray’s explanation, and the two should never be mistaken '
-        + 'for each other — one goes into the tender, the other does not.</div>'
-        + '<span class="ray-cite">Grounded in Request for Tender.pdf p.109</span>\n'
+        + 'for each other — one goes into the document, the other does not.</div>'
+        + '<span class="ray-cite">Grounded in Document name.pdf p.8</span>\n'
         + '<button class="ray-act" data-ray-action="insert">Insert into the field</button> '
-        + '<button class="ray-act ghost" data-ray-action="library">Save to Response Library</button>' },
+        + '<button class="ray-act ghost" data-ray-action="library">Save for reuse</button>' },
 
-    { role: 'user', text: 'Response Library card' },
+    { role: 'user', text: 'Saved answer card' },
     { role: 'assistant',
-      text: '<div class="ray-what">A reusable answer already written by the business, '
-        + 'with the metadata that decides whether to reuse it: category, length, and '
-        + 'how often it has won.</div>'
-        + '<div class="ray-libcard"><b>The saved question this answer covers.</b>'
+      text: '<div class="ray-what">Something already written and worth reusing, with the '
+        + 'metadata that decides whether to reuse it: category, length, and how often it '
+        + 'has worked.</div>'
+        + '<div class="ray-libcard"><b>The question this saved answer covers.</b>'
         + '<div class="m">Category · 392 words · 81% win rate</div>'
         + '<p>The opening of the stored answer, truncated — enough to judge whether it '
         + 'is the right one to reuse…</p>'
@@ -286,16 +286,16 @@
 
     { role: 'user', text: 'Attachments',
       attachments: [
-        { id: 'd-scope', name: 'A document from the tender.docx', kind: 'docx', pages: 11 },
-        { id: 'd-upgeo', name: 'An uploaded scan.pdf', kind: 'pdf', pages: 18 },
+        { id: 'd-scope', name: 'Document name.docx', kind: 'docx', pages: 11 },
+        { id: 'd-upgeo', name: 'Scanned upload.pdf', kind: 'pdf', pages: 18 },
       ] },
     { role: 'assistant',
       text: '<div class="ray-what">Documents sent with a message appear as cards beneath '
-        + 'it — icon tiled by file type, name, and what it is. The same card shows in '
+        + 'it — icon tiled by file type, name, and what it is. The same card shows below '
         + 'the composer before you send. Attached files are read first, ahead of '
-        + 'anything else on the tender.</div>'
-        + 'Ray answers from the attachments and says so, rather than searching the '
-        + 'whole tender and hoping it lands on the same file.' },
+        + 'anything else.</div>'
+        + 'Ray answers from the attachments and says so, rather than searching '
+        + 'everything and hoping it lands on the same file.' },
 
     { role: 'user', text: 'Permission refusal' },
     { role: 'assistant',
@@ -304,14 +304,14 @@
         + 'does not exist.</div>'
         + 'The part of the answer Ray <i>can</i> give still comes first.'
         + '\n\n<span class="ray-deny"><span class="ms">lock</span> I stopped short '
-        + 'because one item is outside your access — the reason is stated plainly. Ask a '
-        + 'Business Admin if you need it.</span>' },
+        + 'because one item is outside your access — the reason is stated plainly. Ask an '
+        + 'administrator if you need it.</span>' },
 
     { role: 'user', text: 'Retrieved messages' },
     { role: 'assistant',
       text: '<div class="ray-what">When Ray fetches older turns that are no longer in '
-        + 'context, it quotes them rather than paraphrasing — so you can see exactly '
-        + 'what was said, and that it was retrieved rather than remembered.</div>'
+        + 'context, it quotes them rather than paraphrasing — so you can see exactly what '
+        + 'was said, and that it was retrieved rather than remembered.</div>'
         + '<blockquote><b>You:</b> The earlier question, quoted verbatim.</blockquote>'
         + '<blockquote><b>Ray:</b> The earlier answer, quoted verbatim.</blockquote>'
         + '\n<span class="ray-note">Retrieved 2 messages from storage — they were not '

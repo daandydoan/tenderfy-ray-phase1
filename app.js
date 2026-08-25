@@ -18,13 +18,17 @@
 (function (global) {
   'use strict';
 
+  /* Two pages. The rest of the contractor nav is present so the chrome reads
+     as the real app, but only these two are built — the demo is about Ray, and
+     five more screens were five more things to explain. */
   const NAV = [
-    { key: 'dashboard', icon: 'desktop_mac',     label: 'Dashboard',   href: 'index.html' },
-    { key: 'tenders',   icon: 'domain',          label: 'Tenders',     href: 'pages/tenders.html' },
-    { key: 'review',    icon: 'fact_check',      label: 'Document review', href: 'pages/document-review.html' },
-    { key: 'responses', icon: 'chat',            label: 'Response Library', href: 'pages/response-library.html' },
-    { key: 'workspace', icon: 'insert_drive_file', label: 'Document Workspace', href: 'pages/document-workspace.html' },
-    { key: 'subbies',   icon: 'groups',          label: 'Subcontractors', href: 'pages/subbies.html' },
+    { key: 'dashboard', icon: 'desktop_mac', label: 'Dashboard', href: 'index.html' },
+    { key: 'tenders',   icon: 'domain',      label: 'Tenders',   href: 'pages/tenders.html' },
+    { key: null, icon: 'chat',                 label: 'Messages' },
+    { key: null, icon: 'insert_drive_file',    label: 'Documents' },
+    { key: null, icon: 'contacts',             label: 'Contacts' },
+    { key: null, icon: 'manage_accounts',      label: 'Manage Staff' },
+    { key: null, icon: 'groups',               label: 'Subcontractors' },
   ];
 
   /* Depth-aware links so pages/ and the root both work off one nav table. */
@@ -108,9 +112,11 @@
     if (!screen) return;
     const user = currentUser();
 
-    const ics = NAV.map((n) =>
-      `<a class="cic ${cfg.nav === n.key ? 'active' : ''}" href="${rel(n.href)}" title="${n.label}">`
-      + `<span class="ms fill">${n.icon}</span></a>`).join('');
+    const ics = NAV.map((n) => n.href
+      ? `<a class="cic ${cfg.nav === n.key ? 'active' : ''}" href="${rel(n.href)}" title="${n.label}">`
+        + `<span class="ms fill">${n.icon}</span></a>`
+      : `<a class="cic" data-toast="${n.label} — not built in this prototype" title="${n.label}">`
+        + `<span class="ms fill">${n.icon}</span></a>`).join('');
 
     const dev = devOn();
     document.documentElement.classList.toggle('dev', dev);
@@ -196,18 +202,13 @@
     { ref: '§3', label: 'On-demand reading — search, then only the pages that matter',
       q: 'What insurance is required?' },
     { ref: '§1', label: 'Question extraction — was the Workspace’s own code',
-      q: 'Extract the response schedule questions',
-      focus: ['document-workspace', { tenderId: 't-envind', documentId: 'd-rft' }] },
+      q: 'Extract the response schedule questions' },
     { ref: '§1', label: 'Response Library — reuse before rewrite',
-      q: 'Find a past answer about safety',
-      focus: ['response-library', {}] },
-    { ref: '§1', label: 'Generate content — inside an edit dialog',
-      q: 'Draft an answer for Q1',
-      focus: ['edit-dialog', { tenderId: 't-envind', field: 'Q1 response', wordLimit: 500,
-                               question: 'Describe your environmental management system.' }] },
+      q: 'Find a past answer about safety' },
+    { ref: '§1', label: 'Generate content — drafting for a field',
+      q: 'Draft an answer for Q1' },
     { ref: '§3', label: 'Answer from a file the user hands over',
-      q: 'What changed in Addendum 2?', attach: ['d-scope'],
-      focus: ['tender', { tenderId: 't-envind' }] },
+      q: 'What changed in Addendum 2?', attach: ['d-scope'] },
     { ref: '§2', label: 'Context management — retrieved, not resent',
       q: 'Remind me what you said about insurance' },
     { ref: '§4', label: 'Permission-based fetching — Ray tries, the guard refuses',
@@ -227,9 +228,9 @@
       : `${DEMO[demoStep].ref} · ${DEMO[demoStep].label}`;
   }
 
-  /** True when the panel is sitting in the guided-demo session with steps
+  /** True when the panel is sitting in the guided-demo project with steps
    *  still to run. Everything below keys off this, so the behaviour never
-   *  leaks into a session the user is actually working in. */
+   *  leaks into a project the user is actually working in. */
   function inDemo(panel) {
     if (!panel || demoStep >= DEMO.length) return false;
     const svc = global.ray;
@@ -245,7 +246,7 @@
       : null;
   };
 
-  /* Clicking an empty composer in the demo session runs the next step. The
+  /* Clicking an empty composer in the demo project runs the next step. The
      empty check matters: it leaves the field usable for a real question, and
      for editing a prompt pulled from the library. */
   global.rayComposerActivate = function (panel) {
@@ -254,8 +255,8 @@
     global.rayDemoStep();
   };
 
-  /** The flow runs in its own session, so it can be restarted cleanly without
-   *  touching the catalogue session beside it. */
+  /** The flow runs in its own project, so it can be restarted cleanly without
+   *  touching the catalogue beside it. */
   function demoSession(service, fresh) {
     const uid = service.user.id;
     let t = service.allThreads().find((x) => x.title === DEMO_TITLE);
@@ -274,7 +275,7 @@
   global.rayDemoStep = async function () {
     const p = global.RayPanel && global.RayPanel.current;
     if (!p || demoBusy) return;
-    if (demoStep >= DEMO.length) {          // restart in a clean session
+    if (demoStep >= DEMO.length) {          // restart in a clean project
       demoStep = 0;
       p.openThread(demoSession(global.ray, true).id);
       paintDemo();
@@ -306,7 +307,7 @@
      off THAT rather than off a list of ids in the flag — an older flag has no
      ids to offer, and cleaning up by "what did I make" is the only version of
      this that cannot leave duplicates behind.                               */
-  const SEED_VERSION = 10;
+  const SEED_VERSION = 12;
 
   function seedDemo(service) {
     const uid = service.user.id;
@@ -344,11 +345,12 @@
       return { rec: t, session: service.thread(t.id, surface, ctx || {}) };
     };
 
-    /* Two sessions, doing two different jobs.
+    /* Two projects, doing two different jobs. (A "project" in the UI is a
+       session in the code — same thing, different vocabulary.)
 
        1. A static catalogue: every block the panel can render, so a reviewer
           can see the vocabulary without anyone driving.
-       2. An empty session the guided flow fills in live, one requirement per
+       2. An empty project the guided flow fills in live, one requirement per
           click. This is the one that proves the behaviour, because the tool
           calls, the thinking and the streaming actually happen. */
     const cat = mk('tender', { tenderId: 't-envind' });

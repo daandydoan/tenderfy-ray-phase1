@@ -15,21 +15,42 @@
 <div id="screen" style="display:none">
 
 <div class="pad">
-  <div class="sect-h">
-    <div><h1>Tenders</h1><p class="sub" style="margin:0" id="count"></p></div>
-    <a class="btn pri"><span class="ms" style="font-size:17px">add</span> New tender</a>
+  <div class="tn-bar">
+    <div class="tn-title">Tenders</div>
+    <div class="tn-tabs">
+      <div class="tn-tab on" onclick="tnPick(this,'.tn-tab')">All Tenders</div>
+      <div class="tn-tab" onclick="tnPick(this,'.tn-tab')">My Tenders</div>
+    </div>
+    <div class="tn-views">
+      <div class="tn-view" onclick="tnPick(this,'.tn-view')"><span class="ms">format_list_bulleted</span> List view</div>
+      <div class="tn-view on" onclick="tnPick(this,'.tn-view')"><span class="ms">grid_view</span> Grid view</div>
+    </div>
+    <div class="tn-filter" data-toast="Filter tenders"><span class="ms" style="font-size:18px">filter_list</span></div>
+    <div class="tn-search"><span class="ms" style="font-size:18px">search</span>
+      <input placeholder="Search by organisation or contact name…" oninput="tnSearch(this.value)"></div>
+    <a class="btn pri tn-create" data-toast="Create new tender"><span class="ms" style="font-size:18px">add</span> Create New Tender</a>
   </div>
-  <div class="crumbsel">
-    <a class="on">All</a><a>Pending</a><a>In progress</a><a>Draft</a><a>Closed</a>
-  </div>
-  <div class="card"><table class="data" id="tbl"></table></div>
 
-  <div class="card devonly">
+  <p class="sub" style="margin:10px 0 0">Tick a tender to hand it to Ray — it becomes the reference in the chat.</p>
+
+  <div class="tn-sec" id="secFolders"><span class="ms car" onclick="tnSec('secFolders')">expand_more</span> Folders
+    <span class="addfolder" data-toast="Add folder"><span class="ms" style="font-size:15px">add</span> Add Folder</span></div>
+  <div class="tn-folders">
+    <div class="tn-folder on" onclick="tnPick(this,'.tn-folder')">Default Tenders</div>
+    <div class="tn-folder" onclick="tnPick(this,'.tn-folder')">Dept of Environment <span class="ms" data-toast="Folder options" onclick="event.stopPropagation()">more_vert</span></div>
+    <div class="tn-folder" onclick="tnPick(this,'.tn-folder')">Transport &amp; Main Roads <span class="ms" data-toast="Folder options" onclick="event.stopPropagation()">more_vert</span></div>
+    <div class="tn-folder" onclick="tnPick(this,'.tn-folder')">Quotes <span class="ms" data-toast="Folder options" onclick="event.stopPropagation()">more_vert</span></div>
+  </div>
+
+  <div class="tn-sec" id="secFiles"><span class="ms car" onclick="tnSec('secFiles')">expand_more</span> Files
+    <span class="ms sort" data-toast="Sort tenders">arrow_downward</span></div>
+  <div class="tn-files" id="tnFiles"></div>
+
+  <div class="card devonly" style="margin-top:18px">
     <h2><span class="ms sec-ic c-red">shield_person</span> Rows withheld from this role</h2>
     <div id="withheld" class="sub" style="margin:0"></div>
   </div>
 </div>
-
 </div>
 
 <script src="../data/fixtures.js"></script>
@@ -43,21 +64,71 @@
 <script src="../ray/ray-panel.js"></script>
 <script>window.PAGE = {"nav": "tenders", "crumb": "Tenders", "ray": {"surface": "page", "context": {"pageTitle": "All tenders"}}};</script>
 <script>
+const CONTACT = {
+  't-envind':'Lara Blake', 't-velocity':'Andrew Williams',
+  't-civic':'Sam Lee', 't-northside':'Priya Nair',
+};
+const PRI = {High:'pri-high', Medium:'pri-med', Low:'pri-low'};
+const ST  = {'Pending':'tn-st-pending','In progress':'tn-st-progress',
+             'In review':'tn-st-review','Draft':'tn-st-draft'};
+const OWNER = {'t-velocity':'Tom', 't-civic':'Tom'};
+
+function tnPick(el, sel){ el.parentNode.querySelectorAll(sel).forEach(x=>x.classList.remove('on')); el.classList.add('on'); }
+function tnSec(id){ document.getElementById(id).classList.toggle('collapsed'); }
+function tnSearch(q){
+  const s=(q||'').toLowerCase();
+  document.querySelectorAll('.tn-card').forEach(c=>{
+    c.style.display = !s || c.dataset.hay.indexOf(s)>=0 ? '' : 'none';
+  });
+}
+
+/* Ticking a tender hands it to Ray. One at a time: the reference chip names a
+   single thing, and "these three tenders" is a different feature. Unticking
+   gives the reference back to the page. */
+function tnTick(box, id){
+  const picked = box.checked;
+  document.querySelectorAll('.tn-card .chk').forEach(other=>{
+    if(other!==box){ other.checked=false; other.closest('.tn-card').classList.remove('picked'); }
+  });
+  box.closest('.tn-card').classList.toggle('picked', picked);
+  if(picked){
+    RayPanel.open('tender', {tenderId:id});
+    RayPanel.toast('Ray is now referencing this tender');
+  } else {
+    RayPanel.focus('page', {pageTitle:'All tenders'});
+  }
+}
+
 window.onPageReady = function(service, user){
-  const g=service.guard, R=RayPermissions.Repositories, all=RayFixtures.TENDERS.length;
-  const t=R.tenders.list(g);
-  document.getElementById('count').textContent = t.length + ' tenders';
-  document.getElementById('tbl').innerHTML =
-    '<thead><tr><th>Tender</th><th>Reference</th><th>Organisation</th><th>Sector</th><th>Value</th><th>Due</th><th>Status</th></tr></thead><tbody>'
-    + t.map(x=>`<tr class="rowlink" onclick="location.href='tender-detail.html'">
-        <td><b>${x.name}</b></td><td>${x.ref}</td><td>${x.org}</td><td>${x.sector}</td>
-        <td>$${(x.value/1e6).toFixed(1)}M</td>
-        <td><span class="dueflag ${x.id==='t-envind'?'due-soon':''}">${rayDate(x.due)}</span></td>
-        <td><span class="badge ${x.status==='Pending'?'b-amber':x.status==='Draft'?'b-grey':'b-green'}">${x.status}</span></td>
-      </tr>`).join('') + '</tbody>';
+  const g=service.guard, R=RayPermissions.Repositories;
+  const tenders=R.tenders.list(g), all=RayFixtures.TENDERS.length;
+  const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  document.getElementById('tnFiles').innerHTML = tenders.map(t=>{
+    const docs=(()=>{try{return R.documents.list(g,t.id).length}catch(e){return 0}})();
+    const hay=[t.name,t.org,CONTACT[t.id],t.ref].join(' ').toLowerCase();
+    return `<div class="tn-card" data-hay="${esc(hay)}" onclick="this.querySelector('.chk').click()">
+      <div class="tc-top">
+        <input type="checkbox" class="chk" onclick="event.stopPropagation();tnTick(this,'${t.id}')">
+        <div class="tc-right">
+          ${OWNER[t.id]?`<span class="tc-chip"><span class="ms">person</span>${OWNER[t.id]}</span>`:''}
+          <span class="ms kebab" data-toast="Tender options" onclick="event.stopPropagation()">more_vert</span>
+        </div>
+      </div>
+      <div class="tc-k">Name</div><div class="tc-v">${esc(t.name)}</div>
+      <div class="tc-k">Organisation</div><div class="tc-v">${esc(t.org)}</div>
+      <div class="tc-k">Contact Name</div><div class="tc-v">${esc(CONTACT[t.id]||'—')}</div>
+      <div class="tc-k">Documents</div><div class="tc-v">${docs} readable</div>
+      <div class="tc-foot">
+        <div class="c"><span class="lab">Priority</span><span class="val ${PRI[t.priority]||''}">${t.priority}</span></div>
+        <div class="c"><span class="lab">Status</span><span class="val ${ST[t.status]||''}">${t.status}</span></div>
+        <div class="c"><span class="lab">Due Date</span><span class="val">${rayDate(t.due)}</span></div>
+      </div>
+    </div>`;}).join('');
+
   document.getElementById('withheld').innerHTML =
-    `${all-t.length} of ${all} tenders are filtered out for <b>${user.role}</b> — by business tenancy or by assignment. `
-    + `Ray receives the same filtered list.`;
+    `${all-tenders.length} of ${all} tenders are filtered out for <b>${user.role}</b> — by business `
+    + `tenancy or by assignment. Ray receives the same filtered list.`;
 };
 </script>
 <script src="../app.js"></script>

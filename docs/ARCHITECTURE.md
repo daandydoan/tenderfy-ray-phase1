@@ -66,7 +66,7 @@ text over a 4px `--teal-bright` underline; identity as a round initialled
 fills with `--header`.
 
 `rayTenderColour(id)` is shared between the page chrome and the rail, so a
-tender's avatar and its session tiles are always the same hue.
+tender's avatar and its project tiles are always the same hue.
 
 **The rail runs dark, and can be switched.** Dark is the default — the one dark
 surface in the product, on a ground from the portal's own `--header` family
@@ -124,24 +124,63 @@ queries. The rail takes up to 640px of the window, so a viewport breakpoint
 would leave the page cramped while the window is still "large" — a bug this
 prototype hit three times before the cause was named.
 
-## The two demo sessions
+## Two screens
+
+The prototype ships **`index.html` and `pages/tenders.html`, and nothing else**.
+It carried seven screens; five were click-through scaffolding whose only job was
+to give the rail a surface to sit on, and each one was another page to keep in
+step with every change to the chrome. They were removed on 25 Aug.
+
+`pages/tenders.html` is taken from the contractor side of the portal
+(`contractor/projects.html`): the title bar with All/My tabs and list/grid
+views, the Folders strip, and the Files grid of tender cards.
+
+**Selection is the surface.** Ticking a card calls `RayPanel.open('tender',
+{tenderId})`, so the reference chip reads `Tenders › <tender>`, the toolset
+widens from the page tools to the tender tools, and the context card carries
+that tender's document list. Ticking another moves the reference; unticking
+calls `focus('page')` and hands it back. This is exactly what the deleted
+tender-detail screen did — reached by selection instead of by navigation, which
+is both fewer pages and a better demonstration that the rail follows context
+rather than URLs.
+
+The service still defines the `document-review`, `response-library` and
+`document-workspace` surfaces (`ray/ray-surfaces.js`). Those are contracts for
+the real platform, which has those screens; the prototype simply no longer
+renders them. Deleting the surfaces along with the pages would have thrown away
+the §1 argument that one service serves every surface.
+
+The remaining sidebar entries have no `href` and render with `data-toast`, so
+they say they are not built rather than 404.
+
+## Naming
+
+The UI calls a conversation a **project**; the code calls it a *thread*
+(`ThreadIndex`, `RayService.thread`) with a `RaySession` bound to it. The rename
+was a copy change on 25 Aug and deliberately stopped at the seam — renaming the
+classes would have churned every call site for a label. Read "session" below as
+the code-level object and "project" as the thing the user sees.
+
+## The two demo projects
 
 The prototype seeds exactly two, doing different jobs:
 
 * **Guided demo** — empty until it is run, one requirement per click. The
   trigger is the **composer itself**: clicking an empty chat field in this
-  session types the next question in and sends it, and the placeholder names
+  project types the next question in and sends it, and the placeholder names
   the step. The header button does the same and carries the counter. Each step
   runs for real, so the tool calls, thinking and streaming all happen. The eight
   steps map one-to-one onto the Phase 1 brief (§1 ×3, §2, §3 ×3, §4).
 
   Two guards keep it from leaking: the panel only asks the shell what a click
-  means, and the shell only answers when the active session *is* the demo
-  session, steps remain, and the composer is **empty** — so typing a real
+  means, and the shell only answers when the active project *is* the demo
+  project, steps remain, and the composer is **empty** — so typing a real
   question, or editing one pulled from the prompt library, is never hijacked.
 * **UI elements** — a reference, not a staged exchange. Each turn is labelled
   with the block it demonstrates and each block explains itself before showing
-  itself, so the session reads as documentation of Ray's vocabulary. The
+  itself, so the project reads as documentation of Ray's vocabulary. Its
+  content is generic — *Document name.pdf*, *Item A* — so it reads as a
+  component sheet rather than a second worked example. The
   explanatory lead-in is `.ray-what`: rule-marked and muted, so it never reads
   as part of the block it describes.
 
@@ -152,17 +191,17 @@ for every role, which makes it the honest way to show the guard working.
 
 ## Demo seeding
 
-The demo sessions are seeded once per user and **versioned** (`SEED_VERSION`).
+The demo projects are seeded once per user and **versioned** (`SEED_VERSION`).
 A plain "have I seeded?" flag meant that anyone who had opened the prototype
 before a new exhibit was added never received it, and the only cure was clearing
 storage by hand — bump the version instead and it reaches everyone.
 
-Seeded sessions carry a `seeded` flag in the thread index, and a rebuild keys
+Seeded projects carry a `seeded` flag in the thread index, and a rebuild keys
 off that rather than off a list of ids: an older flag has no ids to offer, and
 cleaning up by *what I made* is the only version of this that cannot leave
-duplicates. There is also a one-time sweep for sessions seeded before the flag
+duplicates. There is also a one-time sweep for projects seeded before the flag
 existed, identified by exhibit title, history opener, or empty-and-untitled.
-A session the user named or wrote in matches none of those and is never touched.
+A project the user named or wrote in matches none of those and is never touched.
 
 ## Demo modes
 
@@ -179,7 +218,7 @@ feature, and it does not exist in the port.
 | `ray/ray-core.js` | `RayService`, `RaySession`, the agentic loop, the system prompt |
 | `ray/ray-surfaces.js` | Every mount point, as data: tools, suggestions, context card |
 | `ray/ray-tools.js` | Tool schemas + the single executor that all calls pass through |
-| `ray/ray-context.js` | `ConversationStore` (persistence, retrieval), `ContextAssembler` (recency, compaction, budget), `ThreadIndex` (project → sessions) |
+| `ray/ray-context.js` | `ConversationStore` (persistence, retrieval), `ContextAssembler` (recency, compaction, budget), `ThreadIndex` (the project list) |
 | `ray/ray-documents.js` | `DocumentReader` and the four reading strategies |
 | `ray/ray-permissions.js` | `PermissionGuard`, `PermissionError`, guarded repositories, audit trail |
 | `ray/ray-provider.js` | `AnthropicProvider` (real) and `MockProvider` (prototype), one interface |
@@ -203,24 +242,24 @@ Ray is a **region of the application**, not a widget a page owns.
 * **It persists.** Open state and width are stored, so the rail stays as you
   navigate. That continuity is most of what makes Ray read as an agent rather
   than a chat box.
-* **Flat sessions.** One list per user, newest first, the way Figma's chats
+* **Flat projects.** One list per user, newest first, the way Figma's chats
   work. `RayService.thread(id)` returns the session; `ThreadIndex` tracks which
-  sessions exist, their names, last reply and recency. Navigating calls
+  projects exist, their names, last reply and recency. Navigating calls
   `focus()`, never `mount()`: moving around the platform changes the context
-  card, never the session you are sitting in.
+  card, never the project you are sitting in.
 
   > The sync-up proposed **project-based** organisation (a thread per tender).
   > That was reversed on 24 Aug in favour of a flat list — simpler, and closer
-  > to the reference. `ThreadIndex` still records the tender a session was
+  > to the reference. `ThreadIndex` still records the tender a project was
   > started from, so re-introducing grouping is a query rather than a
   > migration, but nothing reads it today. Worth re-confirming with Shivam.
-* **Two screens, not a tab strip.** The rail is a *list* of sessions and the
-  *session* itself, the way Figma's Agents panel works: rows grouped by day,
+* **Two screens, not a tab strip.** The rail is a *list* of projects and the
+  *project* itself, the way Figma's Agents panel works: rows grouped by day,
   each with a title, the last thing Ray said and a relative age; a back chevron
-  is the only way out of a session. At 420px a tab strip costs 40px permanently
+  is the only way out of a project. At 420px a tab strip costs 40px permanently
   and still truncates every title — a list screen costs nothing while you are
   reading, and shows the whole title when you are choosing. Search filters by
-  title and snippet; `+` starts a session. A session names itself from the
+  title and snippet; `+` starts a project. A project names itself from the
   first thing asked in it.
 * **A turn shows its work, then gets out of the way.** While tools run, the
   steps arrive live under a *Working…* header; when the answer is ready the
@@ -253,7 +292,7 @@ Ray is a **region of the application**, not a widget a page owns.
   OCR strategy — and it reports honestly that it has no indexed text yet
   rather than pretending to have read it. Attached documents are named in the
   context card as *read these first*, and the provider searches them instead of
-  the tender at large. Attachments belong to the **message**, not the session:
+  the tender at large. Attachments belong to the **message**, not the project:
   they ride with one turn, are recorded on it, and the tray clears.
 
   Cards are one line of filename with an ellipsis, over the file type — a
@@ -293,21 +332,21 @@ Ray is a **region of the application**, not a widget a page owns.
   so the UI never sees the smaller unit.
 * **Thinking survives a reload.** An assistant turn is persisted with its
   `steps` and duration, and `paintHistory` rebuilds the same collapsed block a
-  live turn folds into. Before this, reopening a session lost every record of
+  live turn folds into. Before this, reopening a project lost every record of
   how Ray reached its answers — the part most worth keeping.
 * **Scrollback is not the context window.** The assembler decides what Ray is
   *told* (§2, a six-message recency window); the panel renders up to 40 messages
-  so the user can scroll the session. Conflating the two meant a reopened
+  so the user can scroll the project. Conflating the two meant a reopened
   conversation showed six messages and said the rest were "not in context" —
   true of the prompt, irrelevant to the reader.
-* **Sessions are CRUD.** Create (`+`), read (the list), rename and delete —
-  from the row's `⋯` in the list, or the `⋯` in the session header for the one
+* **Projects are CRUD.** Create (`+`), read (the list), rename and delete —
+  from the row's `⋯` in the list, or the `⋯` in the project header for the one
   you are in. Both are inline rather than popovers: the list scrolls, and a
   floating menu near the bottom of a 420px rail clips against the composer.
   Delete asks first, and `deleteThread` clears the **conversation body** as well
   as the index entry — leaving the messages behind would keep them reachable
   through `search_conversation` after the user believed them gone. Deleting the
-  session you are in lands on the next most recent; deleting the last one
+  project you are in lands on the next most recent; deleting the last one
   creates a fresh one, so the rail is never empty. A rename sticks: it clears
   `untitled`, so auto-naming never overwrites a name the user chose.
 * **The project list is guard-filtered**, so the switcher can never offer a
@@ -448,7 +487,7 @@ The prototype uses globals so it runs from `file://`. The mapping is mechanical:
 | `PermissionGuard` | wraps the existing auth/permission service |
 | `Repositories` | the existing HTTP data services, with a guard argument |
 | `ConversationStore` | server-side persistence + a thin client cache |
-| `ThreadIndex` | the sessions API; localStorage is a stand-in only |
+| `ThreadIndex` | the projects API; localStorage is a stand-in only |
 | `RayPanel` | one component in the app shell, beside the router outlet |
 | turn markup | `.ray-turn` + `.ray-byline`; only `.ray-bubble.user` is a container |
 | `window.PAGE.ray` focus | route data, applied on `NavigationEnd` via `RayPanel.focus()` |

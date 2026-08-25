@@ -312,9 +312,10 @@
     /** Every session, newest first. */
     allThreads() { return this.threadIndex.recent(this.user.id); }
 
-    /** `projectId` is recorded for provenance only — nothing groups on it. */
-    newThread(projectId) {
-      return this.threadIndex.create(this.user.id, projectId, Date.now());
+    /** `tenderId` is recorded for provenance and colour — nothing groups on
+     *  it. A session is a "Project" in the UI; this is the tender. */
+    newThread(tenderId) {
+      return this.threadIndex.create(this.user.id, tenderId, Date.now());
     }
 
     renameThread(id, title) {

@@ -3,7 +3,7 @@
 A working base for Phase 1 of the Ray expansion: **one site-wide Ray**, opening
 as a right-hand rail that pushes the page rather than floating over it, reading
 as a conversation rather than a chat widget, organised as a flat list of
-**sessions**, Figma-style — with retrieval-based chat history,
+**projects**, Figma-style — with retrieval-based chat history,
 multi-strategy document reading, and permission-enforced data access.
 
 Built on the contractor side of the `tenderfy-subbie-portal` prototype — same
@@ -22,12 +22,12 @@ the model provider is mocked behind the same interface the real one implements.
 
 ## The demo path
 
-Opening Ray for the first time lands on an **empty session** with three sample
+Opening Ray for the first time lands on an **empty project** with three sample
 questions. Click one and you get the whole sequence: the steps arriving live
 while tools run, folding to `Thought for 3.7s · 8 steps`, then the answer
 streaming in with its citations. Click that line to reopen the steps.
 
-The back chevron shows the session list, which ships with two demo sessions:
+The back chevron shows the project list, which ships with two demo projects:
 
 * **Guided demo — the Phase 1 requirements** — the one to present. **Click the
   chat field** and the next question types itself in and sends; the placeholder
@@ -42,7 +42,7 @@ The back chevron shows the session list, which ships with two demo sessions:
   | §3 | What insurance is required? | search first, then only the pages that matter |
   | §1 | Extract the response schedule | question extraction, on the shared service |
   | §1 | Find a past answer about safety | Response Library |
-  | §1 | Draft an answer for Q1 | content generation inside an edit dialog |
+  | §1 | Draft an answer for Q1 | content generation, drafting into a field |
   | §3 | What changed in Addendum 2? | answering from a file the user attaches |
   | §2 | Remind me what you said | retrieved from storage, not resent |
   | §4 | Open another business's tender | Ray tries, the guard refuses |
@@ -54,7 +54,9 @@ The back chevron shows the session list, which ships with two demo sessions:
   conversation. Each turn is labelled with the block it demonstrates — *Short
   answer*, *Table*, *Badges*, *Draft block*, *Attachments*, *Permission
   refusal*, *Thinking block* — and each block says what it is and when Ray uses
-  it before showing itself. Scroll it; nobody has to drive.
+  it before showing itself. The content is deliberately generic (*Document
+  name.pdf*, *Item A*), so it reads as a component sheet rather than as a second
+  worked example. Scroll it; nobody has to drive.
 
 Two more things surface as you go: the **reference chip** above the composer
 names what Ray is pointed at (the tender, the open document, the field you are
@@ -83,21 +85,28 @@ the same service runs underneath.
 
 ## What to look at
 
+Two screens, deliberately: enough to show the rail travelling with you, without
+a click-through app to maintain.
+
 | Page | Screen |
 |---|---|
-| `index.html` | Dashboard — pipeline, tenders, deadlines |
-| `pages/tenders.html` | Tender list |
-| `pages/tender-detail.html` | Tender detail — information, documents, checklist |
-| `pages/document-review.html` | Document set, reviewed in the rail |
-| `pages/response-library.html` | Saved answers |
-| `pages/document-workspace.html` | Build response — questions, and an editor the rail writes into |
-| `pages/subbies.html` | Subcontractor list |
+| `index.html` | Dashboard — contract value, win rate, tasks, deadlines |
+| `pages/tenders.html` | Tenders — folders and tender cards, from the contractor portal |
 
-Open Ray from the header, ask something, then **navigate to another page**: the
-rail stays open holding the same thread, and the page sits beside it rather than
-under it. The back chevron opens the session list — grouped by day and
-searchable — where `+` starts a session and each row's `⋯` renames or deletes
-one (the session header carries the same `⋯` for the one you are in).
+On **Tenders**, tick a card and it becomes the chat's reference: the chip reads
+`Tenders › Velocity Link Highway Extension`, Ray's toolset widens to that
+tender's documents, and questions answer from them. Ticking another moves the
+reference; unticking hands it back to the page. This is the tender-detail
+surface, reached by selection rather than by a separate screen.
+
+The remaining sidebar items are inert on purpose — they toast rather than
+navigate, so the demo stays on the two screens that carry it.
+
+Open Ray from the header, ask something, then **move between the two pages**:
+the rail stays open holding the same thread, and the page sits beside it rather
+than under it. The back chevron opens the project list — grouped by day and
+searchable — where `+` starts a project and each row's `⋯` renames or deletes
+one (the project header carries the same `⋯` for the one you are in).
 
 In detail mode, two more things are worth doing:
 

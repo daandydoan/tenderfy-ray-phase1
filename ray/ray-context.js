@@ -201,11 +201,13 @@
      keyed by the session id; this only tracks which sessions exist, what they
      are called, and when they were last touched.
 
-     Each row still *records* the tender it was started from (`projectId`), but
-     nothing reads it: there is no project layer in the UI. It is kept because
-     the sync-up asked for project-based organisation, and re-introducing a
-     grouping later should be a query, not a migration.                       */
-  const GENERAL = 'general';
+     Each row records the tender it was started from (`tenderId`). Nothing
+     groups on it — the list is flat — but it colours the row, and it means
+     re-introducing a grouping later is a query rather than a migration.
+
+     Note the vocabulary: a row is a *session* in the code and a **Project** in
+     the UI. `tenderId` is the tender, never the UI's notion of a project.    */
+  const NO_TENDER = 'none';
 
   class ThreadIndex {
     constructor(storage) {
@@ -234,11 +236,11 @@
 
     get(userId, id) { return this.all(userId).find((t) => t.id === id) || null; }
 
-    create(userId, projectId, at) {
+    create(userId, tenderId, at) {
       const rows = this.all(userId);
       const rec = {
         id: `t${rows.length + 1}-${Math.random().toString(36).slice(2, 7)}`,
-        projectId: projectId || GENERAL,
+        tenderId: tenderId || NO_TENDER,
         title: 'New session',
         untitled: true,
         at: at || 0,
@@ -297,5 +299,5 @@
     }
   }
 
-  global.RayContext = { ConversationStore, ContextAssembler, ThreadIndex, GENERAL, est };
+  global.RayContext = { ConversationStore, ContextAssembler, ThreadIndex, NO_TENDER, est };
 })(window);

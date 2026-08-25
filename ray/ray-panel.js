@@ -106,11 +106,11 @@
       this.menuFor = this.renaming = this.confirmDelete = null;
       if (wasActive) {
         this.openThread((next || service.newThread(this.context.tenderId)).id, true);
-        toast('Session deleted');
+        toast('Project deleted');
         this.paintChrome();
         return;
       }
-      toast('Session deleted');
+      toast('Project deleted');
       this.paintChrome();
     }
 
@@ -363,17 +363,17 @@
       if (this.view === 'list') {
         head.innerHTML = `
           <img class="ray-mark" src="${RAY_IMG}" alt="">
-          <div class="ray-title">Sessions</div>
-          <span class="ms ray-hbtn" data-ray-new title="New session">add</span>
+          <div class="ray-title">Projects</div>
+          <span class="ms ray-hbtn" data-ray-new title="New project">add</span>
           <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
           <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
         return;
       }
       const t = service.threadIndex.get(service.guard.user.id, this.threadId);
       head.innerHTML = `
-        <span class="ms ray-back" data-ray-list title="All sessions">chevron_left</span>
-        <div class="ray-title">${esc(t && !t.untitled ? t.title : 'New session')}</div>
-        <span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Session options">more_horiz</span>
+        <span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>
+        <div class="ray-title">${esc(t && !t.untitled ? t.title : 'New project')}</div>
+        <span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Project options">more_horiz</span>
         <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
         <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
       this.$('headbar').innerHTML =
@@ -407,8 +407,8 @@
      *  started from — deterministic, so the same tender is always the same
      *  colour and a long list becomes scannable. */
     static tile(thread) {
-      const key = (thread && thread.projectId) || '';
-      if (!key || key === global.RayContext.GENERAL || !global.rayTenderColour) {
+      const key = (thread && thread.tenderId) || '';
+      if (!key || key === global.RayContext.NO_TENDER || !global.rayTenderColour) {
         return `<span class="ray-tile"><span class="ms">chat_bubble</span></span>`;
       }
       /* Shared with the page chrome, so a tender is the same colour in Ray's
@@ -424,14 +424,14 @@
       if (renaming) {
         return `<div class="ray-acts">
           <input class="ray-rename" data-ray-rename="${id}" value="${esc(title)}"
-                 placeholder="Session name" maxlength="80">
+                 placeholder="Project name" maxlength="80">
           <button class="ray-mini pri" data-ray-rename-save="${id}">Save</button>
           <button class="ray-mini" data-ray-cancel>Cancel</button>
         </div>`;
       }
       if (confirming) {
         return `<div class="ray-acts warn">
-          <span class="ray-actmsg">Delete this session and its messages?</span>
+          <span class="ray-actmsg">Delete this project and its messages?</span>
           <button class="ray-mini danger" data-ray-del-confirm="${id}">Delete</button>
           <button class="ray-mini" data-ray-cancel>Cancel</button>
         </div>`;
@@ -453,13 +453,13 @@
       let out = `
         <div class="ray-search">
           <span class="ms">search</span>
-          <input type="text" placeholder="Search sessions" data-ray="q" value="${esc(this.query)}">
+          <input type="text" placeholder="Search projects" data-ray="q" value="${esc(this.query)}">
         </div>`;
 
       if (!rows.length) {
         out += `<div class="ray-listempty">
-            ${this.query ? 'No sessions match that.' : 'No sessions yet.'}
-            <button class="ray-act" data-ray-new>Start a session</button></div>`;
+            ${this.query ? 'No projects match that.' : 'No projects yet.'}
+            <button class="ray-act" data-ray-new>Start a project</button></div>`;
       } else {
         let last = null;
         rows.forEach((t) => {
@@ -471,12 +471,12 @@
               <button class="ray-row${t.id === this.threadId ? ' on' : ''}" data-ray-thread="${t.id}">
                 ${Panel.tile(t)}
                 <span class="ray-rowtx">
-                  <span class="ray-rowt">${esc(t.untitled ? 'New session' : t.title)}</span>
+                  <span class="ray-rowt">${esc(t.untitled ? 'New project' : t.title)}</span>
                   <span class="ray-rows">${esc(t.snippet || 'No messages yet')}</span>
                 </span>
                 <span class="ray-rowage">${t.at ? Panel.ago(t.at) : ''}</span>
               </button>
-              <button class="ms ray-rowmenu" data-ray-menu="${t.id}" title="Session options">more_horiz</button>
+              <button class="ms ray-rowmenu" data-ray-menu="${t.id}" title="Project options">more_horiz</button>
               ${open ? Panel.actions(t.id, this.renaming === t.id,
                                      this.confirmDelete === t.id,
                                      t.untitled ? '' : t.title) : ''}
