@@ -37,9 +37,12 @@
 
   const OPEN_KEY = 'ray_rail_open';
   const WIDE_KEY = 'ray_rail_wide';
+  const FORM_KEY = 'ray_form';       // 'dialog' | 'rail' — see setForm()
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch (e) {} },
+    getStr(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } },
+    setStr(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
 
   let service = null;
@@ -63,6 +66,11 @@
         : this.opts.open != null ? this.opts.open
         : store.get(OPEN_KEY, false);
       this.wide = this.mode !== 'inline' && store.get(WIDE_KEY, false);
+      /* How the panel presents itself. Ray opens as a dialog — a chat you
+         summoned — and is promoted to the rail when you want him alongside the
+         work. Inline embeds have no say: they are already inside something. */
+      this.form = this.mode === 'inline' ? 'rail'
+        : store.getStr(FORM_KEY, 'dialog') === 'rail' ? 'rail' : 'dialog';
       this.view = 'chat';            // 'list' | 'chat' — Figma's two screens
       this.query = '';               // session search
       this.attachments = [];         // files pinned to the next message
@@ -153,7 +161,7 @@
         : (this.shell || document.body);
 
       const el = document.createElement('div');
-      el.className = `ray-panel mode-${this.mode} view-chat`
+      el.className = `ray-panel mode-${this.mode} form-${this.form} view-chat`
         + (this.open ? ' open' : '') + (this.wide ? ' wide' : '');
       el.id = 'rayPanel';
       el.innerHTML = `
@@ -188,11 +196,6 @@
       host.appendChild(el);
       this.el = el;
       this.$ = (n) => el.querySelector(`[data-ray="${n}"]`);
-      /* Set once at build: the mode never changes for a live panel. Both
-         follow the same rule — they mark Ray as a place, not as a control, so
-         an inline panel folded into a dialog gets neither. */
-      this.mark = this.mode === 'inline' ? RAY_IMG : RAY_FULL;
-      this.betaTag = this.mode === 'inline' ? '' : '<span class="ray-beta">Beta</span>';
 
       if (this.mode !== 'inline') {
         const fab = document.createElement('button');
@@ -222,6 +225,9 @@
         }
         if (e.target.closest('[data-ray="close"]')) { this.hide(); return; }
         if (e.target.closest('[data-ray="expand"]')) { this.toggleWide(); return; }
+        if (e.target.closest('[data-ray="toform"]')) {
+          this.setForm(this.form === 'dialog' ? 'rail' : 'dialog'); return;
+        }
         const act = e.target.closest('[data-ray-action]');
         if (act) { this.action(act.getAttribute('data-ray-action'), act); return; }
         const th = e.target.closest('[data-think-toggle]');
@@ -371,26 +377,50 @@
       else this.$('input').focus();
     }
 
+    /* The size controls, which differ by form. A dialog offers one move —
+       become the rail. The rail offers two — widen, or fold back down. */
+    formBtns() {
+      if (this.mode === 'inline') return '';
+      if (this.form === 'dialog') {
+        return `<span class="ms ray-hbtn" data-ray="toform"
+                      title="Expand to the side panel">open_in_full</span>`;
+      }
+      return `<span class="ms ray-hbtn" data-ray="toform"
+                    title="Collapse to the chat dialog">close_fullscreen</span>`
+           + `<span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>`;
+    }
+
+    /* In dialog form Ray introduces himself, the way the co-pilot popup does:
+       avatar, name, and the context underneath. In the rail the title is the
+       project, because by then you know whose panel you are in. */
+    idBlock(sub) {
+      return `<span class="ray-ava"><img src="${this.mark}" alt=""></span>
+              <div class="ray-title">Ray<span>${esc(sub)}</span></div>`;
+    }
+
     paintHeader() {
       const head = this.$('head');
+      const dialog = this.form === 'dialog' && this.mode !== 'inline';
       if (this.view === 'list') {
-        head.innerHTML = `
-          <img class="ray-mark" src="${this.mark}" alt="">
-          <div class="ray-title">Projects</div>
-          ${this.betaTag}
-          <span class="ms ray-hbtn" data-ray-new title="New project">add</span>
-          <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
-          <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
+        head.innerHTML = (dialog
+          ? this.idBlock('Tenderfy Co-Pilot')
+          : `<img class="ray-mark" src="${this.mark}" alt="">
+             <div class="ray-title">Projects</div>
+             ${this.betaTag}`)
+          + `<span class="ms ray-hbtn" data-ray-new title="New project">add</span>`
+          + this.formBtns()
+          + `<span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
         return;
       }
       const t = service.threadIndex.get(service.guard.user.id, this.threadId);
-      head.innerHTML = `
-        <span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>
-        <div class="ray-title">${esc(t && !t.untitled ? t.title : 'New project')}</div>
-        ${this.betaTag}
-        <span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Project options">more_horiz</span>
-        <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
-        <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
+      const name = t && !t.untitled ? t.title : 'New project';
+      head.innerHTML =
+        `<span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>`
+        + (dialog ? this.idBlock(name)
+                  : `<div class="ray-title">${esc(name)}</div>${this.betaTag}`)
+        + `<span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Project options">more_horiz</span>`
+        + this.formBtns()
+        + `<span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
       this.$('headbar').innerHTML =
         (this.menuFor === this.threadId && this.view === 'chat')
           ? Panel.actions(this.threadId, this.renaming === this.threadId,
@@ -785,11 +815,21 @@
        The shell owns the width as a custom property; everything that must
        reflow (content, and any modal that should stop short of the rail)
        reads --rail-w rather than knowing about Ray.                        */
+    /* Both of these say the same thing: the full character and the Beta tag
+       belong to Ray-as-a-place. A dialog is Ray-as-a-control you summoned, and
+       so is an inline embed — they get the compact head and no tag. */
+    get isPanel() { return this.mode !== 'inline' && this.form === 'rail'; }
+    get mark() { return this.isPanel ? RAY_FULL : RAY_IMG; }
+    get betaTag() { return this.isPanel ? '<span class="ray-beta">Beta</span>' : ''; }
+
     applyLayout() {
       if (this.mode === 'inline') return;
-      const w = !this.open ? '0px' : (this.wide ? '640px' : '420px');
+      /* A dialog floats over the page, so it reserves nothing: --rail-w stays
+         0 and the content keeps its full width. Only the rail pushes. */
+      const floats = this.form === 'dialog';
+      const w = (!this.open || floats) ? '0px' : (this.wide ? '640px' : '420px');
       if (this.shell) this.shell.style.setProperty('--rail-w', w);
-      document.documentElement.classList.toggle('ray-rail-open', this.open);
+      document.documentElement.classList.toggle('ray-rail-open', this.open && !floats);
       if (this.fab) this.fab.style.display = this.open ? 'none' : '';
       const btn = this.el.querySelector('[data-ray="expand"]');
       if (btn) {
@@ -817,6 +857,24 @@
       this.el.classList.toggle('wide', this.wide);
       store.set(WIDE_KEY, this.wide);
       this.applyLayout();
+    }
+
+    /** Promote the dialog to the rail, or collapse it back. Nothing about the
+     *  conversation moves: it is one panel, one thread, one session, wearing a
+     *  different shape. The history is repainted only because the mark and the
+     *  Beta tag are read at render time — and never mid-answer, which would
+     *  drop the turn being streamed. */
+    setForm(form) {
+      if (this.mode === 'inline' || form === this.form) return;
+      this.form = form;
+      this.el.classList.toggle('form-dialog', form === 'dialog');
+      this.el.classList.toggle('form-rail', form === 'rail');
+      store.setStr(FORM_KEY, form);
+      this.applyLayout();
+      this.paintHeader();
+      if (!this.busy) this.paintHistory();
+      toast(form === 'rail' ? 'Ray expanded to the side panel'
+                            : 'Ray collapsed to the chat dialog');
     }
 
     /* ── Messages ────────────────────────────────────────────────────────── */

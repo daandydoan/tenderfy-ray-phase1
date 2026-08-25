@@ -65,8 +65,17 @@ substantial question the **credit notice** appears, because the demo starts just
 under its 60% threshold. Files you attach appear as cards **below** the
 composer.
 
+Ray **opens as a chat dialog** — a floating card, bottom-right, that leaves the
+page alone. The `⤢` in its header promotes it to the **side panel**, which takes
+its own column and pushes the page across; `⤡` folds it back. It is one panel
+either way, so the conversation carries over untouched, and the choice is
+remembered. Ray also changes what he shows for the room he is in: the compact
+head and no tag in the dialog, the full character and a **Beta** tag in the
+panel.
+
 The rail is **dark by default**; the switch in the app header flips it to light
-instantly, for demos in rooms where dark does not project well.
+instantly, for demos in rooms where dark does not project well. Both forms
+follow that switch.
 
 ## Two modes
 

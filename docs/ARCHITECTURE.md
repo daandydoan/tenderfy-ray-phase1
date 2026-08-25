@@ -153,6 +153,47 @@ the §1 argument that one service serves every surface.
 The remaining sidebar entries have no `href` and render with `data-toast`, so
 they say they are not built rather than 404.
 
+## Two forms: dialog and rail
+
+Ray presents in two shapes, and the switch between them is a **state of one
+panel**, not two panels.
+
+| | Dialog | Rail |
+|---|---|---|
+| Frame | floating card, 400×640, bottom-right | full-height column, 420px (640 wide) |
+| The page | untouched — `--rail-w` stays `0` | pushed; `html.ray-rail-open` set |
+| Header | teal band, avatar, **Ray** + context beneath | title bar: project name + Beta |
+| Mark | compact head | full character |
+| Controls | `open_in_full` → rail | `close_fullscreen` → dialog, plus widen |
+
+Ray **opens as the dialog** — that is the form the co-pilot has today, and it
+asks for nothing from the page. Promotion to the rail is the user saying they
+want him alongside the work rather than over it. The choice persists in
+`ray_form`, so Ray comes back the way you left him.
+
+`setForm()` swaps a class, re-runs `applyLayout()`, repaints the header, and
+repaints the history. **Nothing about the conversation moves** — same panel,
+same thread, same `RaySession`, same messages in the same store. The history
+repaint exists only because the mark and the Beta tag are read at render time,
+and it is skipped while `busy`, since re-rendering mid-answer would drop the
+turn being streamed.
+
+The dialog reuses the rail's markup at the rail's minimum width — 400px against
+420px — so there is no second layout to keep in step. Only the frame and the
+header band differ. Everything that already fits the rail (reference chip,
+attachment tray, prompt library, credit notice, citations) fits the dialog
+untouched.
+
+> The dialog is CSS-ordered **after** `.mode-rail`. Both selectors weigh the
+> same, so source order is the only thing letting it override the rail's width,
+> height and `min-width` — including the values set inside the `max-width:1180px`
+> block. Moving it earlier silently returns the dialog to rail dimensions.
+
+Both forms take the current theme. The live co-pilot's popup is white, but the
+rail was made dark on purpose and carries a light/dark switch for demos —
+having the dialog disagree with the panel it becomes would be worse than having
+it disagree with the screenshot.
+
 ## The two marks
 
 Ray has two pieces of artwork, and which one shows is a statement about how much
@@ -160,16 +201,16 @@ room he currently occupies.
 
 | | Mark | Where |
 |---|---|---|
-| `assets/ray.svg` | head only, compact | app header chip, the reopen FAB, an inline panel folded into a dialog |
-| `assets/ray-panel.svg` | full character, paw raised | the rail: its header, empty state, and the byline on every reply |
+| `assets/ray.svg` | head only, compact | app header chip, the reopen FAB, the **chat dialog**, an inline embed |
+| `assets/ray-panel.svg` | full character, paw raised | the **rail**: its header, empty state, and the byline on every reply |
 
 The rule is that the **full character is earned by having a panel of your own**.
 Where Ray is a control you press he stays a compact glyph; once he has the side
 panel he is a presence, and gets the room. The **Beta** tag in the panel header
 follows the same rule and for the same reason: it labels the side panel, not the
-button that opens it. `Panel.mark` and `Panel.betaTag` are both resolved once at
-build time from `this.mode`, because a panel's mode never changes after it is
-constructed.
+dialog or the button that opens it. Both are getters over `Panel.isPanel`
+(`mode !== 'inline' && form === 'rail'`) rather than fields, so promoting the
+dialog restyles it live instead of only on the next page load.
 
 The tag sits after `.ray-title` in both header views. Since the title is
 `flex:1` it lands beside the header buttons and reads as panel chrome rather
