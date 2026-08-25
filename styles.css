@@ -597,7 +597,7 @@ html.ray-light .ray-panel{
 .ttbl td.n{text-align:right;color:var(--light);white-space:nowrap;padding-left:10px}
 .ttbl tr.bad td{color:var(--st-pink-tx)}
 .ttbl code{font-size:11px;font-weight:600}
-.ttbl .sub{color:var(--light);font-size:11px;margin-top:1px}
+.ttbl .tsub{color:var(--light);font-size:11px;margin-top:1px}
 .tnote{font-size:11px;color:var(--gray);background:#FAFCFB;border:1px solid var(--border);border-radius:8px;
        padding:7px 9px;margin-top:8px}
 .tnote .ms{font-size:14px;margin-right:3px;color:var(--teal);vertical-align:-2px}
@@ -671,7 +671,7 @@ html.ray-light .ray-panel{
 .ray-attcard{position:relative;display:inline-flex;align-items:center;gap:10px;
              width:calc(50% - 4px);min-width:168px;max-width:100%;flex:0 1 auto;
              border:1px solid var(--lighter);border-radius:12px;
-             padding:9px 11px;background:#fff}
+             padding:8px 10px;background:#fff}
 /* Under a sent message the cards size to their content instead of halving the
    width — there is no tray to keep tidy, and a lone card should not be huge. */
 .ray-attrow .ray-attcard{width:auto;min-width:0;max-width:240px}
@@ -681,16 +681,23 @@ html.ray-light .ray-panel{
 .ray-attcard .ic.k-pdf{background:var(--st-pink-bg);color:var(--st-pink-tx)}
 .ray-attcard .ic.k-docx{background:rgba(92,107,192,.14);color:var(--e-indigo)}
 .ray-attcard .ic.k-xlsx{background:var(--st-green-bg);color:var(--st-green-tx)}
-.ray-attcard .meta{min-width:0;display:flex;flex-direction:column;gap:2px}
-.ray-attcard .nm{font-size:12.5px;font-weight:600;line-height:1.3;
-                 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-                 overflow:hidden;word-break:break-word}
-.ray-attcard .sub{font-size:11px;color:var(--light);text-transform:uppercase;letter-spacing:.03em}
-.ray-attx{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;
-          border:1px solid var(--lighter);background:#fff;padding:0;cursor:pointer;
-          display:flex;align-items:center;justify-content:center;color:var(--gray)}
-.ray-attx:hover{background:var(--ink);border-color:var(--ink);color:#fff}
-.ray-attx .ms{font-size:13px}
+.ray-attcard .meta{min-width:0;display:flex;flex-direction:column;gap:1px;padding-right:14px}
+.ray-attrow .ray-attcard .meta{padding-right:0}
+/* One line, ellipsised. Wrapping a filename to two lines made the card 89px
+   tall around a 34px icon, and no two cards were the same height. */
+.ray-attcard .nm{font-size:12.5px;font-weight:600;line-height:1.35;
+                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* `kind`, not `sub`: the page furniture already owns `.sub` and gives it a
+   20px bottom margin, which was silently making every card 20px taller. */
+.ray-attcard .kind{font-size:11px;color:var(--light);text-transform:uppercase;
+                   letter-spacing:.03em;line-height:1.35}
+/* Inside the card, not overhanging it: the tray scrolls, and anything hung
+   outside the box gets clipped at the edges. */
+.ray-attx{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
+          border:none;background:none;padding:0;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;color:var(--light)}
+.ray-attx:hover{background:var(--n-200);color:var(--ink)}
+.ray-attx .ms{font-size:14px}
 /* Cards under a sent message: a record of what went with it. */
 .ray-attrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .ray-attach{width:32px;height:32px;border-radius:10px;border:1px solid var(--lighter);
@@ -845,7 +852,7 @@ html.ray-light .ray-panel{
 .tsec{color:var(--r-tx-3)}
 .thint{color:var(--r-accent)}
 .ttbl td{border-bottom-color:var(--r-line);color:var(--r-tx-2)}
-.ttbl td.n,.ttbl .sub{color:var(--r-tx-3)}
+.ttbl td.n,.ttbl .tsub{color:var(--r-tx-3)}
 .tnote{background:var(--r-sunk);border-color:var(--r-line);color:var(--r-tx-2)}
 .tnote .ms{color:var(--r-accent)}
 .tfoot{color:var(--r-tx-3);border-top-color:var(--r-line)}
@@ -880,12 +887,12 @@ html:not(.ray-light) .ray-fab{border-color:rgba(255,255,255,.16)}
 .hthemes:hover{background:rgba(255,255,255,.26)}
 .hthemes .ms{font-size:17px}
 .ray-attcard{background:var(--r-raise);border-color:var(--r-line-2);color:var(--r-tx)}
-.ray-attcard .sub{color:var(--r-tx-3)}
+.ray-attcard .kind{color:var(--r-tx-3)}
 .ray-attcard .ic.k-pdf{background:rgba(249,82,70,.16);color:#FFB4AD}
 .ray-attcard .ic.k-docx{background:rgba(129,145,224,.18);color:#A7B2EA}
 .ray-attcard .ic.k-xlsx{background:rgba(106,221,181,.16);color:var(--r-accent)}
-.ray-attx{background:var(--r-sunk);border-color:var(--r-line-2);color:var(--r-tx-2)}
-.ray-attx:hover{background:var(--r-tx);border-color:var(--r-tx);color:var(--r-bg)}
+.ray-attx{background:none;color:var(--r-tx-3)}
+.ray-attx:hover{background:rgba(255,255,255,.12);color:var(--r-tx)}
 .ray-attrow .ray-attcard{background:var(--r-sunk)}
 .ray-attach{border-color:var(--r-line-2);color:var(--r-tx-3)}
 .ray-attach:hover{border-color:var(--r-accent);color:var(--r-accent)}

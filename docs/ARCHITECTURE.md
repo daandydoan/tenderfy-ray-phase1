@@ -34,6 +34,14 @@ implementation.
                         └──────────────────────────────────┘
 ```
 
+### A note on class names
+
+The rail shares a stylesheet with the page furniture, and the page owns short
+generic names. `.sub` — the page's subtitle class, carrying `margin: 0 0 20px` —
+was silently adding 20px to every attachment card and every trace row. Rail
+elements use rail-specific names for anything the page might also want:
+`.kind`, `.tsub`, `.ray-*`. Worth keeping to when adding new blocks.
+
 ## Colour
 
 The palette is **Tenderfy's own**, taken from the subbie portal's `styles.css`
@@ -247,6 +255,11 @@ Ray is a **region of the application**, not a widget a page owns.
   context card as *read these first*, and the provider searches them instead of
   the tender at large. Attachments belong to the **message**, not the session:
   they ride with one turn, are recorded on it, and the tray clears.
+
+  Cards are one line of filename with an ellipsis, over the file type — a
+  wrapped name made them 89px tall around a 34px icon and no two the same
+  height. The remove control sits **inside** the card; hung outside it, the
+  scrolling tray clipped it.
 
   The tray sits **below** the composer. Cards are the tallest thing in that
   band, and above the field they pushed the reference chip away from the label

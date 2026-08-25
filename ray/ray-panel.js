@@ -528,7 +528,7 @@
         .filter(Boolean).join(' · ');
       return `<span class="ray-attcard">
           <span class="ic k-${esc(a.kind || 'pdf')}"><span class="ms">${icon}</span></span>
-          <span class="meta"><span class="nm">${esc(a.name)}</span><span class="sub">${esc(meta)}</span></span>
+          <span class="meta"><span class="nm">${esc(a.name)}</span><span class="kind">${esc(meta)}</span></span>
           ${removable ? `<button class="ray-attx" data-ray-unattach="${a.id}" title="Remove">
               <span class="ms">close</span></button>` : ''}
         </span>`;
@@ -1136,7 +1136,7 @@
       const ctxRows = ctx ? ctx.parts.map((p) =>
         `<tr><td>${esc(p.label)}</td><td class="n">${p.tokens}</td></tr>`).join('') : '';
       const toolRows = tr.trace.filter((t) => t.kind === 'tool').map((t) =>
-        `<tr class="${t.ok ? '' : 'bad'}"><td><code>${esc(t.name)}</code><div class="sub">${esc(t.summary || t.message || '')}</div></td>`
+        `<tr class="${t.ok ? '' : 'bad'}"><td><code>${esc(t.name)}</code><div class="tsub">${esc(t.summary || t.message || '')}</div></td>`
         + `<td class="n">${t.tokens}</td></tr>`).join('');
 
       box.innerHTML = head + `<div class="ray-tracebody">
