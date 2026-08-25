@@ -188,9 +188,25 @@ attachment tray, prompt library, credit notice, citations) fits the dialog
 untouched.
 
 > The dialog is CSS-ordered **after** `.mode-rail`. Both selectors weigh the
-> same, so source order is the only thing letting it override the rail's width,
-> height and `min-width` — including the values set inside the `max-width:1180px`
-> block. Moving it earlier silently returns the dialog to rail dimensions.
+> same, so source order is the only thing letting it override the rail's width
+> and height — including the values set inside the `max-width:1180px` block.
+> Moving it earlier silently returns the dialog to rail dimensions.
+
+The rail pins `min-width` on its children so their contents do not reflow while
+the width transition runs. That pin is **rail-only, and has to say so**:
+`.mode-rail.wide>*` carries three classes and outweighs any `.form-dialog>*`
+rule, so ordering does not save you. Written plainly it produced a real defect —
+widen the rail, then collapse it, and a 640px-wide header is laid out inside a
+400px card, putting the header controls past the edge where `overflow:hidden`
+eats them. The expand button became unreachable exactly when someone wanted it.
+Both pins now carry `:not(.form-dialog)`, and the `max-width:1180px` block
+clears them outright, because `wide` is unavailable at that size yet still rides
+along in `localStorage` from a larger screen.
+
+Two smaller guards in the same header: `.ray-hbtn` and `.ray-back` are
+`flex:none`, so a long project name can never squeeze the controls, and
+double-clicking the title bar toggles the form — the move people try on a
+floating card before they go looking for an icon.
 
 Both forms take the current theme. The live co-pilot's popup is white, but the
 rail was made dark on purpose and carries a light/dark switch for demos —

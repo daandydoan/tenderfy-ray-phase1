@@ -341,8 +341,14 @@ html.ray-light .ray-panel{
 
 .ray-panel.mode-rail{display:flex;flex:none;width:var(--rail-w);min-width:0;height:100vh;
            transition:width .2s cubic-bezier(.4,0,.2,1)}
-.ray-panel.mode-rail>*{min-width:420px}
-.ray-panel.mode-rail.wide>*{min-width:640px}
+/* These min-widths stop the rail's contents reflowing while the width
+   transition runs. They are rail-only, and must say so: .mode-rail.wide>*
+   outweighs any .form-dialog>* rule on specificity, so without the :not()
+   a panel that was widened and then collapsed lays its 640px-wide header
+   out inside a 400px card. The controls end up past the edge, clipped by
+   overflow:hidden — the expand button silently unreachable. */
+.ray-panel.mode-rail:not(.form-dialog)>*{min-width:420px}
+.ray-panel.mode-rail.wide:not(.form-dialog)>*{min-width:640px}
 .ray-panel.mode-rail:not(.open){border-left:none}
 .ray-panel.mode-rail:not(.open)>*{visibility:hidden}
 .c-main{transition:none}
@@ -355,6 +361,14 @@ html.ray-light .ray-panel{
              width:min(420px,92vw);box-shadow:-12px 0 40px rgba(0,0,0,.18)}
   .ray-panel.mode-rail:not(.open){display:none}
   .capp{--rail-w:0px!important}
+  /* Widen is unavailable down here (the control is hidden above), but a
+     `wide` stored on a large screen still rides along in localStorage. Left
+     alone it lays 640px of content inside a 420px overlay and clips the
+     header controls, so the rail is narrow below this breakpoint, full stop.
+     Specificity is matched deliberately: the rules above carry a :not(),
+     which counts a class, so a plainer selector here would lose. */
+  .ray-panel.mode-rail.wide:not(.form-dialog)>*,
+  .ray-panel.mode-rail:not(.form-dialog)>*{min-width:0}
 }
 
 /* ── Ray: the chat dialog ──────────────────────────────────────────────
@@ -392,11 +406,16 @@ html.ray-light .ray-panel{
    A title bar for a region of the app, not a branded chat header. The mark
    is present at 20px and nothing else competes with the conversation.    */
 .ray-head{display:flex;align-items:center;gap:9px;padding:0 12px 0 16px;height:52px;flex-shrink:0}
-.ray-mark{height:20px;width:auto;display:block;opacity:.9}
+.ray-mark{height:20px;width:auto;display:block;opacity:.9;flex:none}
 .ray-mark.lg{height:34px;width:auto;opacity:.85}
 .ray-id{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:8px}
 .ray-id span{font-size:12px;font-weight:400;color:var(--light)}
-.ray-hbtn{cursor:pointer;font-size:19px;color:var(--light);border-radius:6px;padding:3px}
+/* flex:none is load-bearing. These are flex items next to a title that can
+   be arbitrarily long; without it they shrink with everything else, the glyph
+   clips, and the hit area collapses — the expand control quietly becomes
+   unclickable exactly when the project name is long enough to need it. */
+.ray-hbtn{cursor:pointer;font-size:19px;color:var(--light);border-radius:6px;padding:3px;
+          flex:none}
 .ray-hbtn:hover{color:var(--ink);background:var(--row)}
 .ray-hbtn[data-ray="expand"]{margin-left:auto}
 @media(max-width:1180px){.ray-hbtn[data-ray="expand"]{display:none}}
@@ -417,7 +436,8 @@ html.ray-light .ray-panel{
 .ray-beta{flex:none;align-self:center;font-size:9.5px;font-weight:700;line-height:1.5;
           letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border-radius:5px;
           white-space:nowrap;background:var(--r-teal-bg);color:var(--r-teal-tx)}
-.ray-back{cursor:pointer;font-size:22px;color:var(--gray);margin-left:-4px;border-radius:6px}
+.ray-back{cursor:pointer;font-size:22px;color:var(--gray);margin-left:-4px;border-radius:6px;
+          flex:none}
 .ray-back:hover{background:var(--row);color:var(--ink)}
 
 /* ── Ray: session list ─────────────────────────────────────────────────── */

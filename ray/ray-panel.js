@@ -199,6 +199,16 @@
       this.el = el;
       this.$ = (n) => el.querySelector(`[data-ray="${n}"]`);
 
+      /* The title bar is a size handle too. On a floating card, double-click
+         is the move people try first; the icon is for those who don't. Guarded
+         off the controls so a double-click on ⋯ or ✕ is not also a resize. */
+      if (this.mode !== 'inline') {
+        el.querySelector('[data-ray="head"]').addEventListener('dblclick', (e) => {
+          if (e.target.closest('.ray-hbtn, .ray-back')) return;
+          this.setForm(this.form === 'dialog' ? 'rail' : 'dialog');
+        });
+      }
+
       if (this.mode !== 'inline') {
         const fab = document.createElement('button');
         fab.className = 'ray-fab';
