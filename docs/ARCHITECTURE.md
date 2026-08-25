@@ -165,9 +165,18 @@ room he currently occupies.
 
 The rule is that the **full character is earned by having a panel of your own**.
 Where Ray is a control you press he stays a compact glyph; once he has the side
-panel he is a presence, and gets the room. `Panel.mark` is resolved once at
+panel he is a presence, and gets the room. The **Beta** tag in the panel header
+follows the same rule and for the same reason: it labels the side panel, not the
+button that opens it. `Panel.mark` and `Panel.betaTag` are both resolved once at
 build time from `this.mode`, because a panel's mode never changes after it is
 constructed.
+
+The tag sits after `.ray-title` in both header views. Since the title is
+`flex:1` it lands beside the header buttons and reads as panel chrome rather
+than as part of whatever the title happens to say — which matters in the chat
+view, where the title is a project name. It uses the existing `--r-teal-bg` /
+`--r-teal-tx` badge pair, so it is already contrast-checked in both themes and
+speaks the same vocabulary as the badges in Ray's answers.
 
 The supplied artwork is a 60×60 box whose drawing only occupies 46×35.6 of it,
 so at a fixed `20px` square it rendered about a third smaller than the mark it

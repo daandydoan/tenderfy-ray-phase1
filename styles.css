@@ -383,6 +383,9 @@ html.ray-light .ray-panel{
            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ray-title span{display:block;font-size:11.5px;font-weight:400;color:var(--light);
                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-beta{flex:none;align-self:center;font-size:9.5px;font-weight:700;line-height:1.5;
+          letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border-radius:5px;
+          white-space:nowrap;background:var(--r-teal-bg);color:var(--r-teal-tx)}
 .ray-back{cursor:pointer;font-size:22px;color:var(--gray);margin-left:-4px;border-radius:6px}
 .ray-back:hover{background:var(--row);color:var(--ink)}
 

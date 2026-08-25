@@ -188,8 +188,11 @@
       host.appendChild(el);
       this.el = el;
       this.$ = (n) => el.querySelector(`[data-ray="${n}"]`);
-      /* Set once at build: the mode never changes for a live panel. */
+      /* Set once at build: the mode never changes for a live panel. Both
+         follow the same rule — they mark Ray as a place, not as a control, so
+         an inline panel folded into a dialog gets neither. */
       this.mark = this.mode === 'inline' ? RAY_IMG : RAY_FULL;
+      this.betaTag = this.mode === 'inline' ? '' : '<span class="ray-beta">Beta</span>';
 
       if (this.mode !== 'inline') {
         const fab = document.createElement('button');
@@ -374,6 +377,7 @@
         head.innerHTML = `
           <img class="ray-mark" src="${this.mark}" alt="">
           <div class="ray-title">Projects</div>
+          ${this.betaTag}
           <span class="ms ray-hbtn" data-ray-new title="New project">add</span>
           <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
           <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
@@ -383,6 +387,7 @@
       head.innerHTML = `
         <span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>
         <div class="ray-title">${esc(t && !t.untitled ? t.title : 'New project')}</div>
+        ${this.betaTag}
         <span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Project options">more_horiz</span>
         <span class="ms ray-hbtn" data-ray="expand" title="Widen">right_panel_open</span>
         <span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
