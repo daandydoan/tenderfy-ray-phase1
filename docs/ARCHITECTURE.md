@@ -381,6 +381,20 @@ duplicates. There is also a one-time sweep for projects seeded before the flag
 existed, identified by exhibit title, history opener, or empty-and-untitled.
 A project the user named or wrote in matches none of those and is never touched.
 
+## Showing the empty state
+
+A first-run screen is worth demonstrating and impossible to reach once the
+prototype has seeded two projects. The header's **Empty** switch fakes it:
+`rayEmptyDemo` makes `paintList()` treat the list as empty while leaving the
+threads untouched, so it is a view over the data rather than a deletion — flip
+it back and everything returns.
+
+It is deliberately **not persisted**. Coming back to a panel that claims you
+have no projects would read as data loss, so it resets on every load. Starting
+a project from the empty state clears the flag too, otherwise the click appears
+to do nothing: the project is created, and the list it lands back on is still
+pretending to be empty.
+
 ## Demo modes
 
 The prototype ships with the architecture proof folded away (`ray_dev` off).

@@ -144,6 +144,7 @@
     /** A new session records the tender it was started from, for provenance —
      *  nothing groups on it. */
     newSession() {
+      if (global.rayEmptyDemo && global.rayToggleEmpty) global.rayToggleEmpty();
       const t = service.newThread(this.context.tenderId);
       this.openThread(t.id);
     }
@@ -528,7 +529,9 @@
 
     paintList() {
       const box = this.$('list');
-      let rows = service.allThreads();
+      /* The header's demo switch hides the rows without touching them, so the
+         first-run screen can be shown to a room and flipped straight back. */
+      let rows = global.rayEmptyDemo ? [] : service.allThreads();
       if (this.query) {
         const q = this.query.toLowerCase();
         rows = rows.filter((t) => (t.title + ' ' + (t.snippet || '')).toLowerCase().indexOf(q) >= 0);

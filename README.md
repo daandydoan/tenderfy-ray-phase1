@@ -89,6 +89,12 @@ The rail is **dark by default**; the switch in the app header flips it to light
 instantly, for demos in rooms where dark does not project well. Both forms
 follow that switch.
 
+Beside it, **Empty** shows the first-run projects screen on demand — a state
+that is otherwise unreachable once you have projects. It hides the list rather
+than deleting anything, so flipping it back brings everything straight back,
+and starting a project from it turns itself off so you can watch the first one
+appear.
+
 ## Two modes
 
 The screens are the product; the architecture proof is a second layer folded

@@ -59,6 +59,29 @@
     applyTheme(light);
   };
 
+  /* ── Empty state, on demand ──────────────────────────────────────────
+     A first-run screen is worth showing and impossible to reach once you
+     have projects, so the header can fake it. It hides the list rather
+     than deleting anything — flip it back and the projects are all there.
+     `rayEmptyDemo` is read by Panel.paintList(). */
+  function applyEmpty(on) {
+    global.rayEmptyDemo = !!on;
+    const btn = document.querySelector('[data-ray-empty]');
+    if (btn) {
+      btn.innerHTML = `<span class="ms">${on ? 'inventory_2' : 'inbox'}</span>`
+        + (on ? 'Empty' : 'Projects');
+      btn.title = on
+        ? 'Showing the empty state — click to show your projects again'
+        : 'Show the empty projects state';
+      btn.classList.toggle('on', !!on);
+    }
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p && p.view === 'list') p.paintList();
+  }
+  global.rayToggleEmpty = function () {
+    applyEmpty(!global.rayEmptyDemo);
+  };
+
   /* A tender's colour, derived from its id so it is stable everywhere it
      appears — the page title bar here, the session tiles in Ray's list. */
   const TENDER_RAMP = ['c-teal', 'c-indigo', 'c-orange', 'c-brown', 'c-cyan'];
@@ -145,6 +168,7 @@
             ${identity}
             <span class="hthemes" data-ray-demo onclick="rayDemoStep()"></span>
             <span class="hthemes" data-ray-theme onclick="rayToggleTheme()"></span>
+            <span class="hthemes" data-ray-empty onclick="rayToggleEmpty()"></span>
             <span class="ms fill" title="Notifications">notifications</span>
             <span class="hray" onclick="RayPanel.toggle()" title="Ray — Tenderfy Co-Pilot">
               <img src="${asset('assets/ray.svg')}" alt="Ray"> Ray</span>
@@ -186,6 +210,9 @@
     }
 
     applyTheme(themeIsLight());
+    /* Deliberately not persisted: this is a demo switch, and coming back to a
+       panel that claims you have no projects would read as data loss. */
+    applyEmpty(false);
     paintDemo();
 
     if (typeof global.onPageReady === 'function') global.onPageReady(service, user);
