@@ -256,6 +256,22 @@ tender resets it, because a hand-picked list belongs to the tender it was
 picked from. The band holds two rows and scrolls — a tender with a dozen files
 would otherwise push the conversation off the panel.
 
+## Under each answer
+
+A finished answer carries a copy control and the time it was given. Both are
+added **after** streaming completes, never during: there is nothing worth
+copying halfway through, and a timestamp on an unfinished answer is a guess.
+Restored history renders the same row from the message's stored `at`, so a
+reloaded conversation is structurally identical to the one just had — checked
+by comparing the live and repainted DOM.
+
+Copy takes `innerText` of `.ray-answer` alone, so it is the prose a person
+would paste into a tender response: no markup, no citation chips as markup, and
+none of the reasoning steps sitting above it. `navigator.clipboard` needs a
+secure context and a permission that can be refused, so there is an
+`execCommand` fallback behind it. The icon becomes a tick for a moment rather
+than raising a toast — a toast for something this small is noise.
+
 ## The composer
 
 It is a `textarea`, not an input: Enter sends, Shift+Enter breaks a line, and

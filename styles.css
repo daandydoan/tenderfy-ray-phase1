@@ -48,11 +48,13 @@ a{color:inherit;text-decoration:none}
 .c-side .cic:hover{color:var(--teal-bright)}
 .c-side .cic.active{color:var(--teal-bright)}
 .c-main{flex:1;display:flex;flex-direction:column;min-width:0}
+/* gap, not just space-between: the demo switches grew the right-hand group
+   until it sat flush against the crumb, with the two runs of text touching. */
 .c-header{background:var(--cta);color:#fff;display:flex;align-items:center;justify-content:space-between;
-          padding:0 24px;height:56px;font-size:14px;font-weight:700;flex-shrink:0}
+          gap:16px;padding:0 24px;height:56px;font-size:14px;font-weight:700;flex-shrink:0}
 .c-header .l{display:flex;align-items:center;gap:12px;min-width:0}
 .c-header .l span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-header .r{display:flex;align-items:center;gap:22px;font-weight:700;flex:none}
+.c-header .r{display:flex;align-items:center;gap:14px;font-weight:700;flex:none}
 .c-header .r .ms{font-size:22px;cursor:pointer}
 .hray{display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.16);
       border-radius:999px;padding:3px 12px 3px 4px;font-size:12.5px;font-weight:700}
@@ -544,6 +546,20 @@ html.ray-light .ray-panel{
 .ray-bubble code{background:var(--row);border-radius:5px;padding:1px 5px;font-size:12.5px}
 
 /* Inline annotations stay quiet — a citation should not shout over prose. */
+/* Under a finished answer. Quiet until you go looking for it — the answer
+   is the content, this is a handle on it. */
+.ray-turnfoot{display:flex;align-items:center;gap:8px;margin-top:10px}
+.ray-copy{display:flex;align-items:center;justify-content:center;width:26px;height:26px;
+          padding:0;border:none;background:none;border-radius:7px;cursor:pointer;
+          color:var(--light);opacity:.65;transition:opacity .15s,color .15s}
+.ray-turn:hover .ray-copy{opacity:1}
+.ray-copy:hover{background:var(--row);color:var(--teal)}
+.ray-copy.done{color:var(--teal);opacity:1}
+.ray-copy .ms{font-size:16px}
+/* No opacity: the colour is already muted, and fading an 11px label on top
+   of that put it under 4.5:1. Muted by hue, not by transparency. */
+.ray-time{font-size:11px;color:var(--light)}
+
 .ray-cite{display:inline;font-size:12px;font-weight:500;color:var(--teal);
           border-bottom:1px dotted rgba(29,158,117,.4);margin-left:2px}
 .ray-note{display:block;font-size:12px;color:var(--light);margin-top:10px}
@@ -851,6 +867,10 @@ html.ray-light .ray-panel{
 .ray-bubble.user{background:var(--r-user-bg);color:var(--r-tx)}
 .ray-bubble blockquote{background:var(--r-sunk);border-left-color:var(--r-accent);color:var(--r-tx-2)}
 .ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
+.ray-copy{color:var(--r-tx-3)}
+.ray-copy:hover{background:var(--r-raise);color:var(--r-accent)}
+.ray-copy.done{color:var(--r-accent)}
+.ray-time{color:var(--r-tx-3)}
 .ray-cite{color:var(--r-accent);border-bottom-color:rgba(106,221,181,.4)}
 .ray-note{color:var(--r-tx-3)}
 .ray-older{color:var(--r-tx-3);background:var(--r-sunk)}

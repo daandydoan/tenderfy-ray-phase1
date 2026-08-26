@@ -289,6 +289,8 @@
           this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
         }
+        const cp = e.target.closest('[data-ray-copy]');
+        if (cp) { this.copyAnswer(cp); return; }
         const up = e.target.closest('[data-ray-prompt]');
         if (up) { this.usePrompt(up.getAttribute('data-ray-prompt')); return; }
         if (e.target.closest('[data-ray-prompt-save]')) { this.savePrompt(); return; }
@@ -752,6 +754,43 @@
       } catch (err) { toast(err.reason || err.message); }
     }
 
+    /** Copy the answer as plain text — what someone pasting into a tender
+     *  response actually wants, not the markup or the reasoning steps.
+     *  execCommand is the fallback: the async clipboard needs a secure
+     *  context and a permission that can be refused. */
+    copyAnswer(btn) {
+      const turn = btn.closest('.ray-turn');
+      const body = turn && turn.querySelector('.ray-answer');
+      if (!body) return;
+      const text = (body.innerText || '').trim();
+      const done = () => {
+        btn.classList.add('done');
+        btn.querySelector('.ms').textContent = 'check';
+        setTimeout(() => {
+          btn.classList.remove('done');
+          const ic = btn.querySelector('.ms');
+          if (ic) ic.textContent = 'content_copy';
+        }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, () => this.copyFallback(text, done));
+      } else {
+        this.copyFallback(text, done);
+      }
+    }
+    copyFallback(text, done) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        done();
+      } catch (e) { toast('Could not copy — select the text instead'); }
+    }
+
     savePrompt() {
       const text = (this.$('input').value || '').trim();
       if (!text) return;
@@ -1005,6 +1044,7 @@
       shown.forEach((m) => this.bubble(m.role,
         m.role === 'assistant'
           ? Panel.thinkBlock(m.steps, m.ms) + `<div class="ray-answer">${renderAnswer(m.text)}</div>`
+            + Panel.turnFoot(m.at)
           : esc(m.text) + Panel.attachRow(m.attachments)));
     }
 
@@ -1105,6 +1145,11 @@
         this.paintTrace();
         this.paintChrome();       // the session may have just earned its name
         await this.stream(bub.querySelector('.ray-answer'), renderAnswer(out.text));
+        /* Added once the answer has finished arriving, so the copy control
+           never offers a half-streamed answer and the time is the moment Ray
+           actually finished rather than when it started. */
+        bub.insertAdjacentHTML('beforeend', Panel.turnFoot(Date.now()));
+        this.$('body').scrollTop = this.$('body').scrollHeight;
         this.busy = false;
         return out;
       } catch (err) {
@@ -1258,6 +1303,19 @@
     /** The collapsed thinking block, rebuilt from a stored turn. Same markup
      *  a live turn folds into, so history and the moment it happened look the
      *  same. */
+    /** The row under a finished answer: copy it, and when it was said.
+     *  Absent while a turn is still streaming — there is nothing to copy
+     *  yet, and a timestamp on an unfinished answer would be a guess. */
+    static turnFoot(at) {
+      const d = new Date(at || Date.now());
+      const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `<div class="ray-turnfoot">
+          <button class="ray-copy" data-ray-copy title="Copy this answer">
+            <span class="ms">content_copy</span></button>
+          <span class="ray-time">${esc(time)}</span>
+        </div>`;
+    }
+
     static thinkBlock(steps, ms) {
       if (!steps || !steps.length) return '';
       const lines = steps.map((st) =>
