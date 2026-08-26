@@ -191,9 +191,11 @@
               <form class="ray-composer" data-ray="composer">
                 <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
                   <span class="ms">add</span></button>
+                <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
+                <!-- Saved prompts sits with Send, not with Attach: both act on
+                     what you are about to say, while + acts on what you bring. -->
                 <button type="button" class="ray-attach" data-ray-prompts title="Saved prompts">
                   <span class="ms">bookmark</span></button>
-                <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
                 <button type="submit" class="ray-send" title="Send"><span class="ms">arrow_upward</span></button>
               </form>
             </div>
