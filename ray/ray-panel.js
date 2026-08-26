@@ -439,7 +439,7 @@
       if (this.view === 'list') {
         head.innerHTML = (dialog
           ? this.idBlock('Tenderfy Co-Pilot')
-          : `<img class="ray-mark" src="${this.mark}" alt="">
+          : `<span class="ray-halo"><img class="ray-mark" src="${this.mark}" alt=""></span>
              <div class="ray-title">Projects</div>
              ${this.betaTag}`)
           + `<span class="ms ray-hbtn" data-ray-new title="New project">add</span>`
@@ -923,7 +923,7 @@
       const n = service.registry.countsFor(s, g);
       this.$('body').innerHTML = `
         <div class="ray-empty">
-          <img class="ray-mark lg" src="${this.mark}" alt="">
+          <span class="ray-halo lg"><img class="ray-mark lg" src="${this.mark}" alt=""></span>
           <h3>What's next?</h3>
           <p>Ask me anything across your tenders, documents and Response Library.
              I can see what you have open, and everything I fetch stays inside

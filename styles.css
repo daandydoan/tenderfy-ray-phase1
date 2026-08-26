@@ -300,6 +300,7 @@ h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center
   --r-teal-bg:rgba(106,221,181,.14);   --r-teal-tx:#6ADDB5;
   --r-blue-bg:rgba(129,145,224,.16);   --r-blue-tx:#A7B2EA;
   --r-amber-bg:rgba(255,188,74,.14);   --r-amber-tx:#F5C879;
+  --r-halo:rgba(255,188,74,.20);       /* the disc behind the full mark */
   --r-grey-bg:rgba(255,255,255,.08);   --r-grey-tx:#A8B2B6;
   --r-clay-tx:#D8A88F;
   --r-deny-bg:rgba(249,82,70,.12);     --r-deny-bd:rgba(249,82,70,.35);
@@ -327,6 +328,7 @@ html.ray-light .ray-panel{
   --r-teal-bg:#E1F5EE;  --r-teal-tx:#085041;
   --r-blue-bg:rgba(92,107,192,.14); --r-blue-tx:#414C90;
   --r-amber-bg:#FAEEDA; --r-amber-tx:#633806;
+  --r-halo:#FCEBCF;
   --r-grey-bg:#EFEFEF;  --r-grey-tx:#5F5E5A;
   --r-clay-tx:#6D4C41;
   --r-deny-bg:#FCEBEB;  --r-deny-bd:#F6DCD9; --r-deny-tx:#A32D2D;
@@ -408,6 +410,14 @@ html.ray-light .ray-panel{
 .ray-head{display:flex;align-items:center;gap:9px;padding:0 12px 0 16px;height:52px;flex-shrink:0}
 .ray-mark{height:20px;width:auto;display:block;opacity:.9;flex:none}
 .ray-mark.lg{height:34px;width:auto;opacity:.85}
+/* Ray sits on a warm disc wherever he appears at full size — the same idea as
+   the mint avatar in the dialog's header. The box is square on purpose: the
+   artwork is wider than tall, so border-radius on the image itself would draw
+   an ellipse. */
+.ray-halo{display:flex;align-items:center;justify-content:center;flex:none;
+          width:32px;height:32px;border-radius:50%;background:var(--r-halo)}
+.ray-halo.lg{width:54px;height:54px}
+.ray-halo .ray-mark{opacity:1}
 .ray-id{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:8px}
 .ray-id span{font-size:12px;font-weight:400;color:var(--light)}
 /* flex:none is load-bearing. These are flex items next to a title that can
@@ -435,7 +445,7 @@ html.ray-light .ray-panel{
                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ray-beta{flex:none;align-self:center;font-size:9.5px;font-weight:700;line-height:1.5;
           letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border-radius:5px;
-          white-space:nowrap;background:var(--r-teal-bg);color:var(--r-teal-tx)}
+          white-space:nowrap;background:var(--r-amber-bg);color:var(--r-amber-tx)}
 .ray-back{cursor:pointer;font-size:22px;color:var(--gray);margin-left:-4px;border-radius:6px;
           flex:none}
 .ray-back:hover{background:var(--row);color:var(--ink)}

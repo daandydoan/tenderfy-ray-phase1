@@ -279,9 +279,17 @@ dialog restyles it live instead of only on the next page load.
 The tag sits after `.ray-title` in both header views. Since the title is
 `flex:1` it lands beside the header buttons and reads as panel chrome rather
 than as part of whatever the title happens to say — which matters in the chat
-view, where the title is a project name. It uses the existing `--r-teal-bg` /
-`--r-teal-tx` badge pair, so it is already contrast-checked in both themes and
-speaks the same vocabulary as the badges in Ray's answers.
+view, where the title is a project name. It uses the existing `--r-amber-bg` /
+`--r-amber-tx` badge pair — amber rather than teal, since Beta is a caution and
+not a brand flourish — so it is already contrast-checked in both themes and
+speaks the same vocabulary as the badges in Ray's answers. Measured 6.8:1 on
+the dark header band.
+
+Wherever the full character appears at size — the project-list header and the
+empty state — it sits on a warm disc, `--r-halo`, the same idea as the mint
+avatar in the dialog header. The wrapper is a **square** box: the artwork is
+wider than it is tall, so a radius on the image itself would draw an ellipse.
+The 16px byline mark is left bare; a disc on every reply is noise.
 
 The supplied artwork is a 60×60 box whose drawing only occupies 46×35.6 of it,
 so at a fixed `20px` square it rendered about a third smaller than the mark it
