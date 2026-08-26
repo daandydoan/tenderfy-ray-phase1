@@ -265,6 +265,12 @@ Restored history renders the same row from the message's stored `at`, so a
 reloaded conversation is structurally identical to the one just had — checked
 by comparing the live and repainted DOM.
 
+The row is **only visible on the answer you are on**. It fades rather than
+being removed, so it keeps its space and the conversation does not jump as the
+pointer travels down it. `:focus-within` is on the same selector, or tabbing to
+the copy button would reveal nothing; and a `hover:none` query leaves it
+permanently visible on touch, where there is no hover to give.
+
 Copy takes `innerText` of `.ray-answer` alone, so it is the prose a person
 would paste into a tender response: no markup, no citation chips as markup, and
 none of the reasoning steps sitting above it. `navigator.clipboard` needs a

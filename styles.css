@@ -546,13 +546,19 @@ html.ray-light .ray-panel{
 .ray-bubble code{background:var(--row);border-radius:5px;padding:1px 5px;font-size:12.5px}
 
 /* Inline annotations stay quiet — a citation should not shout over prose. */
-/* Under a finished answer. Quiet until you go looking for it — the answer
-   is the content, this is a handle on it. */
-.ray-turnfoot{display:flex;align-items:center;gap:8px;margin-top:10px}
+/* Under a finished answer, and only while you are on that answer. The row
+   keeps its space when hidden — fading it out rather than removing it, so
+   the conversation does not jump as the pointer moves down it. focus-within
+   matters too: tabbing to the copy button has to reveal what it is on. */
+.ray-turnfoot{display:flex;align-items:center;gap:8px;margin-top:10px;
+              opacity:0;transition:opacity .15s}
+.ray-turn:hover .ray-turnfoot,
+.ray-turn:focus-within .ray-turnfoot{opacity:1}
+/* Nothing hovers on a touch screen, so there the row simply stays. */
+@media(hover:none){ .ray-turnfoot{opacity:1} }
 .ray-copy{display:flex;align-items:center;justify-content:center;width:26px;height:26px;
           padding:0;border:none;background:none;border-radius:7px;cursor:pointer;
-          color:var(--light);opacity:.65;transition:opacity .15s,color .15s}
-.ray-turn:hover .ray-copy{opacity:1}
+          color:var(--light);transition:color .15s}
 .ray-copy:hover{background:var(--row);color:var(--teal)}
 .ray-copy.done{color:var(--teal);opacity:1}
 .ray-copy .ms{font-size:16px}
