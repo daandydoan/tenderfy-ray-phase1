@@ -61,10 +61,14 @@
          re-pointing Ray at a field must not lose where that field lives. */
       this.pageCrumb = this.context.crumb || '';
       /* The rail remembers itself across navigation — that persistence is the
-         whole difference between "a chat on this page" and "Ray is open". */
+         whole difference between "a chat on this page" and "Ray is open".
+         It also opens **by default**: this is a demo of an agent, and making
+         the first move a hunt for the Ray button buries the thing being
+         demonstrated. Closing is still remembered, so anyone who shuts Ray
+         keeps him shut — only a visitor with nothing stored gets the default. */
       this.open = this.mode === 'inline' ? true
         : this.opts.open != null ? this.opts.open
-        : store.get(OPEN_KEY, false);
+        : store.get(OPEN_KEY, true);
       this.wide = this.mode !== 'inline' && store.get(WIDE_KEY, false);
       /* How the panel presents itself. Ray opens **expanded**, as the rail:
          this is a demo of an agent that works alongside you, and opening

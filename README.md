@@ -76,8 +76,9 @@ substantial question the **credit notice** appears, because the demo starts just
 under its 60% threshold. Files you attach appear as cards **below** the
 composer.
 
-Ray **opens as the side panel**, taking its own column and pushing the page
-across. The `⤡` in its header folds him down to a **chat dialog** — a floating
+Ray is **already open** when the page loads, as the side panel — taking its own
+column and pushing the page across. Closing him is remembered, so if you shut
+Ray he stays shut until you reopen him from the header. The `⤡` in its header folds him down to a **chat dialog** — a floating
 card, bottom-right, that leaves the page alone — and `⤢` puts him back. It is
 one panel either way, so the conversation carries over untouched, and the choice
 is remembered. Ray also changes what he shows for the room he is in: the compact
