@@ -541,9 +541,17 @@
         </div>`;
 
       if (!rows.length) {
+        /* Centred in what is left of the list, not stranded under the search
+           box. A first-run panel is mostly empty space; the one thing to do
+           belongs in the middle of it. */
         out += `<div class="ray-listempty">
-            ${this.query ? 'No projects match that.' : 'No projects yet.'}
-            <button class="ray-act" data-ray-new>Start a project</button></div>`;
+            <span class="ray-halo lg"><img class="ray-mark lg" src="${this.mark}" alt=""></span>
+            <p class="ray-emptyhead">${this.query ? 'Nothing matches that' : 'No projects yet'}</p>
+            <p class="ray-emptysub">${this.query
+              ? 'Try a different word, or start a project for it.'
+              : 'Every question you ask Ray lives in a project. They are kept, so you can pick one up later.'}</p>
+            <button class="ray-act go" data-ray-new>
+              <span class="ms">add</span>Start a project</button></div>`;
       } else {
         let last = null;
         rows.forEach((t) => {

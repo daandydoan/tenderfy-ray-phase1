@@ -451,7 +451,9 @@ html.ray-light .ray-panel{
 .ray-back:hover{background:var(--row);color:var(--ink)}
 
 /* ── Ray: session list ─────────────────────────────────────────────────── */
-.ray-list{flex:1;min-height:0;overflow:auto;background:#fff}
+/* A flex column so the empty state can claim the space the rows would have
+   taken and centre itself in it. */
+.ray-list{flex:1;min-height:0;overflow:auto;background:#fff;display:flex;flex-direction:column}
 .ray-search{display:flex;align-items:center;gap:8px;margin:12px 14px 4px;padding:8px 11px;
             background:var(--row);border-radius:8px}
 .ray-search .ms{font-size:18px;color:var(--light)}
@@ -506,8 +508,18 @@ html.ray-light .ray-panel{
 .ray-rows{display:block;font-size:12.5px;color:var(--gray);line-height:1.4;margin-top:2px;
           display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ray-rowage{font-size:11.5px;color:var(--light);flex:none;padding-top:2px}
-.ray-listempty{padding:20px 16px;font-size:13px;color:var(--light);text-align:center}
-.ray-listempty .ray-act{display:block;margin:12px auto 0}
+.ray-listempty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;
+               justify-content:center;gap:2px;padding:24px 28px;text-align:center}
+.ray-listempty .ray-halo{margin-bottom:14px}
+.ray-emptyhead{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.ray-emptysub{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--light);max-width:250px}
+/* .ray-act carries margin:8px 6px 0 0 for the button rows it usually sits in.
+   Left alone, that 6px on the right shifts a centred box 3px off centre. */
+.ray-listempty .ray-act{margin:18px 0 0}
+.ray-act.go{background:var(--cta);border-color:var(--cta);color:#fff;gap:4px;
+            display:inline-flex;align-items:center}
+.ray-act.go:hover{background:var(--cta-dark);border-color:var(--cta-dark);color:#fff}
+.ray-act.go .ms{font-size:17px}
 
 /* ── Ray: the conversation ─────────────────────────────────────────────
    Ray's turns are prose set flush in the column — no tinted balloon, no
@@ -898,6 +910,10 @@ html.ray-light .ray-panel{
 .ray-rowmenu{color:var(--r-tx-3)}
 .ray-rowmenu:hover{background:var(--r-sunk);color:var(--r-tx)}
 .ray-listempty{color:var(--r-tx-3)}
+.ray-emptyhead{color:var(--r-tx)}
+.ray-emptysub{color:var(--r-tx-3)}
+.ray-act.go{background:var(--cta);border-color:var(--cta);color:#fff}
+.ray-act.go:hover{background:var(--teal);border-color:var(--teal);color:#fff}
 .ray-mini{background:transparent;border-color:var(--r-line-2);color:var(--r-tx-2)}
 .ray-mini:hover{border-color:var(--r-tx-2);color:var(--r-tx)}
 .ray-rename{background:var(--r-raise);border-color:var(--r-accent);color:var(--r-tx)}
