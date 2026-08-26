@@ -215,6 +215,34 @@ rail was made dark on purpose and carries a light/dark switch for demos —
 having the dialog disagree with the panel it becomes would be worse than having
 it disagree with the screenshot.
 
+## The composer
+
+It is a `textarea`, not an input: Enter sends, Shift+Enter breaks a line, and
+`autosize()` sets the height from `scrollHeight` on every keystroke, capped by
+CSS at about six lines before it starts scrolling. Height is cleared to `auto`
+before each measurement — without that the box can only ever grow, never shrink
+back as text is deleted.
+
+An **empty** box is special-cased back to its natural single row rather than
+measured. Measuring an empty textarea sizes it to the *placeholder*, and the
+demo's hint is long enough to wrap — which left the composer two lines tall
+with nothing typed in it, eating the space this is meant to save. The hint is
+now just the step counter: 248px of field fits about 24 characters, and every
+label overflowed it. Nothing is lost, since the full label is the Demo button's
+tooltip and the toast each step raises.
+
+The two pickers — attachments and saved prompts — are **popovers that open
+upward**, anchored to the composer's top edge inside `.ray-composerwrap` and
+floated over the conversation. Inline they pushed the whole input band down as
+they opened, moving the field out from under the cursor that had just clicked
+it. They close on click-outside and on Escape, both bound to `document` rather
+than the panel, because a click on the page behind Ray should dismiss them too.
+
+Spacing throughout the panel is deliberately tight — the conversation is the
+product and the chrome around it is not. The body runs at `16px` padding with a
+`20px` gap between turns; the dialog is `420px` wide, exactly the rail's narrow
+width, so neither form has a layout the other does not.
+
 ## The two marks
 
 Ray has two pieces of artwork, and which one shows is a statement about how much

@@ -381,7 +381,7 @@ html.ray-light .ray-panel{
    same, so source order is what lets the dialog override the rail's width,
    height and min-width — including inside the media query above.        */
 .ray-panel.form-dialog{position:fixed;right:20px;bottom:20px;top:auto;left:auto;z-index:95;
-           width:min(400px,calc(100vw - 32px));height:min(640px,calc(100vh - 116px));
+           width:min(420px,calc(100vw - 32px));height:min(740px,calc(100vh - 88px));
            border:none;border-radius:16px;box-shadow:0 18px 48px rgba(0,0,0,.26);
            transition:none}
 .ray-panel.form-dialog>*{min-width:0}
@@ -390,7 +390,7 @@ html.ray-light .ray-panel{
 
 /* The branded band. Teal, white-on-teal controls, and Ray named in it —
    the one place he introduces himself rather than just being present. */
-.ray-panel.form-dialog .ray-head{height:64px;gap:12px;padding:0 10px 0 14px;
+.ray-panel.form-dialog .ray-head{height:56px;gap:10px;padding:0 8px 0 12px;
            background:var(--cta);border-bottom:none}
 .ray-panel.form-dialog .ray-title{color:#fff;font-size:16px;font-weight:600}
 .ray-panel.form-dialog .ray-title span{color:rgba(255,255,255,.84);font-size:11.5px;font-weight:400}
@@ -398,9 +398,9 @@ html.ray-light .ray-panel{
 .ray-panel.form-dialog .ray-back{color:rgba(255,255,255,.92)}
 .ray-panel.form-dialog .ray-hbtn:hover,
 .ray-panel.form-dialog .ray-back:hover{background:rgba(255,255,255,.18);color:#fff}
-.ray-ava{width:34px;height:34px;border-radius:50%;background:var(--teal-bright);
+.ray-ava{width:30px;height:30px;border-radius:50%;background:var(--teal-bright);
          display:flex;align-items:center;justify-content:center;flex:none}
-.ray-ava img{height:24px;width:auto;display:block}
+.ray-ava img{height:21px;width:auto;display:block}
 
 /* ── Ray: header ───────────────────────────────────────────────────────
    A title bar for a region of the app, not a branded chat header. The mark
@@ -503,15 +503,15 @@ html.ray-light .ray-panel{
    Ray's turns are prose set flush in the column — no tinted balloon, no
    avatar rail. Only the user's own words get a container, because that is
    the one thing you need to pick out when scanning back.                  */
-.ray-body{flex:1;min-height:0;overflow:auto;padding:22px 20px 8px;display:flex;
-          flex-direction:column;gap:26px}
-.ray-turn{display:flex;flex-direction:column;gap:7px}
+.ray-body{flex:1;min-height:0;overflow:auto;padding:16px 16px 6px;display:flex;
+          flex-direction:column;gap:20px}
+.ray-turn{display:flex;flex-direction:column;gap:6px}
 .ray-turn.user{align-items:flex-end}
 .ray-byline{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
             letter-spacing:.02em}
 .ray-byline img{height:16px;width:auto;display:block;opacity:.75}
 .ray-bubble{line-height:1.68;font-size:14px;overflow-wrap:break-word}
-.ray-bubble.user{border-radius:14px;padding:11px 15px;max-width:88%;line-height:1.55}
+.ray-bubble.user{border-radius:14px;padding:9px 13px;max-width:90%;line-height:1.55}
 .ray-bubble p{margin:0 0 12px}
 .ray-bubble p:last-child{margin-bottom:0}
 .ray-bubble ul{margin:10px 0 0;padding-left:19px}
@@ -640,7 +640,7 @@ html.ray-light .ray-panel{
 /* Space below the chip, not above it — the chip was sitting flush against the
    composer's top edge. Collapses when there is no chip, so an empty context
    area reserves nothing. */
-.ray-ctx{padding:0 0 9px}
+.ray-ctx{padding:0 0 7px}
 .ray-ctx:empty{display:none}
 .ray-ctxchip{display:inline-flex;align-items:center;gap:5px;max-width:100%;
              background:var(--st-green-bg);border-radius:100px;padding:5px 5px 5px 10px;
@@ -690,7 +690,7 @@ html.ray-light .ray-panel{
    context chip, because both describe the message you are about to send.  */
 /* Capped: the footer does not shrink, so an unbounded tray would eat the
    conversation a card at a time. Two rows, then it scrolls. */
-.ray-atts{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 0;
+.ray-atts{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 0;
           max-height:150px;overflow-y:auto}
 .ray-atts:empty{display:none}
 /* A file reads as an object, not a tag: an icon tile coloured by type, the
@@ -733,7 +733,14 @@ html.ray-light .ray-panel{
             justify-content:center;color:var(--gray)}
 .ray-attach:hover{border-color:var(--teal);color:var(--teal)}
 .ray-attach .ms{font-size:18px}
-.ray-attpick{max-height:230px;overflow:auto;border-radius:10px;margin-bottom:8px}
+/* A dropdown that opens upward: the composer is at the bottom of the panel,
+   so there is nowhere else for it to go. Anchored to the composer's top edge
+   and floated over the conversation, so opening one does not shove the field
+   away from the cursor that just clicked it. */
+.ray-composerwrap{position:relative}
+.ray-attpick{position:absolute;left:0;right:0;bottom:100%;margin-bottom:8px;z-index:30;
+             max-height:min(320px,52vh);overflow:auto;border-radius:12px;
+             box-shadow:0 12px 32px rgba(0,0,0,.28)}
 .ray-attpick:empty{display:none}
 /* The picker's own rows. These used to live with the project drawer that the
    session list replaced; they belong here now. */
@@ -770,18 +777,22 @@ html.ray-light .ray-panel{
    than they look — without them the suggestions read as part of Ray's last
    answer rather than as controls.                                         */
 .ray-foot{flex-shrink:0}
-.ray-sec{padding:10px 20px 14px}
+.ray-sec{padding:8px 16px 10px}
 .ray-seclabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;
-              color:var(--light);margin-bottom:7px}
+              color:var(--light);margin-bottom:5px}
 .ray-composer{display:flex;gap:8px;align-items:flex-end;border-radius:14px;
-              padding:8px 8px 8px 14px;transition:border-color .15s}
-.ray-composer textarea{flex:1;min-width:0;border:none;padding:6px 0;font:inherit;font-size:13.5px;
-                       resize:none;max-height:140px;outline:none;line-height:1.5;background:none}
+              padding:6px 6px 6px 12px;transition:border-color .15s}
+/* height is written inline by autosize(); the cap lives here so the box
+   stops growing at about six lines and starts scrolling instead. Two lines
+   fit before it ever needs to grow. */
+.ray-composer textarea{flex:1;min-width:0;border:none;padding:5px 0;font:inherit;font-size:13.5px;
+                       resize:none;min-height:22px;max-height:132px;overflow-y:auto;outline:none;
+                       line-height:1.5;background:none}
 .ray-send{background:var(--teal);color:#fff;border:none;border-radius:10px;width:32px;height:32px;
           padding:0;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
 .ray-send .ms{font-size:18px}
 .ray-send:hover{background:var(--cta-dark)}
-.ray-surfacebar{font-size:11px;color:var(--light);padding:9px 0 0;line-height:1.5}
+.ray-surfacebar{font-size:11px;color:var(--light);padding:7px 0 0;line-height:1.4}
 .ray-surfacebar b{color:var(--gray);font-weight:600}
 
 .ray-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:#2E343C;

@@ -181,16 +181,22 @@
           <div class="ray-sec input">
             <div class="ray-seclabel" data-ray="ctxlabel">Reference</div>
             <div class="ray-ctx" data-ray="ctx"></div>
-            <div class="ray-attpick" data-ray="attpick"></div>
-            <div class="ray-attpick" data-ray="prompts"></div>
-            <form class="ray-composer" data-ray="composer">
-              <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
-                <span class="ms">add</span></button>
-              <button type="button" class="ray-attach" data-ray-prompts title="Saved prompts">
-                <span class="ms">bookmark</span></button>
-              <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
-              <button type="submit" class="ray-send" title="Send"><span class="ms">arrow_upward</span></button>
-            </form>
+            <!-- The two pickers are popovers anchored to the composer, opening
+                 upward over the conversation. Inline they pushed the whole
+                 input band down every time one was opened, which moved the
+                 field out from under the cursor that had just clicked it. -->
+            <div class="ray-composerwrap">
+              <div class="ray-attpick" data-ray="attpick"></div>
+              <div class="ray-attpick" data-ray="prompts"></div>
+              <form class="ray-composer" data-ray="composer">
+                <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
+                  <span class="ms">add</span></button>
+                <button type="button" class="ray-attach" data-ray-prompts title="Saved prompts">
+                  <span class="ms">bookmark</span></button>
+                <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
+                <button type="submit" class="ray-send" title="Send"><span class="ms">arrow_upward</span></button>
+              </form>
+            </div>
             <!-- Attachment cards sit UNDER the composer: they are the tallest
                  thing in this band, and above the field they pushed the
                  reference chip away from the label it belongs to. -->
@@ -226,6 +232,26 @@
       }
 
       this.$('composer').onsubmit = (e) => { e.preventDefault(); this.submit(); };
+      this.$('input').addEventListener('input', () => this.autosize());
+      this.autosize();   // settle the one-line height before anything is typed
+
+      /* A popover has to be dismissable from outside itself. Both of these
+         are on `document`, not the panel: a click landing on the page behind
+         Ray should close the dropdown just as readily as one inside it. */
+      this._closePickers = (e) => {
+        if (!this.attachOpen && !this.promptsOpen) return;
+        if (e.target.closest && e.target.closest(
+              '.ray-attpick, [data-ray-attach], [data-ray-prompts]')) return;
+        this.attachOpen = false; this.promptsOpen = false;
+        this.paintAttachments(); this.paintPrompts();
+      };
+      document.addEventListener('pointerdown', this._closePickers, true);
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || (!this.attachOpen && !this.promptsOpen)) return;
+        this.attachOpen = false; this.promptsOpen = false;
+        this.paintAttachments(); this.paintPrompts();
+        this.$('input').focus();
+      });
       this.$('input').addEventListener('keydown', (e) => {
         if ((e.key === 'Enter' || e.key === 'Return') && !e.shiftKey) {
           e.preventDefault(); this.submit();
@@ -703,6 +729,7 @@
         box.value = r.text;
         this.promptsOpen = false;
         this.paintPrompts();
+        this.autosize();
         box.focus();
         box.setSelectionRange(box.value.length, box.value.length);
       } catch (err) { toast(err.reason || err.message); }
@@ -985,11 +1012,13 @@
         const per = Math.max(8, Math.round(620 / Math.max(1, q.length)));
         for (let i = 1; i <= q.length; i++) {
           box.value = q.slice(0, i);
+          this.autosize();
           await new Promise((r) => setTimeout(r, per));
         }
         await new Promise((r) => setTimeout(r, 240));
       }
       box.value = '';
+      this.autosize();
       return this.ask(q);
     }
 
@@ -1150,11 +1179,27 @@
       });
     }
 
+    /** Grow the composer to fit what has been typed, up to the CSS cap.
+     *  Height must be cleared before reading scrollHeight — otherwise the
+     *  box can only ever grow, never shrink back when text is deleted. */
+    autosize() {
+      const box = this.$('input');
+      if (!box) return;
+      /* Empty goes back to the natural single row. Measuring an empty box
+         sizes it to the *placeholder*, so a long one — the demo's "Click to
+         run step 3 of 8…" — would leave the composer two lines tall with
+         nothing typed in it, eating the space this is meant to save. */
+      if (!box.value) { box.style.height = ''; return; }
+      box.style.height = 'auto';
+      box.style.height = box.scrollHeight + 'px';
+    }
+
     submit() {
       const input = this.$('input');
       const q = input.value.trim();
       if (!q || this.busy) return;
       input.value = '';
+      this.autosize();
       this.ask(q);
     }
 

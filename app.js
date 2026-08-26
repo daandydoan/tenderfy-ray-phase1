@@ -242,7 +242,11 @@
   /* The composer says what clicking it will do. */
   global.rayComposerHint = function (panel) {
     return inDemo(panel) && !demoBusy
-      ? `Click to run step ${demoStep + 1} of ${DEMO.length} — ${DEMO[demoStep].label}`
+      /* Just the counter. The composer is one row until something is typed,
+         and 248px of it fits ~24 characters — every step's label overflowed.
+         The label is not lost: it is the Demo button's tooltip, and the toast
+         each step raises names the requirement as it runs. */
+      ? `Click to run step ${demoStep + 1} of ${DEMO.length}`
       : null;
   };
 
