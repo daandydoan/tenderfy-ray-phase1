@@ -731,8 +731,11 @@ html.ray-light .ray-panel{
 /* Bare glyphs, not buttons. Boxed, they read as two more controls competing
    with Send for attention; the composer only needs one thing that looks
    pressable. The hit area stays 30px — the outline goes, not the target. */
-.ray-attach{width:30px;height:30px;border-radius:8px;border:none;background:none;
-            cursor:pointer;flex:none;display:flex;align-items:center;
+/* padding:0 is not decorative. Dropping the border left the button carrying
+   the UA's default 1px 6px, which squashed the glyph off-centre inside its
+   own box. Sized to match Send exactly so all three sit on one baseline. */
+.ray-attach{width:32px;height:32px;border-radius:10px;border:none;background:none;
+            padding:0;cursor:pointer;flex:none;display:flex;align-items:center;
             justify-content:center;color:var(--gray)}
 .ray-attach:hover{background:var(--row);color:var(--teal)}
 .ray-attach .ms{font-size:20px}
@@ -779,15 +782,18 @@ html.ray-light .ray-panel{
 .ray-sec{padding:8px 16px 10px}
 .ray-seclabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;
               color:var(--light);margin-bottom:5px}
-.ray-composer{display:flex;gap:8px;align-items:flex-end;border-radius:15px;
-              padding:7px 7px 7px 14px;transition:border-color .15s}
+.ray-composer{display:flex;gap:6px;align-items:flex-end;border-radius:15px;
+              padding:7px;transition:border-color .15s}
 /* height is written inline by autosize(); the cap lives here so the box
    stops growing at about six lines and starts scrolling instead. Two lines
    fit before it ever needs to grow. */
 .ray-composer textarea{flex:1;min-width:0;border:none;padding:6px 2px;font:inherit;font-size:13.5px;
                        resize:none;min-height:22px;max-height:132px;overflow-y:auto;outline:none;
                        line-height:1.5;background:none}
-.ray-send{background:var(--teal);color:#fff;border:none;border-radius:11px;width:32px;height:32px;
+/* The text's gap from the icons either side of it, rather than the composer
+   padding doing it — that only worked while the icons were on one side. */
+.ray-composer textarea{padding:6px 6px}
+.ray-send{background:var(--teal);color:#fff;border:none;border-radius:10px;width:32px;height:32px;
           padding:0;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
 .ray-send .ms{font-size:18px}
 .ray-send:hover{background:var(--cta-dark)}
