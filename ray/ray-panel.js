@@ -297,15 +297,6 @@
         const up = e.target.closest('[data-ray-prompt]');
         if (up) { this.usePrompt(up.getAttribute('data-ray-prompt')); return; }
         if (e.target.closest('[data-ray-prompt-save]')) { this.savePrompt(); return; }
-        const pd = e.target.closest('[data-ray-prompt-del]');
-        if (pd) {
-          try {
-            global.RayPermissions.Repositories.promptLibrary
-              .remove(service.guard, pd.getAttribute('data-ray-prompt-del'));
-            this.paintPrompts();
-          } catch (err) { toast(err.reason || err.message); }
-          return;
-        }
         const ad = e.target.closest('[data-ray-attachdoc]');
         if (ad) { this.attachDoc(ad.getAttribute('data-ray-attachdoc')); return; }
         if (e.target.closest('[data-ray-upload]')) { this.$('file').click(); return; }
@@ -703,6 +694,9 @@
       const canWrite = guard.scopes.indexOf('prompt_library.write') >= 0;
       const draft = (this.$('input').value || '').trim();
 
+      /* Pick one, or save what you have typed. Nothing here removes a prompt:
+         the library is managed on its own screen, and a destructive control
+         one mis-click from the send button is not worth the convenience. */
       box.innerHTML = `<div class="ray-pickhead">Saved prompts</div>`
         + (rows.length ? rows.map((r) => `
             <div class="ray-promptrow">
@@ -710,8 +704,6 @@
                 <span class="ms">bookmark</span>
                 <span class="t">${esc(r.label)}<span class="s">${esc(r.text)}</span></span>
               </button>
-              ${canWrite ? `<button class="ray-promptx" data-ray-prompt-del="${r.id}"
-                  title="Remove"><span class="ms">close</span></button>` : ''}
             </div>`).join('')
           : '<div class="ray-pickempty">No saved prompts yet.</div>')
         + (canWrite

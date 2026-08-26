@@ -183,6 +183,10 @@
         F().PROMPT_LIBRARY.push(rec);
         return rec;
       },
+      /* Nothing in the rail calls this: the picker only selects and adds,
+         because the library is managed on its own screen. It stays because
+         that screen is the caller — the contract is the point, not the UI
+         this prototype happens to render. */
       remove(guard, id) {
         guard.assertScope('prompt_library.write', 'prompt_library');
         const rows = F().PROMPT_LIBRARY;
