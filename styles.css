@@ -650,7 +650,12 @@ html.ray-light .ray-panel{
 /* Space below the chip, not above it — the chip was sitting flush against the
    composer's top edge. Collapses when there is no chip, so an empty context
    area reserves nothing. */
-.ray-ctx{padding:0 0 7px}
+/* A tender can carry a dozen documents. Wrapped without a ceiling the band
+   grew taller than the answer it sat under, so it holds two rows and scrolls
+   — every chip stays reachable, and the conversation keeps its height. */
+.ray-ctx{padding:0 0 7px;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;
+         max-height:63px;overflow-y:auto}
+.ray-ctxnone{font-size:11.5px;color:var(--light)}
 .ray-ctx:empty{display:none}
 .ray-ctxchip{display:inline-flex;align-items:center;gap:5px;max-width:100%;
              background:var(--st-green-bg);border-radius:100px;padding:5px 5px 5px 10px;
@@ -950,6 +955,7 @@ html:not(.ray-light) .ray-fab{border-color:rgba(255,255,255,.16)}
 .ray-attrow .ray-attcard{background:var(--r-sunk)}
 .ray-attach{color:var(--r-tx-3)}
 .ray-attach:hover{background:var(--r-raise);color:var(--r-accent)}
+.ray-ctxnone{color:var(--r-tx-3)}
 .ray-attpick{background:var(--r-sunk);border:1px solid var(--r-line)}
 .ray-attpick .ray-pickhead{color:var(--r-tx-3)}
 .ray-attpick .ray-pickrow{color:var(--r-tx)}

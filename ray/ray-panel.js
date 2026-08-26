@@ -82,6 +82,11 @@
       this.attachments = [];         // files pinned to the next message
       this.attachOpen = false;
       this.promptsOpen = false;
+      /* Which of the platform's documents Ray is pointed at. null means "not
+         chosen" — the tender's own documents stand in until the user edits
+         the list, so the band is right before anyone has touched it. */
+      this.refDocs = null;
+      this.refPickOpen = false;
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
       this.confirmDelete = null;     // session id awaiting confirmation
@@ -188,6 +193,7 @@
             <div class="ray-composerwrap">
               <div class="ray-attpick" data-ray="attpick"></div>
               <div class="ray-attpick" data-ray="prompts"></div>
+              <div class="ray-attpick" data-ray="refpick"></div>
               <form class="ray-composer" data-ray="composer">
                 <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
                   <span class="ms">add</span></button>
@@ -275,12 +281,12 @@
         const tt = e.target.closest('[data-ray-trace-toggle]');
         if (tt) { this.traceOpen = !this.traceOpen; this.paintTrace(); return; }
         if (e.target.closest('[data-ray-attach]')) {
-          this.attachOpen = !this.attachOpen; this.promptsOpen = false;
-          this.paintAttachments(); this.paintPrompts(); return;
+          this.attachOpen = !this.attachOpen; this.promptsOpen = this.refPickOpen = false;
+          this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
         }
         if (e.target.closest('[data-ray-prompts]')) {
-          this.promptsOpen = !this.promptsOpen; this.attachOpen = false;
-          this.paintAttachments(); this.paintPrompts(); return;
+          this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
+          this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
         }
         const up = e.target.closest('[data-ray-prompt]');
         if (up) { this.usePrompt(up.getAttribute('data-ray-prompt')); return; }
@@ -295,14 +301,24 @@
           this.paintAttachments();
           return;
         }
-        if (e.target.closest('[data-ray-ctx-off]')) {
-          this.session.contextOff = true;
+        const roff = e.target.closest('[data-ray-ref-off]');
+        if (roff) {
+          const id = roff.getAttribute('data-ray-ref-off');
+          this.refDocs = this.referenceDocs().map((d) => d.id).filter((x) => x !== id);
           this.paintContext();
           return;
         }
-        if (e.target.closest('[data-ray-ctx-on]')) {
-          this.session.contextOff = false;
+        const ron = e.target.closest('[data-ray-ref-on]');
+        if (ron) {
+          this.refDocs = this.referenceDocs().map((d) => d.id)
+            .concat(ron.getAttribute('data-ray-ref-on'));
           this.paintContext();
+          return;
+        }
+        if (e.target.closest('[data-ray-refpick]')) {
+          this.refPickOpen = !this.refPickOpen;
+          this.attachOpen = this.promptsOpen = false;
+          this.paintAttachments(); this.paintPrompts(); this.paintRefPick();
           return;
         }
         if (e.target.closest('[data-ray-list]')) { this.setView('list'); return; }
@@ -566,9 +582,17 @@
        looking at. The conversation is untouched — no rebind, no repaint of
        history, no lost scrollback. */
     focus(surfaceId, context) {
+      const wasTender = this.context && this.context.tenderId;
       this.surfaceId = surfaceId || this.surfaceId;
       this.context = context || {};
       if (!this.context.crumb) this.context.crumb = this.pageCrumb;
+      /* A hand-picked reference list belongs to the tender it was picked
+         from. Moving to another one starts from that tender's documents
+         rather than carrying over ids that are no longer readable. */
+      if (this.context.tenderId !== wasTender) {
+        this.refDocs = null;
+        this.refPickOpen = false;
+      }
       /* Navigating changes what Ray is looking at, never which session you are
          in — the same way a Figma chat survives moving around a file. */
       this.session.setFocus(this.surfaceId, this.context);
@@ -577,9 +601,10 @@
     }
 
     /* ── Attachments ─────────────────────────────────────────────────────
-       Rendered below the composer. "Reference" is the page or field Ray is
-       pointed at; attachments are files sent with one message. Two different
-       things, so they do not share a row.
+       Rendered below the composer. References are the platform documents Ray
+       may read for the whole conversation; attachments are files sent with
+       one message and read first. Two different things, so they do not share
+       a row.
        A message can carry documents. The picker offers the tender's own files,
        guard-filtered — a document you may not read is never offered, so the
        permission model holds at the point of attachment rather than at the
@@ -741,57 +766,76 @@
      *  it. The root comes from the page's own breadcrumb so the chip and the
      *  header agree; the leaves come from the context, because they are the
      *  specific thing — the tender, the open document, the field. */
-    contextLabel() {
-      const c = this.context || {};
-      const Repos = global.RayPermissions.Repositories;
-      const named = (fn) => { try { return fn(); } catch (e) { return null; } };
+    /* ── References ──────────────────────────────────────────────────────
+       What Ray is pointed at is a set of the platform's own documents, not
+       the screen you happen to be on. A page tells you where you are; it
+       does not tell Ray what to read. Removing a chip narrows the card, so
+       the band is a control rather than a status line.                     */
+    availableDocs() {
+      try {
+        return global.RayPermissions.Repositories.documents
+          .list(service.guard, this.context.tenderId || null);
+      } catch (e) { return []; }
+    }
 
-      const crumbs = String(c.crumb || '').split('•').map((x) => x.trim()).filter(Boolean);
-      const trail = crumbs.length ? [crumbs[0]] : [];
-      let icon = 'web_asset';
+    referenceDocs() {
+      const all = this.availableDocs();
+      if (this.refDocs === null) return all;         // untouched: everything readable
+      const want = this.refDocs;
+      return all.filter((d) => want.indexOf(d.id) >= 0);
+    }
 
-      const tender = c.tenderId && named(() => Repos.tenders.get(service.guard, c.tenderId));
-      if (tender) { trail.push(tender.name); icon = 'domain'; }
+    /* The card names exactly what the chips show — otherwise the band would
+       be decoration and Ray would still read what the user removed. */
+    syncReferences() {
+      if (this.session) this.session.contextData.documents = this.referenceDocs();
+    }
 
-      const doc = c.documentId && named(() => Repos.documents.get(service.guard, c.documentId));
-      if (doc) { trail.push(doc.name); icon = 'description'; }
-
-      if (this.surfaceId === 'edit-dialog' && c.field) { trail.push(c.field); icon = 'edit_note'; }
-
-      /* Nothing specific to point at — fall back to the rest of the page's own
-         breadcrumb so the chip still says something true. */
-      if (trail.length <= 1 && crumbs.length > 1) trail.push.apply(trail, crumbs.slice(1));
-      if (!trail.length && c.pageTitle) trail.push(c.pageTitle);
-      if (!trail.length) return null;
-
-      return { icon, trail, text: trail[trail.length - 1] };
+    static docIcon(kind) {
+      return kind === 'xlsx' ? 'table_chart'
+           : kind === 'docx' ? 'description' : 'picture_as_pdf';
     }
 
     paintContext() {
       const box = this.$('ctx');
-      const label = this.contextLabel();
-      /* The section header only earns its place when there is a chip under it. */
-      this.$('ctxlabel').style.display = label ? '' : 'none';
-      if (!label) { box.innerHTML = ''; return; }
-      const off = this.session && this.session.contextOff;
-      const trail = label.trail
-        .map((seg, i) => (i ? '<span class="sep">›</span>' : '')
-          + `<span class="seg">${esc(seg)}</span>`).join('');
-      box.innerHTML = off
-        ? `<button class="ray-ctxadd" data-ray-ctx-on>
-             <span class="ms">add</span>Add ${esc(label.text)} as reference</button>`
-        : `<span class="ray-ctxchip" title="Ray is answering about ${esc(label.trail.join(' › '))}. Dismiss to ask something general.">
-             <span class="ms">${label.icon}</span>
-             <span class="t">${trail}</span>
-             <button class="ray-ctxx" data-ray-ctx-off title="Stop using this as a reference">
-               <span class="ms">close</span></button>
-           </span>`;
+      const docs = this.referenceDocs();
+      const spare = this.availableDocs().length - docs.length;
+      this.syncReferences();
+      this.$('ctxlabel').style.display = '';
+
+      const chips = docs.map((d) => `
+        <span class="ray-ctxchip" title="${esc(d.name)} — ${d.pages} pages${d.scanned ? ', scanned' : ''}">
+          <span class="ms">${Panel.docIcon(d.kind)}</span>
+          <span class="t"><span class="seg">${esc(d.name)}</span></span>
+          <button class="ray-ctxx" data-ray-ref-off="${d.id}" title="Stop referencing this document">
+            <span class="ms">close</span></button>
+        </span>`).join('');
+
+      const add = (spare > 0 || !docs.length)
+        ? `<button class="ray-ctxadd" data-ray-refpick>
+             <span class="ms">add</span>${docs.length ? 'Add document' : 'Add a document as reference'}</button>`
+        : '';
+
+      box.innerHTML = chips + add
+        || '<span class="ray-ctxnone">No documents on this tender you can read.</span>';
+      this.paintRefPick();
     }
 
-    /* ── Credits ─────────────────────────────────────────────────────────
-       Silent until the month's allowance is running down. No per-answer token
-       count ever reaches this surface — the sync-up was explicit that metering
-       every reply discourages people from using Ray at all.                */
+    paintRefPick() {
+      const pick = this.$('refpick');
+      if (!pick) return;
+      if (!this.refPickOpen) { pick.innerHTML = ''; return; }
+      const shown = this.referenceDocs().map((d) => d.id);
+      const rows = this.availableDocs().filter((d) => shown.indexOf(d.id) === -1);
+      pick.innerHTML = `<div class="ray-pickhead">Documents on this tender</div>`
+        + (rows.length ? rows.map((d) => `
+            <button class="ray-pickrow" data-ray-ref-on="${d.id}">
+              <span class="ms">${Panel.docIcon(d.kind)}</span>
+              <span class="t">${esc(d.name)}<span class="s">${d.pages} pages${d.scanned ? ' · scanned' : ''}</span></span>
+            </button>`).join('')
+          : '<div class="ray-pickempty">Everything you can read here is already referenced.</div>');
+    }
+
     paintCredits() {
       const box = this.$('credit');
       const c = service.credits();

@@ -230,6 +230,32 @@ needs one, because every exhibit now carries a block — the card explaining the
 feature sat inside the feature it was explaining. The explanation moved into
 the first exhibit's lead-in instead.
 
+## References are documents, not screens
+
+The band above the composer names **the platform's own documents** — the files
+already uploaded against the tender — rather than the page you happen to be
+looking at. A breadcrumb tells you where you are; it does not tell Ray what to
+read, and the two were being conflated.
+
+`referenceDocs()` starts from everything the guard lets this user read on the
+tender in context, and `syncReferences()` writes exactly that list into
+`session.contextData.documents`. `buildCard()` already preferred a supplied
+list over its own lookup, so removing a chip genuinely narrows what Ray is
+told about — the band is a control, not a status line. Verified by reading
+`DOCUMENTS:` straight off the card as chips are removed and added back.
+
+One honest limit: this narrows what Ray is **told**, not what he is **allowed**.
+The guard is still the thing that decides reachability, and a document removed
+from the band remains readable if the model asks for it by name. Making the
+reference list a hard filter would mean threading it through `PermissionGuard`,
+which is the right shape but a bigger change than the band itself.
+
+`refDocs` is `null` until the user edits the list, so the default is "everything
+readable here" and the band is correct before anyone has touched it. Changing
+tender resets it, because a hand-picked list belongs to the tender it was
+picked from. The band holds two rows and scrolls — a tender with a dozen files
+would otherwise push the conversation off the panel.
+
 ## The composer
 
 It is a `textarea`, not an input: Enter sends, Shift+Enter breaks a line, and
