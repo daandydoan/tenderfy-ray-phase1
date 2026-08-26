@@ -215,6 +215,21 @@ rail was made dark on purpose and carries a light/dark switch for demos —
 having the dialog disagree with the panel it becomes would be worse than having
 it disagree with the screenshot.
 
+## Every answer shows its work
+
+Each response carries a thinking block, and it is **collapsed by default**:
+`Thought for 2.6s · 2 steps`, one line, click to open. `.ray-think` renders
+without `.open`, and `.ray-think:not(.working):not(.open) .ray-steps` is what
+hides the steps — so a restored conversation comes back folded exactly as it
+was left, with the steps still in the DOM rather than thrown away. While a turn
+is live the block carries `.working` and stays open so the steps can be watched
+arriving; removing that class at the end is what folds it.
+
+The catalogue used to demonstrate this with an exhibit of its own. It no longer
+needs one, because every exhibit now carries a block — the card explaining the
+feature sat inside the feature it was explaining. The explanation moved into
+the first exhibit's lead-in instead.
+
 ## The composer
 
 It is a `textarea`, not an input: Enter sends, Shift+Enter breaks a line, and
@@ -307,7 +322,9 @@ The prototype seeds exactly two, doing different jobs:
   with the block it demonstrates and each block explains itself before showing
   itself, so the project reads as documentation of Ray's vocabulary. Its
   content is generic — *Document name.pdf*, *Item A* — so it reads as a
-  component sheet rather than a second worked example. The
+  component sheet rather than a second worked example. Nine blocks: Short
+  answer, Long answer, Table, Badges, Block, CTA Card, Attachments, No
+  permission, Quotes. The
   explanatory lead-in is `.ray-what`: rule-marked and muted, so it never reads
   as part of the block it describes.
 

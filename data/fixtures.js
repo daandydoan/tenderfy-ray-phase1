@@ -205,15 +205,27 @@
      staged exchange about a tender.                                          */
   const UI_CATALOGUE = [
     { role: 'user', text: 'Short answer' },
-    { role: 'assistant',
+    { role: 'assistant', ms: 1800,
+      steps: [
+        { name: 'search_document', summary: 'find the passage before reading it', ok: true },
+        { name: 'read_pages', summary: 'one page, the one the search pointed at', ok: true },
+      ],
       text: '<div class="ray-what">A fact lifted straight from a document. One or two '
         + 'sentences, then a citation chip naming the file and page. This is most of '
-        + 'what Ray returns.</div>'
+        + 'what Ray returns.<br><br>Every answer carries the folded line above it: '
+        + 'while Ray works the steps arrive live, and once the answer is ready the '
+        + 'block collapses to one line. Click it to see the steps — they are kept, '
+        + 'including any the permission guard refused.</div>'
         + 'The answer sits here, in a sentence or two, with the source named underneath.'
         + '\n<span class="ray-cite">Document name.pdf p.12</span>' },
 
     { role: 'user', text: 'Long answer' },
-    { role: 'assistant',
+    { role: 'assistant', ms: 4100,
+      steps: [
+        { name: 'list_documents', summary: 'what is readable on this record', ok: true },
+        { name: 'outline_document', summary: 'sections first, so the read can be narrowed', ok: true },
+        { name: 'read_pages', summary: 'only the pages that carry the answer', ok: true },
+      ],
       text: '<div class="ray-what">Used for reviews and summaries. A bold lead-in, '
         + 'bulleted findings each carrying their own citation, and a closing note in '
         + 'grey saying what it cost to produce — how much was read, not how many '
@@ -230,7 +242,11 @@
         + 'avoided opening.</span>' },
 
     { role: 'user', text: 'Table' },
-    { role: 'assistant',
+    { role: 'assistant', ms: 2600,
+      steps: [
+        { name: 'list_documents', summary: 'what is readable on this record', ok: true },
+        { name: 'plan_document_review', summary: 'a strategy chosen per document', ok: true },
+      ],
       text: '<div class="ray-what">For comparing things — documents against strategies, '
         + 'questions against saved answers. Numeric columns never wrap; the whole table '
         + 'scrolls sideways inside the rail rather than squeezing.</div>'
@@ -248,7 +264,11 @@
         + '</tbody></table>' },
 
     { role: 'user', text: 'Badges' },
-    { role: 'assistant',
+    { role: 'assistant', ms: 2300,
+      steps: [
+        { name: 'list_documents', summary: 'what is readable on this record', ok: true },
+        { name: 'plan_document_review', summary: 'a strategy chosen per document', ok: true },
+      ],
       text: '<div class="ray-what">Small pills that classify a row. Reading strategies '
         + 'use one set; saved-answer coverage uses another. They carry meaning, so the '
         + 'same colour always means the same kind of thing.</div>'
@@ -261,8 +281,13 @@
         + '<span class="ray-match">Match found</span> '
         + '<span class="ray-gap">No match</span>' },
 
-    { role: 'user', text: 'Draft block' },
-    { role: 'assistant',
+    { role: 'user', text: 'Block' },
+    { role: 'assistant', ms: 3200,
+      steps: [
+        { name: 'search_response_library', summary: 'check for something reusable first', ok: true },
+        { name: 'search_document', summary: 'gather what the draft should be built on', ok: true },
+        { name: 'generate_content', summary: 'drafted to the field’s word limit', ok: true },
+      ],
       text: '<div class="ray-what">Content Ray has written for a field, set apart from '
         + 'the surrounding prose so it is obvious what would be inserted. The actions '
         + 'below it act on the page, not the conversation.</div>'
@@ -273,8 +298,11 @@
         + '<button class="ray-act" data-ray-action="insert">Insert into the field</button> '
         + '<button class="ray-act ghost" data-ray-action="library">Save for reuse</button>' },
 
-    { role: 'user', text: 'Saved answer card' },
-    { role: 'assistant',
+    { role: 'user', text: 'CTA Card' },
+    { role: 'assistant', ms: 1400,
+      steps: [
+        { name: 'search_response_library', summary: 'one reusable answer, scored', ok: true },
+      ],
       text: '<div class="ray-what">Something already written and worth reusing, with the '
         + 'metadata that decides whether to reuse it: category, length, and how often it '
         + 'has worked.</div>'
@@ -289,7 +317,11 @@
         { id: 'd-scope', name: 'Document name.docx', kind: 'docx', pages: 11 },
         { id: 'd-upgeo', name: 'Scanned upload.pdf', kind: 'pdf', pages: 18 },
       ] },
-    { role: 'assistant',
+    { role: 'assistant', ms: 2100,
+      steps: [
+        { name: 'search_document', summary: 'search inside what was handed over', ok: true },
+        { name: 'read_pages', summary: 'only the pages that matched', ok: true },
+      ],
       text: '<div class="ray-what">Documents sent with a message appear as cards beneath '
         + 'it — icon tiled by file type, name, and what it is. The same card shows below '
         + 'the composer before you send. Attached files are read first, ahead of '
@@ -297,8 +329,12 @@
         + 'Ray answers from the attachments and says so, rather than searching '
         + 'everything and hoping it lands on the same file.' },
 
-    { role: 'user', text: 'Permission refusal' },
-    { role: 'assistant',
+    { role: 'user', text: 'No permission' },
+    { role: 'assistant', ms: 900,
+      steps: [
+        { name: 'list_tenders', summary: 'what is in scope for this user', ok: true },
+        { name: 'get_tender', summary: 'a step the guard refused — shown in red', ok: false },
+      ],
       text: '<div class="ray-what">When the guard blocks a fetch, Ray stops and says so. '
         + 'It never speculates about what it could not open, and never implies the item '
         + 'does not exist.</div>'
@@ -307,8 +343,11 @@
         + 'because one item is outside your access — the reason is stated plainly. Ask an '
         + 'administrator if you need it.</span>' },
 
-    { role: 'user', text: 'Retrieved messages' },
-    { role: 'assistant',
+    { role: 'user', text: 'Quotes' },
+    { role: 'assistant', ms: 1200,
+      steps: [
+        { name: 'search_conversation', summary: 'earlier messages, retrieved not resent', ok: true },
+      ],
       text: '<div class="ray-what">When Ray fetches older turns that are no longer in '
         + 'context, it quotes them rather than paraphrasing — so you can see exactly what '
         + 'was said, and that it was retrieved rather than remembered.</div>'
@@ -317,20 +356,6 @@
         + '\n<span class="ray-note">Retrieved 2 messages from storage — they were not '
         + 'in context.</span>' },
 
-    { role: 'user', text: 'Thinking block' },
-    { role: 'assistant', ms: 3700,
-      steps: [
-        { name: 'list_documents', summary: 'what each step did, in one line', ok: true },
-        { name: 'plan_document_review', summary: 'a strategy chosen per document', ok: true },
-        { name: 'search_document', summary: 'find the passages before reading them', ok: true },
-        { name: 'read_pages', summary: 'only the pages the search pointed at', ok: true },
-        { name: 'read_pages', summary: 'a step the guard refused — shown in red', ok: false },
-      ],
-      text: '<div class="ray-what">Every answer carries one. While Ray works the steps '
-        + 'arrive live; when the answer is ready the block folds to a single line. Click '
-        + 'the line above to open it — the steps are kept, including any the permission '
-        + 'guard refused.</div>'
-        + 'The answer itself then follows, and the reasoning stays out of its way.' },
   ];
 
   global.RayFixtures = { USERS, TENDERS, DOCUMENTS, PAGE_TEXT, RESPONSE_LIBRARY,

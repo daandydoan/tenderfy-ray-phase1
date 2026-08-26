@@ -311,7 +311,7 @@
      off THAT rather than off a list of ids in the flag — an older flag has no
      ids to offer, and cleaning up by "what did I make" is the only version of
      this that cannot leave duplicates behind.                               */
-  const SEED_VERSION = 12;
+  const SEED_VERSION = 13;
 
   function seedDemo(service) {
     const uid = service.user.id;
