@@ -260,35 +260,38 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
-## The offer card
+## Setup is a dialog, not a card in the session
 
-Picking a tender is the moment someone wants something done with it, so Ray
-says what he can do rather than waiting to be asked. The card appears at the
-foot of the conversation when a tender is referenced, and it is the live app's
-**two modals collapsed into one non-blocking thing**: the Information modal that
-introduced Ray, and the "5 documents are available — are you sure?" confirm.
+Ray's session is a **record of a conversation**. A control that was only true
+once — a document picker, a cost estimate, a confirm button — does not belong
+in something you scroll back through, and an earlier version that dropped an
+offer card into the rail had exactly that smell.
 
-It carries what those carried, and more:
+So setup moved out. The tender card's **three dots** stay where people already
+look for them, and carry the live app's menu: AI Review with its ⓘ, View Time,
+Add Reminder, Delete Tender. Two dialogs hang off it — **Information**, which is
+Ray introducing himself, and **AI Document Review**, which is the confirm.
 
-* **What will be read** — taken from the reference chips, not a static count.
-  Drop a document and the card re-prices in place. The modal could only offer
-  yes or no; this lets you review four of five.
-* **What it costs** — a credit estimate that moves with the choice, shown
-  *before* the decision instead of after it.
-* **The one choice that changes both** — Deep review, in the open rather than
-  inside a modal, with the trade-off spelled out either way.
+The review dialog keeps the live copy and adds the thing the modal never had:
+the documents themselves, tickable, with the estimate re-pricing as you change
+them. Five documents at 198 pages is ~17 credits; untick the 148-page RFT and
+it is ~4. Deep Review sits in the same dialog with its trade-off stated, and
+moves the estimate to ~79. A yes/no became an itemised, priced choice without
+leaving the shape people recognise.
 
-It lives in its own slot below `.ray-body`, not inside it: an offer is not
-something Ray said, and repainting history must not wipe it. Dismissing sets
-`offerOff` for that tender, and pointing at a different tender clears it —
-a new tender is a fresh offer. Acting on it dismisses it too, because the
-answer that follows supersedes it.
+## While it runs
 
-The credit figures are **mocked** (`pages / 12`, or `pages / 2.5` for deep) and
-deliberately visible. The point of the card is that cost is legible before the
-click; the arithmetic behind the number is the platform's to supply.
+The review shows a **floating dialog at the bottom of the page**, not a card in
+the rail. That placement is the argument: the promise is *"carry on with
+something else"*, and the rail can be closed — a job should not appear to
+cancel because a panel did. It carries a spinner, what is being reviewed, and
+Stop.
 
-## References are documents, not screens
+`rayProgress(opts)` shows it, `rayProgress(null)` clears it. It is app-level
+rather than panel-level for the same reason, and the spinner slows to a crawl
+under `prefers-reduced-motion` rather than stopping, so it still reads as busy.
+
+## References are documents, not screens## References are documents, not screens
 
 The band above the composer names **the platform's own documents** — the files
 already uploaded against the tender — rather than the page you happen to be

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="stylesheet" href="../styles.css?v=018b2f89">
+<link rel="stylesheet" href="../styles.css?v=df19db54">
 </head>
 <body>
 <div id="screen" style="display:none">
@@ -61,7 +61,7 @@
 <script src="../ray/ray-provider.js?v=95246751"></script>
 <script src="../ray/ray-surfaces.js?v=58d64b1d"></script>
 <script src="../ray/ray-core.js?v=c97f2ec3"></script>
-<script src="../ray/ray-panel.js?v=757710b3"></script>
+<script src="../ray/ray-panel.js?v=7510ad8d"></script>
 <script>window.PAGE = {"nav": "tenders", "crumb": "Tenders", "ray": {"surface": "page", "context": {"pageTitle": "All tenders"}}};</script>
 <script>
 const CONTACT = {
@@ -112,7 +112,7 @@ window.onPageReady = function(service, user){
         <input type="checkbox" class="chk" onclick="event.stopPropagation();tnTick(this,'${t.id}')">
         <div class="tc-right">
           ${OWNER[t.id]?`<span class="tc-chip"><span class="ms">person</span>${OWNER[t.id]}</span>`:''}
-          <span class="ms kebab" data-toast="Tender options" onclick="event.stopPropagation()">more_vert</span>
+          <span class="ms kebab" onclick="event.stopPropagation();tnMenu(this,'${t.id}')">more_vert</span>
         </div>
       </div>
       <div class="tc-k">Name</div><div class="tc-v">${esc(t.name)}</div>
@@ -130,7 +130,117 @@ window.onPageReady = function(service, user){
     `${all-tenders.length} of ${all} tenders are filtered out for <b>${user.role}</b> — by business `
     + `tenancy or by assignment. Ray receives the same filtered list.`;
 };
+
+/* esc is scoped inside onPageReady, so this block needs its own. */
+const dlgEsc = s => String(s == null ? '' : s)
+  .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ── The tender menu ───────────────────────────────────────────────────
+   The three dots stay where people already look for them. What changed is
+   the destination: AI Review opens a dialog rather than dropping a card
+   into Ray's session, because setup is not conversation. */
+function tnMenu(el, id){
+  document.querySelectorAll('.tn-menu').forEach(m=>m.remove());
+  const card = el.closest('.tn-card');
+  const m = document.createElement('div');
+  m.className = 'tn-menu';
+  m.innerHTML = `
+    <button class="tn-mi ai" onclick="event.stopPropagation();tnCloseMenu();tnReview('${id}')">
+      <span class="ms">auto_awesome</span>AI Review
+      <span class="ms info" onclick="event.stopPropagation();tnCloseMenu();tnInfo()"
+            title="What does this do?">info</span></button>
+    <button class="tn-mi" onclick="event.stopPropagation();tnCloseMenu();RayPanel.toast('View time — mocked')">View Time</button>
+    <button class="tn-mi teal" onclick="event.stopPropagation();tnCloseMenu();RayPanel.toast('Add reminder — mocked')">Add Reminder</button>
+    <button class="tn-mi red" onclick="event.stopPropagation();tnCloseMenu();RayPanel.toast('Delete tender — mocked')">Delete Tender</button>`;
+  card.querySelector('.tc-right').appendChild(m);
+  setTimeout(()=>document.addEventListener('click', tnCloseMenu, {once:true}), 0);
+}
+function tnCloseMenu(){ document.querySelectorAll('.tn-menu').forEach(m=>m.remove()); }
+
+function tnInfo(){
+  rayDlg('Information', `
+    <div class="dlg-mid">
+      <div class="dlg-ic"><span class="ms">info</span></div>
+      <p>Hey, I am Ray — your Tenderfy Co-Pilot. I can help you review tender documents
+         and extract key information. Use the three dots on a tender to review its
+         documents. I will automatically pull out questions and answers to start building
+         your Response Library — making it easier to reuse quality content across future
+         bids.</p>
+    </div>
+    <div class="dlg-acts">
+      <button class="btn pri" data-dlg-close>Ok, Got It</button>
+    </div>`);
+}
+
+/* Deep review changes what gets read and what it costs, so the dialog shows
+   both and re-prices as documents are unticked. */
+function tnReview(id){
+  const g = window.ray.guard, R = RayPermissions.Repositories;
+  let docs = []; try { docs = R.documents.list(g, id); } catch(e){ docs = []; }
+  const t = (()=>{ try { return R.tenders.get(g, id); } catch(e){ return null; } })();
+  if (!docs.length) { RayPanel.toast('No documents on this tender you can read'); return; }
+  const picked = new Set(docs.map(d=>d.id));
+  let deep = false;
+
+  const body = rayDlg('AI Document Review', '<div id="rvBody"></div>');
+  const paint = () => {
+    const on = docs.filter(d=>picked.has(d.id));
+    const pages = on.reduce((n,d)=>n+(d.pages||0),0);
+    const cost = Math.max(1, Math.round(pages / (deep ? 2.5 : 12)));
+    body.querySelector('#rvBody').innerHTML = `
+      <p>${on.length} document${on.length===1?'':'s'} ${on.length===1?'is':'are'} available for
+         <b>${dlgEsc(t?t.name:'this tender')}</b>. Are you sure you want to review
+         ${on.length===1?'it':'these documents'}?</p>
+      <div class="dlg-docs">${docs.map(d=>`
+        <label class="dlg-doc">
+          <input type="checkbox" data-rv-doc="${d.id}" ${picked.has(d.id)?'checked':''}>
+          <span class="n">${dlgEsc(d.name)}</span>
+          <span class="p">${d.pages}p${d.scanned?' · scanned':''}</span>
+        </label>`).join('')}</div>
+      <div class="dlg-deep">
+        <p>Deep Review consumes more AI credits but provides a comprehensive evaluation of
+           the document, extracting more detailed responses and insights.</p>
+        <label><input type="checkbox" id="rvDeep" ${deep?'checked':''}> Deep Review</label>
+      </div>
+      <div class="dlg-cost">Estimated cost: <b>~${cost} credit${cost===1?'':'s'}</b>
+        · ${pages} pages selected</div>
+      <div class="dlg-acts">
+        <button class="btn" data-dlg-close>Cancel</button>
+        <button class="btn pri" id="rvGo" ${on.length?'':'disabled'}>Review Documents</button>
+      </div>`;
+    body.querySelectorAll('[data-rv-doc]').forEach(b=>b.onchange=()=>{
+      const i=b.getAttribute('data-rv-doc');
+      b.checked?picked.add(i):picked.delete(i); paint();
+    });
+    body.querySelector('#rvDeep').onchange = (e)=>{ deep = e.target.checked; paint(); };
+    const go = body.querySelector('#rvGo');
+    if (go) go.onclick = ()=>{ rayDlgClose(); tnRunReview(id, docs.filter(d=>picked.has(d.id)), deep); };
+  };
+  paint();
+}
+
+/* The run itself. No backend: the floating dialog is the honest surface for
+   "this takes a while and you can leave" — the rail would hide it. */
+function tnRunReview(id, docs, deep){
+  const box = document.querySelector(`.tn-card .chk`);
+  const card = [...document.querySelectorAll('.tn-card')].find(c=>{
+    const b=c.querySelector('.chk'); return b && b.getAttribute('onclick').includes(id);
+  });
+  if (card && !card.querySelector('.chk').checked) card.querySelector('.chk').click();
+
+  let stopped = false;
+  rayProgress({
+    title: `Reviewing ${docs.length} document${docs.length===1?'':'s'}…`,
+    sub: 'Carry on with something else — Ray posts the result in the chat.',
+    onStop: ()=>{ stopped = true; rayProgress(null); RayPanel.toast('Review stopped'); },
+  });
+  RayPanel.current.show();
+  RayPanel.current.run(deep
+    ? 'Review all documents for this tender in depth'
+    : 'Review all documents for this tender'
+  ).then(()=>{ if(!stopped) rayProgress(null); });
+}
 </script>
-<script src="../app.js?v=3c15e88e"></script>
+<script src="../app.js?v=780a402d"></script>
 </body>
 </html>

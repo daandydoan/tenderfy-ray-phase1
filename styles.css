@@ -587,33 +587,80 @@ html.ray-light .ray-panel{
 .ray-act.go.wide{display:flex;width:100%;justify-content:center;margin:12px 0 0;
                  padding:10px 14px;font-size:13.5px}
 
-/* ── Ray: the offer card ───────────────────────────────────────────────
-   Shown when a tender is picked. It replaces two modals from the live app,
-   so it has to carry what they carried — what will be read, what it costs,
-   and the one choice that changes both — without stopping the page.      */
-.ray-offer{flex:none;padding:0 16px 12px}
-.ray-offer:empty{display:none}
-.ray-offercard{border:1px solid var(--lighter);border-radius:13px;padding:12px 13px;
-               background:#fff}
-.ray-offerhead{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;
-               color:var(--ink)}
-.ray-offerhead .ms{font-size:18px;color:var(--teal);flex:none}
-.ray-offerhead .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ray-offerx{border:none;background:none;padding:2px;cursor:pointer;color:var(--light);
-            border-radius:6px;display:flex;flex:none}
-.ray-offerx:hover{background:var(--row);color:var(--ink)}
-.ray-offerx .ms{font-size:16px}
-.ray-offersub{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--gray)}
-.ray-deep{display:flex;gap:9px;align-items:flex-start;margin-top:11px;padding:9px 10px;
-          border:1px solid var(--lighter);border-radius:9px;cursor:pointer}
-.ray-deep.on{border-color:var(--teal);background:var(--teal-tint)}
-.ray-deep input{margin:1px 0 0;accent-color:var(--teal);flex:none;cursor:pointer}
-.ray-deep .l{font-size:12.5px;line-height:1.45;color:var(--gray)}
-.ray-deep .l b{display:block;font-size:13px;color:var(--ink);font-weight:600}
-.ray-offeracts{display:flex;align-items:center;justify-content:space-between;gap:10px;
-               margin-top:11px}
-.ray-offercost{font-size:11.5px;color:var(--light)}
-.ray-offeracts .ray-act{margin:0}
+/* The tender card's own menu, anchored under its three dots. */
+.tc-right{position:relative}
+.tn-menu{position:absolute;top:24px;right:0;z-index:60;background:#fff;border-radius:10px;
+         box-shadow:0 12px 32px rgba(0,0,0,.2);border:1px solid var(--lighter);
+         padding:6px;min-width:186px;display:flex;flex-direction:column}
+.tn-mi{display:flex;align-items:center;gap:8px;border:none;background:none;font:inherit;
+       font-size:13.5px;text-align:left;padding:9px 10px;border-radius:7px;cursor:pointer;
+       color:var(--ink);white-space:nowrap}
+.tn-mi:hover{background:var(--row)}
+.tn-mi .ms{font-size:17px;color:var(--teal)}
+.tn-mi.ai{color:var(--teal);font-weight:600}
+.tn-mi.ai .info{margin-left:auto;font-size:16px;color:var(--light)}
+.tn-mi.ai .info:hover{color:var(--teal)}
+.tn-mi.teal{color:var(--teal)}
+.tn-mi.red{color:var(--accent)}
+
+/* ── Dialogs ───────────────────────────────────────────────────────────
+   Setup lives here rather than in the rail: Ray's session is a record of a
+   conversation, and a control that was only true once does not belong in
+   one. Slate header, white body, matching the platform's own modals.     */
+.dlg-back{position:fixed;inset:0;z-index:200;background:rgba(20,24,28,.45);
+          display:flex;align-items:center;justify-content:center;padding:24px}
+.dlg-back[hidden]{display:none}
+.dlg{background:#fff;border-radius:12px;width:min(520px,100%);max-height:86vh;
+     display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.dlg-head{background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;
+          padding:15px 18px;font-size:17px;font-weight:600;flex:none}
+.dlg-x{border:none;background:none;color:#fff;cursor:pointer;padding:2px;display:flex;
+       border-radius:6px;opacity:.9}
+.dlg-x:hover{background:rgba(255,255,255,.18);opacity:1}
+.dlg-body{padding:22px;overflow:auto;font-size:14px;line-height:1.6;color:var(--gray)}
+.dlg-body p{margin:0 0 14px}
+.dlg-body p:last-child{margin-bottom:0}
+.dlg-ic{width:44px;height:44px;border-radius:50%;background:var(--teal);color:#fff;
+        display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.dlg-ic .ms{font-size:24px}
+.dlg-mid{text-align:center}
+.dlg-acts{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
+/* The one choice that changes cost, stated rather than checked and hoped. */
+.dlg-deep{border:2px solid var(--teal-bright);border-radius:10px;padding:14px 15px;margin:16px 0 0;
+          background:var(--teal-tint)}
+.dlg-deep p{font-size:13px;margin:0 0 10px}
+.dlg-deep label{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;
+                color:var(--ink);cursor:pointer}
+.dlg-deep input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
+.dlg-docs{border:1px solid var(--lighter);border-radius:10px;margin-top:14px;overflow:hidden}
+.dlg-doc{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:13px;
+         border-bottom:1px solid var(--row)}
+.dlg-doc:last-child{border-bottom:none}
+.dlg-doc input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;flex:none}
+.dlg-doc .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.dlg-doc .p{color:var(--light);font-size:12px;flex:none}
+.dlg-cost{font-size:12.5px;color:var(--light);margin-top:12px}
+
+/* ── A review, while it runs ───────────────────────────────────────────
+   Floating, because the promise is that you can go and do something else.
+   Deliberately outside the rail: the rail can be closed, and closing a
+   panel should not look like cancelling a job.                          */
+.rvw-float{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:180;
+           display:flex;align-items:center;gap:13px;background:#fff;border-radius:13px;
+           padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.22);border:1px solid var(--lighter);
+           max-width:min(460px,calc(100vw - 32px))}
+.rvw-spin{width:19px;height:19px;border-radius:50%;flex:none;
+          border:2.5px solid var(--n-200);border-top-color:var(--teal);
+          animation:rvwspin .7s linear infinite}
+@keyframes rvwspin{to{transform:rotate(360deg)}}
+.rvw-t{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.rvw-t small{display:block;font-size:11.5px;font-weight:400;color:var(--light);margin-top:2px}
+.rvw-stop{display:flex;align-items:center;gap:5px;border:1px solid var(--lighter);background:none;
+          border-radius:9px;padding:7px 11px;font:inherit;font-size:12.5px;font-weight:600;
+          color:var(--accent);cursor:pointer;flex:none}
+.rvw-stop:hover{border-color:var(--accent)}
+.rvw-stop .ms{font-size:16px}
+@media(prefers-reduced-motion:reduce){.rvw-spin{animation-duration:2.4s}}
 
 /* Under a finished answer, and only while you are on that answer. The row
    keeps its space when hidden — fading it out rather than removing it, so
@@ -947,18 +994,6 @@ html.ray-light .ray-panel{
 .ray-resulthead .ms{color:var(--r-accent)}
 .ray-result p,.ray-result li{color:var(--r-tx-2)}
 .ray-result p b,.ray-result li b{color:var(--r-tx)}
-.ray-offercard{background:var(--r-raise);border-color:var(--r-line-2)}
-.ray-offerhead{color:var(--r-tx)}
-.ray-offerhead .ms{color:var(--r-accent)}
-.ray-offerx{color:var(--r-tx-3)}
-.ray-offerx:hover{background:var(--r-sunk);color:var(--r-tx)}
-.ray-offersub{color:var(--r-tx-2)}
-.ray-deep{border-color:var(--r-line-2)}
-.ray-deep.on{border-color:var(--r-accent);background:var(--r-accent-dim)}
-.ray-deep .l{color:var(--r-tx-2)}
-.ray-deep .l b{color:var(--r-tx)}
-.ray-deep input{accent-color:var(--r-accent)}
-.ray-offercost{color:var(--r-tx-3)}
 .ray-copy{color:var(--r-tx-3)}
 .ray-copy:hover{background:var(--r-raise);color:var(--r-accent)}
 .ray-copy.done{color:var(--r-accent)}

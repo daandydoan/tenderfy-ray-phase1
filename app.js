@@ -60,6 +60,69 @@
     applyTheme(light);
   };
 
+  /* ── Dialogs ─────────────────────────────────────────────────────────
+     Ray owns a persistent session, so one-shot setup does not belong inside
+     it — a conversation you scroll back through should not be littered with
+     controls that were only true once. Setup happens in a dialog; the
+     conversation keeps the answer. */
+  function dlgEl() {
+    let el = document.getElementById('rayDlg');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'rayDlg';
+    el.className = 'dlg-back';
+    el.hidden = true;
+    el.innerHTML = `
+      <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="rayDlgTitle">
+        <div class="dlg-head"><span id="rayDlgTitle"></span>
+          <button class="dlg-x" data-dlg-close aria-label="Close"><span class="ms">close</span></button></div>
+        <div class="dlg-body" id="rayDlgBody"></div>
+      </div>`;
+    document.body.appendChild(el);
+    /* Backdrop and ✕ close; the dialog itself does not. */
+    el.addEventListener('click', (e) => {
+      if (e.target === el || e.target.closest('[data-dlg-close]')) global.rayDlgClose();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !el.hidden) global.rayDlgClose();
+    });
+    return el;
+  }
+  global.rayDlg = function (title, body) {
+    const el = dlgEl();
+    el.querySelector('#rayDlgTitle').textContent = title;
+    el.querySelector('#rayDlgBody').innerHTML = body;
+    el.hidden = false;
+    const first = el.querySelector('.dlg-body button, .dlg-body input');
+    if (first) first.focus();
+    return el.querySelector('#rayDlgBody');
+  };
+  global.rayDlgClose = function () {
+    const el = document.getElementById('rayDlg');
+    if (el) el.hidden = true;
+  };
+
+  /* ── The review, while it runs ───────────────────────────────────────
+     Floating and out of the way, because the whole promise is "carry on
+     with something else". It is not in the rail: the rail can be closed,
+     and a job you started should not disappear when you close a panel. */
+  global.rayProgress = function (opts) {
+    let el = document.getElementById('rayProg');
+    if (!opts) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'rayProg';
+      el.className = 'rvw-float';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = `
+      <span class="rvw-spin" aria-hidden="true"></span>
+      <div class="rvw-t">${opts.title}<small>${opts.sub || ''}</small></div>
+      <button class="rvw-stop" data-rvw-stop><span class="ms">stop_circle</span>Stop</button>`;
+    el.querySelector('[data-rvw-stop]').onclick = opts.onStop || global.rayProgress.bind(null, null);
+    return el;
+  };
+
   /* ── Empty state, on demand ──────────────────────────────────────────
      A first-run screen is worth showing and impossible to reach once you
      have projects, so the header can fake it. It hides the list rather
