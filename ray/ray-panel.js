@@ -87,6 +87,8 @@
          the list, so the band is right before anyone has touched it. */
       this.refDocs = null;
       this.refPickOpen = false;
+      this.deepReview = false;
+      this.offerOff = false;      // dismissed for this tender
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
       this.confirmDelete = null;     // session id awaiting confirmation
@@ -181,6 +183,10 @@
         <div class="ray-headbar" data-ray="headbar"></div>
         <div class="ray-list" data-ray="list"></div>
         <div class="ray-body" data-ray="body"></div>
+        <!-- Sits at the foot of the conversation rather than inside it: an
+             offer is not something Ray said, and repainting history must not
+             wipe it. -->
+        <div class="ray-offer" data-ray="offer"></div>
         <div class="ray-trace" data-ray="trace"></div>
         <div class="ray-foot">
           <div class="ray-credit" data-ray="credit"></div>
@@ -288,6 +294,19 @@
         if (e.target.closest('[data-ray-prompts]')) {
           this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
+        }
+        if (e.target.closest('[data-ray-offer-off]')) {
+          this.offerOff = true; this.paintOffer(); return;
+        }
+        if (e.target.closest('[data-ray-deep]')) {
+          this.deepReview = !this.deepReview; this.paintOffer(); return;
+        }
+        if (e.target.closest('[data-ray-review]')) {
+          this.offerOff = true; this.paintOffer();
+          this.run(this.deepReview
+            ? 'Review all documents for this tender in depth'
+            : 'Review all documents for this tender');
+          return;
         }
         const cp = e.target.closest('[data-ray-copy]');
         if (cp) { this.copyAnswer(cp); return; }
@@ -605,6 +624,7 @@
       if (this.context.tenderId !== wasTender) {
         this.refDocs = null;
         this.refPickOpen = false;
+        this.offerOff = false;    // a different tender is a fresh offer
       }
       /* Navigating changes what Ray is looking at, never which session you are
          in — the same way a Figma chat survives moving around a file. */
@@ -869,6 +889,57 @@
       box.innerHTML = chips + add
         || '<span class="ray-ctxnone">No documents on this tender you can read.</span>';
       this.paintRefPick();
+      this.paintOffer();          // the cost line follows the chips
+    }
+
+    /* ── The offer ───────────────────────────────────────────────────────
+       Picking a tender is the moment someone wants something done with it,
+       so Ray says what he can do rather than waiting to be asked. This is
+       the live app's two modals — the introduction and the "are you sure?"
+       — collapsed into one card that names the documents, prices the work
+       and stays out of the way if ignored.                                 */
+    paintOffer() {
+      const box = this.$('offer');
+      if (!box) return;
+      const t = this.context.tenderId;
+      if (!t || this.offerOff || this.view === 'list' || this.busy) { box.innerHTML = ''; return; }
+      let tender = null;
+      try { tender = global.RayPermissions.Repositories.tenders.get(service.guard, t); }
+      catch (e) { box.innerHTML = ''; return; }
+      const docs = this.referenceDocs();
+      if (!docs.length) { box.innerHTML = ''; return; }
+
+      const pages = docs.reduce((n, d) => n + (d.pages || 0), 0);
+      /* Mocked, and deliberately shown: the point of the card is that the
+         cost of a choice is visible before it is made, not after. */
+      const cost = Math.max(1, Math.round(pages / (this.deepReview ? 2.5 : 12)));
+
+      box.innerHTML = `
+        <div class="ray-offercard">
+          <div class="ray-offerhead">
+            <span class="ms">auto_awesome</span>
+            <span class="t">Review ${esc(tender.name)}</span>
+            <button class="ray-offerx" data-ray-offer-off title="Not now">
+              <span class="ms">close</span></button>
+          </div>
+          <p class="ray-offersub">${docs.length} document${docs.length === 1 ? '' : 's'} referenced,
+             ${pages} pages. Ray pulls out the questions and drafts answers into your
+             Response Library.</p>
+          <label class="ray-deep${this.deepReview ? ' on' : ''}">
+            <input type="checkbox" data-ray-deep ${this.deepReview ? 'checked' : ''}>
+            <span class="l">
+              <b>Deep review</b>
+              <span>${this.deepReview
+                ? 'Every page read in full. Slower, and more thorough on scanned files.'
+                : 'Search first, read only the pages that matter. Faster and cheaper.'}</span>
+            </span>
+          </label>
+          <div class="ray-offeracts">
+            <span class="ray-offercost">~${cost} credit${cost === 1 ? '' : 's'}</span>
+            <button class="ray-act go" data-ray-review>
+              <span class="ms">play_arrow</span>Review documents</button>
+          </div>
+        </div>`;
     }
 
     paintRefPick() {
@@ -924,6 +995,7 @@
         : s.id === 'edit-dialog' ? 'Ask Ray to draft, tighten or reuse…'
         : started ? 'Reply to Ray…' : 'Ask Ray anything…';
       this.paintContext();
+      this.paintOffer();
       this.paintCredits();
       this.paintAttachments();
       this.paintPrompts();

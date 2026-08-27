@@ -230,6 +230,34 @@ needs one, because every exhibit now carries a block — the card explaining the
 feature sat inside the feature it was explaining. The explanation moved into
 the first exhibit's lead-in instead.
 
+## The offer card
+
+Picking a tender is the moment someone wants something done with it, so Ray
+says what he can do rather than waiting to be asked. The card appears at the
+foot of the conversation when a tender is referenced, and it is the live app's
+**two modals collapsed into one non-blocking thing**: the Information modal that
+introduced Ray, and the "5 documents are available — are you sure?" confirm.
+
+It carries what those carried, and more:
+
+* **What will be read** — taken from the reference chips, not a static count.
+  Drop a document and the card re-prices in place. The modal could only offer
+  yes or no; this lets you review four of five.
+* **What it costs** — a credit estimate that moves with the choice, shown
+  *before* the decision instead of after it.
+* **The one choice that changes both** — Deep review, in the open rather than
+  inside a modal, with the trade-off spelled out either way.
+
+It lives in its own slot below `.ray-body`, not inside it: an offer is not
+something Ray said, and repainting history must not wipe it. Dismissing sets
+`offerOff` for that tender, and pointing at a different tender clears it —
+a new tender is a fresh offer. Acting on it dismisses it too, because the
+answer that follows supersedes it.
+
+The credit figures are **mocked** (`pages / 12`, or `pages / 2.5` for deep) and
+deliberately visible. The point of the card is that cost is legible before the
+click; the arithmetic behind the number is the platform's to supply.
+
 ## References are documents, not screens
 
 The band above the composer names **the platform's own documents** — the files
