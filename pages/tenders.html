@@ -61,7 +61,7 @@
 <script src="../ray/ray-provider.js?v=84644275"></script>
 <script src="../ray/ray-surfaces.js?v=58d64b1d"></script>
 <script src="../ray/ray-core.js?v=c97f2ec3"></script>
-<script src="../ray/ray-panel.js?v=a2f34abe"></script>
+<script src="../ray/ray-panel.js?v=9c3eb165"></script>
 <script>window.PAGE = {"nav": "tenders", "crumb": "Tenders", "ray": {"surface": "page", "context": {"pageTitle": "All tenders"}}};</script>
 <script>
 const CONTACT = {
@@ -219,26 +219,30 @@ function tnReview(id){
   paint();
 }
 
-/* The run itself. No backend: the floating dialog is the honest surface for
-   "this takes a while and you can leave" — the rail would hide it. */
-function tnRunReview(id, docs, deep){
-  const box = document.querySelector(`.tn-card .chk`);
-  const card = [...document.querySelectorAll('.tn-card')].find(c=>{
-    const b=c.querySelector('.chk'); return b && b.getAttribute('onclick').includes(id);
-  });
-  if (card && !card.querySelector('.chk').checked) card.querySelector('.chk').click();
+/* The run itself.
 
-  let stopped = false;
+   Deliberately NOT a Ray turn. This is a batch job launched from a tender
+   card, not a question anyone asked him — running it through the agent would
+   put a turn in his session that nobody said, and leave the rail as the only
+   place the job existed. So it owns its own surface end to end: the float
+   while it runs, the dialog when it lands. Ray is untouched, and asking him
+   to review documents in conversation still works and still reads as an
+   answer.
+
+   No backend: the duration is a timer. Everything around it — stopping,
+   the done state, the way back in — is the real shape. */
+const REVIEW_MS = 4200;
+
+function tnRunReview(id, docs, deep){
+  let timer = null;
+  const stop = () => { clearTimeout(timer); rayProgress(null); RayPanel.toast('Review stopped'); };
   rayProgress({
     title: `Reviewing ${docs.length} document${docs.length===1?'':'s'}…`,
-    sub: 'Carry on with something else — Ray posts the result in the chat.',
-    onStop: ()=>{ stopped = true; rayProgress(null); RayPanel.toast('Review stopped'); },
+    sub: deep ? 'Deep review — reading every page. Carry on with something else.'
+              : 'Carry on with something else — this keeps running.',
+    onStop: stop,
   });
-  RayPanel.current.show();
-  RayPanel.current.run(deep
-    ? 'Review all documents for this tender in depth'
-    : 'Review all documents for this tender'
-  );  /* the float switches to its done state from the panel's completion hook */
+  timer = setTimeout(() => rayReviewComplete(), deep ? REVIEW_MS * 1.6 : REVIEW_MS);
 }
 </script>
 <script src="../app.js?v=81cdf6ed"></script>

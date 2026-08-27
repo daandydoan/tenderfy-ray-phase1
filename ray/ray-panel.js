@@ -1180,13 +1180,6 @@
         bub.insertAdjacentHTML('beforeend', Panel.turnFoot(Date.now()));
         this.$('body').scrollTop = this.$('body').scrollHeight;
         this.busy = false;
-        /* A review is a job, and finishing one is an event. Detected from the
-           trace rather than the entry point, so it behaves the same whether
-           the run came from the AI Review dialog or from a typed question. */
-        if (global.rayReviewComplete
-            && out.trace.some((t) => t.name === 'plan_document_review' && t.ok)) {
-          global.rayReviewComplete();
-        }
         return out;
       } catch (err) {
         think.remove();

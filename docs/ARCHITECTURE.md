@@ -293,9 +293,17 @@ dialog. An earlier version opened the modal automatically, which is precisely
 the interruption the float exists to prevent: you went and did something else,
 and a dialog landed on top of it. The result stays reachable until dismissed.
 
-Completion is detected from the **trace** (`plan_document_review` succeeded)
-rather than from the entry point, so a review behaves the same whether it was
-launched from the AI Review dialog or typed into the composer.
+**The job does not run through Ray.** It launches from a tender card, so it is
+not a question anyone asked him — putting a turn in his session for it would
+mean the conversation contains something nobody said, and would make the rail
+the only place the job existed. It owns its surface end to end instead: the
+float while it runs, the dialog when it lands. Ray is not opened, not made
+busy, and the tender reference is left alone.
+
+Asking Ray to review documents **in conversation** still works and still reads
+as an answer — the strategy table, what matters most — with no float and no
+dialog. Two different things that happen to share a verb: one is a batch job,
+the other is a question.
 
 `rayProgress(opts)` shows it, `rayProgress(null)` clears it, `opts.done`
 switches states. The spinner slows under `prefers-reduced-motion` rather than
