@@ -232,12 +232,16 @@ the first exhibit's lead-in instead.
 
 ## Where the review ends up
 
-The review answer closes with a **result card**: counts, then the way out. The
-live app spends five lines there teaching a screen you have not seen yet —
-*"you'll see the Combine and Craft option…"* — because once you leave, Ray
-cannot help. Here he travels with you, so the instructions are unnecessary and
-counts take their place: they answer the only question anyone has at that
-moment, which is whether there is work waiting.
+The review answer closes with a **result card** in the live app's shape: what
+Ray did, what is now yours to do, the Combine and Craft note, and a full-width
+**View Responses**.
+
+I had argued for replacing the prose with counts — *16 drafted, 9 matched, 4
+near-duplicate pairs* — on the grounds that Ray travels with you here, so a
+briefing about a screen one click away is a manual delivered before it is
+needed. That was overruled, deliberately: matching what people already know
+from the live product is worth more in a demo than the tidier version. The
+counts variant is one string swap away if that changes.
 
 That card is a `<button data-ray-action>`, never an `<a href>`. The sanitiser
 allow-lists `BUTTON` with `data-ray-action` and strips `href` precisely so a

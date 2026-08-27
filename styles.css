@@ -571,14 +571,21 @@ html.ray-light .ray-panel{
 .rs-page{font-size:12px;color:var(--light);padding:4px 2px}
 .rs-empty{font-size:13px;color:var(--light);padding:16px 2px}
 
-/* The review's closing card: what was produced, and the way to it. */
-.ray-result{border:1px solid var(--lighter);border-radius:12px;padding:12px 13px;margin-top:14px;
+/* The review's closing card: what Ray did, what is now yours, and the way
+   through. Prose rather than a summary line, following the live app. */
+.ray-result{border:1px solid var(--lighter);border-radius:12px;padding:13px 14px;margin-top:14px;
             background:#fff}
-.ray-resulthead{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--ink)}
+.ray-resulthead{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;
+                color:var(--ink);margin-bottom:8px}
 .ray-resulthead .ms{font-size:18px;color:var(--teal)}
-.ray-resultnums{font-size:12.5px;line-height:1.55;color:var(--gray);margin:6px 0 11px}
-.ray-resultnums b{color:var(--ink)}
-.ray-result .ray-act{margin:0}
+.ray-result p{font-size:13px;line-height:1.6;color:var(--gray);margin:0 0 8px}
+.ray-result p b{color:var(--ink)}
+.ray-result ul{margin:0 0 8px;padding-left:18px}
+.ray-result li{font-size:13px;line-height:1.6;color:var(--gray);margin-bottom:3px}
+.ray-result li b{color:var(--ink)}
+/* Full width: it is the one thing to do next, not one option among several. */
+.ray-act.go.wide{display:flex;width:100%;justify-content:center;margin:12px 0 0;
+                 padding:10px 14px;font-size:13.5px}
 
 /* ── Ray: the offer card ───────────────────────────────────────────────
    Shown when a tender is picked. It replaces two modals from the live app,
@@ -938,8 +945,8 @@ html.ray-light .ray-panel{
 .ray-result{background:var(--r-raise);border-color:var(--r-line-2)}
 .ray-resulthead{color:var(--r-tx)}
 .ray-resulthead .ms{color:var(--r-accent)}
-.ray-resultnums{color:var(--r-tx-2)}
-.ray-resultnums b{color:var(--r-tx)}
+.ray-result p,.ray-result li{color:var(--r-tx-2)}
+.ray-result p b,.ray-result li b{color:var(--r-tx)}
 .ray-offercard{background:var(--r-raise);border-color:var(--r-line-2)}
 .ray-offerhead{color:var(--r-tx)}
 .ray-offerhead .ms{color:var(--r-accent)}
