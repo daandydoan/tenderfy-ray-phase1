@@ -112,19 +112,24 @@ the same service runs underneath.
 
 ## What to look at
 
-Two screens, deliberately: enough to show the rail travelling with you, without
-a click-through app to maintain.
+Three screens: enough to show the rail travelling with you, and to carry the
+review arc end to end, without a click-through app to maintain.
 
 | Page | Screen |
 |---|---|
 | `index.html` | Dashboard — contract value, win rate, tasks, deadlines |
 | `pages/tenders.html` | Tenders — folders and tender cards, from the contractor portal |
+| `pages/responses.html` | Responses — the drafts a review produced, triaged |
 
 On **Tenders**, tick a card and it becomes the chat's reference: the chip reads
 `Tenders › Velocity Link Highway Extension`, Ray's toolset widens to that
 tender's documents, and questions answer from them. Ticking another moves the
 reference; unticking hands it back to the page. This is the tender-detail
 surface, reached by selection rather than by a separate screen.
+
+On **Responses**, ticking a row hands it to Ray the same way — the chip becomes
+the response, and ticking two is the "combine these" case. Triage stays on the
+page because it is list work; refining is a conversation, so it stays in Ray.
 
 The remaining sidebar items are inert on purpose — they toast rather than
 navigate, so the demo stays on the two screens that carry it.

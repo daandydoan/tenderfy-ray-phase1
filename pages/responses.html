@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenderfy — Responses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../styles.css?v=02251edd">
+</head>
+<body>
+<div id="screen" style="display:none">
+
+<div class="pad">
+  <div class="tn-bar">
+    <div class="tn-title">Responses</div>
+    <div class="rs-search">
+      <span class="ms">search</span>
+      <input type="text" id="rsq" placeholder="Search responses">
+    </div>
+    <span class="tn-spacer"></span>
+    <button class="btn" id="rsBulk" disabled>
+      <span class="ms">done_all</span> Approve selected</button>
+  </div>
+
+  <p class="sub">Tick a response to hand it to Ray — ask him to refine it, or tick two
+     and ask him to combine them.</p>
+
+  <!-- Header and content are siblings, as on Tenders: .tn-sec is a horizontal
+       flex bar, so nesting the content inside it lays it out beside the label. -->
+  <div class="tn-sec"><span class="ms car">expand_more</span> Folders</div>
+  <div class="tn-folders">
+    <div class="tn-folder on"><span class="ms">auto_awesome</span> AI Responses</div>
+    <div class="tn-folder">Default Responses</div>
+  </div>
+
+  <div class="tn-sec"><span class="ms car">expand_more</span> Responses</div>
+  <div id="rsList"></div>
+  <div class="rs-page"><span id="rsCount"></span></div>
+</div>
+
+</div>
+
+<script src="../data/fixtures.js?v=4010ebd5"></script>
+<script src="../ray/ray-permissions.js?v=9ee793a7"></script>
+<script src="../ray/ray-documents.js?v=da7bc666"></script>
+<script src="../ray/ray-context.js?v=203841fd"></script>
+<script src="../ray/ray-tools.js?v=9c4b4724"></script>
+<script src="../ray/ray-provider.js?v=5cb4f22c"></script>
+<script src="../ray/ray-surfaces.js?v=58d64b1d"></script>
+<script src="../ray/ray-core.js?v=c97f2ec3"></script>
+<script src="../ray/ray-panel.js?v=757710b3"></script>
+<script>window.PAGE = {"nav": "responses", "crumb": "Responses", "ray": {"surface": "response-library", "context": {"pageTitle": "AI Responses"}}};</script>
+<script>
+/* Drafted by the review. Mocked — the point of this screen is where triage
+   lives and how it hands work to Ray, not the content of the answers. */
+const DRAFTS = [
+  { id:'r1', q:'Defined Terms and Conditions', cat:'Commercial', words:214, match:true },
+  { id:'r2', q:'Plant operator',               cat:'Personnel',  words:168, match:true },
+  { id:'r3', q:'Project Manager',              cat:'Personnel',  words:301, match:true },
+  { id:'r4', q:'Site Foreman / Supervisor',    cat:'Personnel',  words:288, match:true, dupe:'r3' },
+  { id:'r5', q:'Flooring',                     cat:'Technical',  words:142, match:false },
+  { id:'r6', q:'Leading Hand',                 cat:'Personnel',  words:196, match:true, dupe:'r2' },
+  { id:'r7', q:'Environmental management system', cat:'Environmental', words:392, match:true },
+  { id:'r8', q:'Traffic management approach',  cat:'Technical',  words:255, match:false },
+];
+const state = { picked: [], done: {} };
+
+function rsPaint() {
+  const q = (document.getElementById('rsq').value || '').toLowerCase();
+  const rows = DRAFTS.filter((d) => d.q.toLowerCase().includes(q));
+  document.getElementById('rsList').innerHTML = rows.map((d) => {
+    const st = state.done[d.id];
+    return `<div class="rs-row${state.picked.includes(d.id) ? ' picked' : ''}${st ? ' done' : ''}">
+      <input type="checkbox" class="chk" ${state.picked.includes(d.id) ? 'checked' : ''}
+             onchange="rsPick('${d.id}', this.checked)" ${st ? 'disabled' : ''}>
+      <div class="nm">${d.q}
+        <small>${d.cat} · ${d.words} words${d.match ? ' · matched your library' : ''}${
+          d.dupe ? ' · near-duplicate' : ''}</small></div>
+      ${st ? `<span class="rs-state ${st}">${st === 'approved' ? 'Approved' : 'Discarded'}</span>`
+           : `<div class="rs-acts">
+                <button class="btn sm ghost" onclick="rsSet('${d.id}','discarded')">Discard</button>
+                <button class="btn sm" onclick="rsEdit('${d.id}')">Edit</button>
+                <button class="btn sm pri" onclick="rsSet('${d.id}','approved')">Approve</button>
+              </div>`}
+    </div>`;
+  }).join('') || '<div class="rs-empty">Nothing matches that.</div>';
+
+  const left = DRAFTS.filter((d) => !state.done[d.id]).length;
+  document.getElementById('rsCount').textContent =
+    `${rows.length} of ${DRAFTS.length} shown · ${left} awaiting a decision`;
+  const bulk = document.getElementById('rsBulk');
+  bulk.disabled = !state.picked.length;
+  bulk.querySelector('span').nextSibling.textContent =
+    state.picked.length ? ` Approve ${state.picked.length} selected` : ' Approve selected';
+}
+
+/* Ticking hands the response to Ray as a reference — the same gesture the
+   Tenders page uses for a tender. Two ticked is the "combine" case. */
+function rsPick(id, on) {
+  state.picked = on ? state.picked.concat(id) : state.picked.filter((x) => x !== id);
+  rsPaint();
+  const picked = state.picked.map((i) => DRAFTS.find((d) => d.id === i)).filter(Boolean);
+  if (!picked.length) {
+    RayPanel.focus('response-library', { pageTitle: 'AI Responses', crumb: 'Responses' });
+    return;
+  }
+  RayPanel.open('response-library', {
+    pageTitle: picked.map((d) => d.q).join(' + '), crumb: 'Responses',
+    responses: picked.map((d) => ({ id: d.id, q: d.q })),
+  });
+  RayPanel.toast(picked.length > 1
+    ? 'Ray has ' + picked.length + ' — ask him to combine them'
+    : 'Ray is now referencing this response');
+}
+function rsSet(id, how) { state.done[id] = how; state.picked = state.picked.filter((x) => x !== id); rsPaint(); }
+function rsEdit(id) { RayPanel.toast('Inline edit — mocked for this prototype'); }
+window.onPageReady = function () {
+  document.getElementById('rsq').addEventListener('input', rsPaint);
+  document.getElementById('rsBulk').addEventListener('click', function () {
+    state.picked.forEach((id) => { state.done[id] = 'approved'; });
+    const n = state.picked.length; state.picked = [];
+    rsPaint(); RayPanel.toast(n + ' approved');
+  });
+  rsPaint();
+};
+</script>
+<script src="../app.js?v=3c15e88e"></script>
+</body>
+</html>

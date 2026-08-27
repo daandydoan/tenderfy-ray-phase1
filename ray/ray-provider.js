@@ -299,7 +299,21 @@
           + `<li><b>Addendum 2 overrides the RFT twice</b>: Public Liability rises $20M → $25M, and stem rates rise 1,200 → 1,500/ha for zones B and C only. <span class="ray-cite">Scope of Works — Addendum 2 p.2, p.5</span></li>`
           + `<li>The scanned survey confirms a 30m watercourse setback in Zone C and acid sulfate sample points — price the handling. <span class="ray-cite">Site Survey p.17 (OCR)</span></li>`
           + `<li>Liquidated damages $4,500/day past practical completion. <span class="ray-cite">Request for Tender p.131</span></li></ul>`
-          + `\n<span class="ray-note">I opened ${ok.filter((r) => /read_|outline/.test(r.tool)).length} reads across ${plan ? plan.plans.length : 0} documents rather than loading ${plan ? plan.plans.reduce((n, p) => n + p.pages, 0) : 0} pages.</span>` + denialNote;
+          + `\n<span class="ray-note">I opened ${ok.filter((r) => /read_|outline/.test(r.tool)).length} reads across ${plan ? plan.plans.length : 0} documents rather than loading ${plan ? plan.plans.reduce((n, p) => n + p.pages, 0) : 0} pages.</span>`
+          /* The way out. The live app says this in five lines of instructions
+             about a screen you have not seen yet; counts answer the only
+             question anyone has at this moment — did it find much, and is
+             there work waiting. The rest is explained by the screen itself. */
+          + `\n<div class="ray-result">`
+          + `<div class="ray-resulthead"><span class="ms">task_alt</span>Review complete</div>`
+          + `<div class="ray-resultnums"><b>16</b> responses drafted · <b>9</b> matched your `
+          + `Response Library · <b>4</b> near-duplicate pairs worth combining</div>`
+          /* A button, not a link: the sanitiser allows BUTTON with
+             data-ray-action and deliberately strips href, so a model string
+             can never carry a javascript: URL. The destination is decided by
+             our code, not by the answer. */
+          + `<button class="ray-act go" data-ray-action="responses">`
+          + `<span class="ms">arrow_forward</span>View responses</button></div>` + denialNote;
       }
 
       if (intent === 'extract') {

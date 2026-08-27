@@ -24,6 +24,7 @@
   const NAV = [
     { key: 'dashboard', icon: 'desktop_mac', label: 'Dashboard', href: 'index.html' },
     { key: 'tenders',   icon: 'domain',      label: 'Tenders',   href: 'pages/tenders.html' },
+    { key: 'responses', icon: 'auto_awesome', label: 'Responses', href: 'pages/responses.html' },
     { key: null, icon: 'chat',                 label: 'Messages' },
     { key: null, icon: 'insert_drive_file',    label: 'Documents' },
     { key: null, icon: 'contacts',             label: 'Contacts' },

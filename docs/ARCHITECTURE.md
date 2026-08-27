@@ -230,6 +230,32 @@ needs one, because every exhibit now carries a block — the card explaining the
 feature sat inside the feature it was explaining. The explanation moved into
 the first exhibit's lead-in instead.
 
+## Where the review ends up
+
+The review answer closes with a **result card**: counts, then the way out. The
+live app spends five lines there teaching a screen you have not seen yet —
+*"you'll see the Combine and Craft option…"* — because once you leave, Ray
+cannot help. Here he travels with you, so the instructions are unnecessary and
+counts take their place: they answer the only question anyone has at that
+moment, which is whether there is work waiting.
+
+That card is a `<button data-ray-action>`, never an `<a href>`. The sanitiser
+allow-lists `BUTTON` with `data-ray-action` and strips `href` precisely so a
+model string cannot carry a `javascript:` URL — the destination is chosen by
+our code, not by the answer.
+
+**`pages/responses.html`** is where it lands, and it splits the work the live
+Responses screen fuses. Discard and Approve are bulk, mechanical, list work, so
+they stay on the page. Edit-by-prompt and *Combine and Craft* are conversations,
+so they move into Ray: ticking a row makes it the reference — the same gesture
+the Tenders page uses for a tender — and ticking two is the combine case,
+without a bespoke button for it.
+
+The reference band handles this by asking the surface first: `context.responses`
+wins over documents, and on that surface with nothing ticked the band hides
+rather than falling through to "every document in the business", which is true
+and useless.
+
 ## The offer card
 
 Picking a tender is the moment someone wants something done with it, so Ray

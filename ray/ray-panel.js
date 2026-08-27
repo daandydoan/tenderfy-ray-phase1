@@ -868,6 +868,33 @@
 
     paintContext() {
       const box = this.$('ctx');
+      /* A surface can hand Ray something that is not a document. The Responses
+         screen hands him the rows you ticked, and those are the reference —
+         showing that tender's files instead would be answering a question
+         nobody asked. Ticking is the control here, so no × on the chips. */
+      const picked = this.context.responses || [];
+      /* On the Responses screen the reference is whatever is ticked, and
+         nothing else. Falling through would list every document in the
+         business — true, but not an answer to anything being asked here. */
+      if (!picked.length && this.surfaceId === 'response-library') {
+        this.$('ctxlabel').style.display = 'none';
+        box.innerHTML = '';
+        if (this.session) this.session.contextData.documents = [];
+        this.paintOffer();
+        return;
+      }
+      if (picked.length) {
+        this.$('ctxlabel').style.display = '';
+        if (this.session) this.session.contextData.documents = [];
+        box.innerHTML = picked.map((r) => `
+          <span class="ray-ctxchip" title="${esc(r.q)}">
+            <span class="ms">auto_awesome</span>
+            <span class="t"><span class="seg">${esc(r.q)}</span></span>
+          </span>`).join('');
+        this.paintRefPick();
+        this.paintOffer();
+        return;
+      }
       const docs = this.referenceDocs();
       const spare = this.availableDocs().length - docs.length;
       this.syncReferences();
@@ -1461,6 +1488,11 @@
           target.dispatchEvent(new Event('input'));
           toast('Inserted into ' + (this.context.field || 'the field'));
         } else toast('No editable field on this surface');
+        return;
+      }
+      if (kind === 'responses') {
+        const to = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
+        location.href = to;
         return;
       }
       if (kind === 'topup') {
