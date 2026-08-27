@@ -584,8 +584,11 @@ html.ray-light .ray-panel{
 .ray-result li{font-size:13px;line-height:1.6;color:var(--gray);margin-bottom:3px}
 .ray-result li b{color:var(--ink)}
 /* Full width: it is the one thing to do next, not one option among several. */
-.ray-act.go.wide{display:flex;width:100%;justify-content:center;margin:12px 0 0;
-                 padding:10px 14px;font-size:13.5px}
+.btn.dlg-wide{display:flex;width:100%;justify-content:center;margin:20px 0 0;padding:11px 14px;
+              font-size:14px}
+.dlg-list{margin:0 0 14px;padding-left:20px}
+.dlg-list li{margin-bottom:6px}
+.dlg-list b{color:var(--ink)}
 
 /* The tender card's own menu, anchored under its three dots. */
 .tc-right{position:relative}
@@ -645,10 +648,25 @@ html.ray-light .ray-panel{
    Floating, because the promise is that you can go and do something else.
    Deliberately outside the rail: the rail can be closed, and closing a
    panel should not look like cancelling a job.                          */
-.rvw-float{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:180;
+/* Bottom right, clear of the rail when it is open and clear of the reopen
+   button when it is not — that button only exists while the rail is closed,
+   which is exactly what .ray-rail-open tells us. */
+.rvw-float{position:fixed;right:calc(var(--ray-rail,0px) + 22px);bottom:74px;z-index:180;
            display:flex;align-items:center;gap:13px;background:#fff;border-radius:13px;
            padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.22);border:1px solid var(--lighter);
-           max-width:min(460px,calc(100vw - 32px))}
+           width:min(400px,calc(100vw - var(--ray-rail,0px) - 40px))}
+html.ray-rail-open .rvw-float{bottom:22px}
+.rvw-float.done{border-color:var(--teal-bright)}
+.rvw-tick{width:22px;height:22px;border-radius:50%;flex:none;background:var(--teal);color:#fff;
+          display:flex;align-items:center;justify-content:center}
+.rvw-tick .ms{font-size:15px}
+.rvw-go{border:none;background:var(--cta);color:#fff;border-radius:9px;padding:7px 14px;
+        font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
+.rvw-go:hover{background:var(--cta-dark)}
+.rvw-x{border:none;background:none;padding:2px;cursor:pointer;color:var(--light);border-radius:6px;
+       display:flex;flex:none}
+.rvw-x:hover{background:var(--row);color:var(--ink)}
+.rvw-x .ms{font-size:16px}
 .rvw-spin{width:19px;height:19px;border-radius:50%;flex:none;
           border:2.5px solid var(--n-200);border-top-color:var(--teal);
           animation:rvwspin .7s linear infinite}

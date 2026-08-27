@@ -102,6 +102,43 @@
     if (el) el.hidden = true;
   };
 
+  /* Finishing a review is an event, not something Ray said, so it lands in
+     a dialog too. The conversation keeps the analysis — the table, what
+     matters most — which is the part worth scrolling back to. */
+  global.rayReviewDialog = function () {
+    global.rayDlg('Ray’s Review Complete', `
+      <p>I’ve finished reviewing your documents — now it’s over to you.</p>
+      <p>You can:</p>
+      <ul class="dlg-list">
+        <li><b>Edit responses</b> directly</li>
+        <li><b>Use AI prompts</b> to refine further</li>
+        <li><b>Approve or decline</b> responses individually</li>
+      </ul>
+      <p>Where similar questions were found, you’ll see the <b>Combine and Craft</b>
+         option — use it to merge them into a single, polished AI-generated response.</p>
+      <p>Let me know if you need anything else — <b>I’m here to help</b>.</p>
+      <button class="btn pri dlg-wide" data-ray-goto-responses>View Responses</button>`);
+    const el = document.getElementById('rayDlg');
+    const go = el.querySelector('[data-ray-goto-responses]');
+    if (go) go.onclick = () => {
+      global.rayDlgClose();
+      global.rayProgress(null);
+      location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
+    };
+  };
+
+  /* Finishing does not seize the screen. The whole point of running this in
+     the background is that you went and did something else, and a modal
+     landing on top of that is the interruption the float exists to avoid.
+     The float switches to a done state and becomes the way in. */
+  global.rayReviewComplete = function () {
+    global.rayProgress({
+      done: true,
+      title: 'Review complete',
+      sub: '16 responses drafted · 9 matched your library',
+    });
+  };
+
   /* ── The review, while it runs ───────────────────────────────────────
      Floating and out of the way, because the whole promise is "carry on
      with something else". It is not in the rail: the rail can be closed,
@@ -115,11 +152,21 @@
       el.className = 'rvw-float';
       document.body.appendChild(el);
     }
-    el.innerHTML = `
-      <span class="rvw-spin" aria-hidden="true"></span>
-      <div class="rvw-t">${opts.title}<small>${opts.sub || ''}</small></div>
-      <button class="rvw-stop" data-rvw-stop><span class="ms">stop_circle</span>Stop</button>`;
-    el.querySelector('[data-rvw-stop]').onclick = opts.onStop || global.rayProgress.bind(null, null);
+    el.classList.toggle('done', !!opts.done);
+    el.innerHTML = (opts.done
+        ? `<span class="rvw-tick"><span class="ms">check</span></span>`
+        : `<span class="rvw-spin" aria-hidden="true"></span>`)
+      + `<div class="rvw-t">${opts.title}<small>${opts.sub || ''}</small></div>`
+      + (opts.done
+        ? `<button class="rvw-go" data-rvw-open>View</button>
+           <button class="rvw-x" data-rvw-close aria-label="Dismiss"><span class="ms">close</span></button>`
+        : `<button class="rvw-stop" data-rvw-stop><span class="ms">stop_circle</span>Stop</button>`);
+    const stop = el.querySelector('[data-rvw-stop]');
+    if (stop) stop.onclick = opts.onStop || global.rayProgress.bind(null, null);
+    const open = el.querySelector('[data-rvw-open]');
+    if (open) open.onclick = () => global.rayReviewDialog();
+    const close = el.querySelector('[data-rvw-close]');
+    if (close) close.onclick = () => global.rayProgress(null);
     return el;
   };
 

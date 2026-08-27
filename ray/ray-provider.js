@@ -300,20 +300,7 @@
           + `<li>The scanned survey confirms a 30m watercourse setback in Zone C and acid sulfate sample points — price the handling. <span class="ray-cite">Site Survey p.17 (OCR)</span></li>`
           + `<li>Liquidated damages $4,500/day past practical completion. <span class="ray-cite">Request for Tender p.131</span></li></ul>`
           + `\n<span class="ray-note">I opened ${ok.filter((r) => /read_|outline/.test(r.tool)).length} reads across ${plan ? plan.plans.length : 0} documents rather than loading ${plan ? plan.plans.reduce((n, p) => n + p.pages, 0) : 0} pages.</span>`
-          /* The handover, in the shape the live app uses: what Ray did, what
-             is now yours to do, and the way through. */
-          + `\n<div class="ray-result">`
-          + `<div class="ray-resulthead"><span class="ms">description</span>Ray’s Review Complete</div>`
-          + `<p>I’ve finished reviewing your documents — now it’s over to you.</p>`
-          + `<p>You can:</p>`
-          + `<ul><li><b>Edit responses</b> directly</li>`
-          + `<li><b>Use AI prompts</b> to refine further</li>`
-          + `<li><b>Approve or decline</b> responses individually</li></ul>`
-          + `<p>Where similar questions were found, you’ll see the <b>Combine and Craft</b> `
-          + `option — use it to merge them into a single, polished AI-generated response.</p>`
-          + `<p>Let me know if you need anything else — <b>I’m here to help</b>.</p>`
-          + `<button class="ray-act go wide" data-ray-action="responses">View Responses</button>`
-          + `</div>` + denialNote;
+          + denialNote;
       }
 
       if (intent === 'extract') {

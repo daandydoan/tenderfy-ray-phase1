@@ -232,16 +232,14 @@ the first exhibit's lead-in instead.
 
 ## Where the review ends up
 
-The review answer closes with a **result card** in the live app's shape: what
-Ray did, what is now yours to do, the Combine and Craft note, and a full-width
-**View Responses**.
+The completion notice is a **dialog**, reached from the finished float. It
+carries the live app's wording: what Ray did, the three things now yours to do,
+the Combine and Craft note, and a full-width **View Responses**.
 
-I had argued for replacing the prose with counts — *16 drafted, 9 matched, 4
-near-duplicate pairs* — on the grounds that Ray travels with you here, so a
-briefing about a screen one click away is a manual delivered before it is
-needed. That was overruled, deliberately: matching what people already know
-from the live product is worth more in a demo than the tidier version. The
-counts variant is one string swap away if that changes.
+It was briefly a card inside the answer, which was wrong for the same reason
+the setup card was: finishing a job is an event, not something Ray said. What
+stays in the conversation is the analysis — the strategy table, what matters
+most — which is the part worth scrolling back to.
 
 That card is a `<button data-ray-action>`, never an `<a href>`. The sanitiser
 allow-lists `BUTTON` with `data-ray-action` and strips `href` precisely so a
@@ -279,17 +277,29 @@ it is ~4. Deep Review sits in the same dialog with its trade-off stated, and
 moves the estimate to ~79. A yes/no became an itemised, priced choice without
 leaving the shape people recognise.
 
-## While it runs
+## While it runs, and when it finishes
 
-The review shows a **floating dialog at the bottom of the page**, not a card in
-the rail. That placement is the argument: the promise is *"carry on with
-something else"*, and the rail can be closed — a job should not appear to
-cancel because a panel did. It carries a spinner, what is being reviewed, and
-Stop.
+The review shows a **floating card at the bottom right**, not a card in the
+rail. That placement is the argument: the promise is *"carry on with something
+else"*, and the rail can be closed — a job should not appear to cancel because
+a panel did. It sits clear of the rail when open (`--ray-rail`, mirrored onto
+`<html>` by `applyLayout` because `--rail-w` lives on `.capp` and a body-level
+element cannot inherit it) and clear of the reopen button when closed, which
+`.ray-rail-open` already tells us.
 
-`rayProgress(opts)` shows it, `rayProgress(null)` clears it. It is app-level
-rather than panel-level for the same reason, and the spinner slows to a crawl
-under `prefers-reduced-motion` rather than stopping, so it still reads as busy.
+Finishing **does not seize the screen**. The card switches to a done state —
+tick, counts, **View**, dismiss — and that is the way into the completion
+dialog. An earlier version opened the modal automatically, which is precisely
+the interruption the float exists to prevent: you went and did something else,
+and a dialog landed on top of it. The result stays reachable until dismissed.
+
+Completion is detected from the **trace** (`plan_document_review` succeeded)
+rather than from the entry point, so a review behaves the same whether it was
+launched from the AI Review dialog or typed into the composer.
+
+`rayProgress(opts)` shows it, `rayProgress(null)` clears it, `opts.done`
+switches states. The spinner slows under `prefers-reduced-motion` rather than
+stopping, so it still reads as busy.
 
 ## References are documents, not screens## References are documents, not screens
 

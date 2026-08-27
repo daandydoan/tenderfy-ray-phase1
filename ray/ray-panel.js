@@ -972,6 +972,10 @@
       const floats = this.form === 'dialog';
       const w = (!this.open || floats) ? '0px' : (this.wide ? '640px' : '420px');
       if (this.shell) this.shell.style.setProperty('--rail-w', w);
+      /* Mirrored onto <html> so page-level fixed furniture — the review
+         float — can sit clear of the rail. --rail-w lives on .capp, which a
+         body-level element cannot inherit from. */
+      document.documentElement.style.setProperty('--ray-rail', w);
       document.documentElement.classList.toggle('ray-rail-open', this.open && !floats);
       if (this.fab) this.fab.style.display = this.open ? 'none' : '';
       const btn = this.el.querySelector('[data-ray="expand"]');
@@ -1176,6 +1180,13 @@
         bub.insertAdjacentHTML('beforeend', Panel.turnFoot(Date.now()));
         this.$('body').scrollTop = this.$('body').scrollHeight;
         this.busy = false;
+        /* A review is a job, and finishing one is an event. Detected from the
+           trace rather than the entry point, so it behaves the same whether
+           the run came from the AI Review dialog or from a typed question. */
+        if (global.rayReviewComplete
+            && out.trace.some((t) => t.name === 'plan_document_review' && t.ok)) {
+          global.rayReviewComplete();
+        }
         return out;
       } catch (err) {
         think.remove();
