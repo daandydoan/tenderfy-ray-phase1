@@ -258,36 +258,38 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
-## The path through a tender
+## Guiding, in the conversation
 
-Ray's empty state, when he is pointed at a tender, is **the eight things a bid
-needs, in the order it needs them** — not a set of sample questions.
+There are **eight things a bid needs, in the order it needs them** — understand
+the pack, find what the addenda changed, get the questions, see what is already
+answered, draft the rest, price the risk, approve, submit. They are deliberately
+**not the guided demo's eight**, which are ordered by which part of the brief
+they prove: right for showing the build, wrong for doing the work.
 
-These are deliberately **not the guided demo's eight**. Those are ordered by
-which part of the brief they prove, which is right for showing the build and
-wrong for doing the work. These are the job: understand the pack, find what the
-addenda changed, get the questions, see what you have already answered, draft
-the rest, price the risk, approve, submit.
+They were first drawn as a checklist panel in the empty state. That was wrong
+for the people who need them. A panel is something you have to notice and read,
+and *"what should I ask it?"* is the question that kills assistants for
+non-technical users — a sidebar does not answer it, because they are not
+looking at the sidebar. They are reading the conversation.
 
-The reason to show them as a path rather than a menu is the user base. A bid
-coordinator should not have to know how to phrase a prompt to get started, and
-*"what should I ask it?"* is the question that kills assistants for
-non-technical users. A path answers it before it is asked: read where you are,
-press the next thing.
+So the guidance **is** the conversation. Ray opens by saying where you are, and
+one card sits under his last answer offering the next move: what it is, why,
+**Start**, and **Skip**. After every answer it advances. Nothing else changes,
+and there is never more than one thing being suggested.
 
-Three states per row and nothing else — done, the one to do now, the ones
-after. **Later steps stay pressable.** Locking them would be condescending, and
-people jump around real bids constantly; the highlight says what is
-recommended, it does not gate. Progress is per tender.
+The card lives in its own slot below the body, not in it. It is an offer rather
+than something Ray said, so it must survive a history repaint without ever
+being written into the scrollback — otherwise reopening the conversation would
+show every offer ever made, most of them stale.
+
+**Skip** matters as much as Start. Without it the only way past a step is to do
+it, which turns a suggestion into a gate; people jump around real bids
+constantly. **See all** opens the full eight in a dialog for anyone who wants
+to know where this is going.
 
 Six of the eight run for real through the mock provider. `rayStepsDone()` is a
-mocked table — a real one reads the tender's own record. What is being proposed
-here is the shape: the ordering, the three states, the per-tender progress.
-
-> The empty state must be repainted when focus changes, since the path only
-> exists once there is a tender and `focus()` lands after the first paint. It
-> repaints **only while it is still the empty state** — a conversation must
-> never be redrawn out from under someone mid-read.
+mocked table — a real one reads the tender's own record. What is proposed here
+is the shape: the ordering, one suggestion at a time, and progress per tender.
 
 ## Setup is a dialog, not a card in the session
 

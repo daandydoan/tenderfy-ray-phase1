@@ -104,17 +104,38 @@
   global.rayStepsDone = function (tenderId) {
     return DONE[tenderId] || 0;
   };
+  global.rayStepSkip = function (i, tenderId) {
+    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p) p.paintNextStep();
+  };
   global.rayStepRun = function (i, tenderId) {
     const st = STEPS[i];
     if (!st) return;
-    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i);   // reaching a step clears the ones before it
+    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);   // doing it completes it
     if (st.goto === 'responses') {
       location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
       return;
     }
-    if (st.todo) { global.RayPanel.toast('Compile the submission — not built in this prototype'); return; }
+    if (st.todo) {
+      global.RayPanel.toast('Compile the submission — not built in this prototype');
+      const p0 = global.RayPanel && global.RayPanel.current;
+      if (p0) p0.paintNextStep();
+      return;
+    }
     const p = global.RayPanel && global.RayPanel.current;
     if (p) p.run(st.q);
+  };
+
+  global.rayStepsDialog = function (tenderId) {
+    const done = global.rayStepsDone(tenderId);
+    global.rayDlg('Working through this tender', `
+      <p>Ray suggests these in order, but you can start anywhere.</p>
+      <div class="dlg-steps">${STEPS.map((st, i) => `
+        <div class="dlg-step ${i < done ? 'done' : i === done ? 'now' : ''}">
+          <span class="ms">${i < done ? 'check_circle' : i === done ? 'play_circle' : 'radio_button_unchecked'}</span>
+          <span class="t">${st.n}<span class="d">${st.d}</span></span>
+        </div>`).join('')}</div>`);
   };
 
   /* ── Dialogs ─────────────────────────────────────────────────────────

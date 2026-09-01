@@ -181,6 +181,7 @@
         <div class="ray-headbar" data-ray="headbar"></div>
         <div class="ray-list" data-ray="list"></div>
         <div class="ray-body" data-ray="body"></div>
+        <div class="ray-nextslot" data-ray="nextstep"></div>
         <div class="ray-trace" data-ray="trace"></div>
         <div class="ray-foot">
           <div class="ray-credit" data-ray="credit"></div>
@@ -293,6 +294,14 @@
         if (step) {
           global.rayStepRun(+step.getAttribute('data-ray-step'), this.context.tenderId);
           return;
+        }
+        const skip = e.target.closest('[data-ray-skip]');
+        if (skip) {
+          global.rayStepSkip(+skip.getAttribute('data-ray-skip'), this.context.tenderId);
+          return;
+        }
+        if (e.target.closest('[data-ray-steps]')) {
+          global.rayStepsDialog(this.context.tenderId); return;
         }
         const cp = e.target.closest('[data-ray-copy]');
         if (cp) { this.copyAnswer(cp); return; }
@@ -963,6 +972,7 @@
          state: a conversation must never be repainted out from under you. */
       if (this.session && !this.session.history().length
           && this.$('body').querySelector('.ray-empty')) this.greet();
+      this.paintNextStep();
     }
 
     /* ── Visibility ──────────────────────────────────────────────────────
@@ -1038,47 +1048,75 @@
     /* ── Messages ────────────────────────────────────────────────────────── */
     /** The blank-conversation state. One line, then the things worth asking —
      *  no greeting bubble pretending a conversation has started. */
-    /* The path through a tender, when Ray is pointed at one. It replaces the
-       generic starters because "what's next" has a real answer here, and a
-       user who is not going to phrase a prompt can read it and press it. */
-    stepPath() {
+    /* ── Guiding, in the conversation ────────────────────────────────────
+       A checklist in a panel is something you have to notice and read. For
+       someone who is not going to phrase a prompt, the thing that works is
+       being offered the next move where they are already looking — inside
+       the conversation, as the last thing Ray said.
+
+       So the path is not a sidebar. It is one card, always the next step,
+       appearing under whatever Ray just answered.                          */
+    nextStepCard() {
       const id = this.context.tenderId;
       const steps = global.rayStepList;
       if (!id || !steps) return '';
-      let tender = null;
-      try { tender = global.RayPermissions.Repositories.tenders.get(service.guard, id); }
-      catch (e) { return ''; }
       const done = global.rayStepsDone(id);
-      const pct = Math.round(done / steps.length * 100);
-      const rows = steps.map((st, i) => {
-        const state = i < done ? 'done' : i === done ? 'now' : 'next';
-        const icon = state === 'done' ? 'check_circle'
-                   : state === 'now' ? 'play_circle' : 'radio_button_unchecked';
-        return `<button class="ray-step-row ${state}" data-ray-step="${i}">
-            <span class="ms">${icon}</span>
-            <span class="t">${esc(st.n)}<span class="d">${esc(st.d)}</span></span>
-            ${state === 'now' ? '<span class="go">Start</span>' : ''}
-          </button>`;
-      }).join('');
-      return `
-        <div class="ray-path">
-          <div class="ray-pathhead">
-            <span class="k">Working through</span>
-            <span class="n">${esc(tender.name)}</span>
+      if (done >= steps.length) {
+        return `<div class="ray-next done">
+            <span class="ms">task_alt</span>
+            <div class="t">All eight steps done for this tender.
+              <span class="d">Ask me anything else, or go back over any of them.</span></div>
+            <button class="ray-nextall" data-ray-steps>See the steps</button>
+          </div>`;
+      }
+      const st = steps[done];
+      return `<div class="ray-next">
+          <div class="ray-nexthead">Next step · ${done + 1} of ${steps.length}
+            <button class="ray-nextall" data-ray-steps>See all</button></div>
+          <div class="ray-nextbody">
+            <div class="t">${esc(st.n)}<span class="d">${esc(st.d)}</span></div>
           </div>
-          <div class="ray-pathbar"><i style="width:${pct}%"></i></div>
-          <div class="ray-pathcount">${done} of ${steps.length} done</div>
-          <div class="ray-steps-list">${rows}</div>
+          <div class="ray-nextacts">
+            <button class="ray-act ghost" data-ray-skip="${done}">Skip</button>
+            <button class="ray-act go" data-ray-step="${done}">
+              <span class="ms">play_arrow</span>Start</button>
+          </div>
         </div>`;
+    }
+
+    /* Kept in its own slot under the conversation so it survives a history
+       repaint and never becomes a message — it is an offer, not something
+       Ray said, and it must not end up in the scrollback twice. */
+    paintNextStep() {
+      const box = this.$('nextstep');
+      if (!box) return;
+      box.innerHTML = (this.view === 'list' || this.busy) ? '' : this.nextStepCard();
     }
 
     greet() {
       const g = service.guard;
       const s = global.RaySurfaces.resolve(this.surfaceId);
       const n = service.registry.countsFor(s, g);
-      const path = this.stepPath();
-      if (path) {
-        this.$('body').innerHTML = `<div class="ray-empty path">${path}</div>`;
+      const id = this.context.tenderId;
+      if (id && global.rayStepList) {
+        let t = null;
+        try { t = global.RayPermissions.Repositories.tenders.get(g, id); } catch (e) {}
+        const done = global.rayStepsDone(id);
+        /* Shaped like a turn, because it is Ray talking. The offer that
+           follows it lives in its own slot, not in the body. */
+        this.$('body').innerHTML = `
+          <div class="ray-turn">
+            <div class="ray-byline"><img src="${this.mark}" alt="">Ray</div>
+            <div class="ray-bubble">
+              ${done ? `You're <b>${done} of ${global.rayStepList.length}</b> of the way through
+                        <b>${esc(t ? t.name : 'this tender')}</b>.`
+                     : `Let's work through <b>${esc(t ? t.name : 'this tender')}</b>.
+                        There are ${global.rayStepList.length} steps, and I'll offer the next
+                        one each time.`}
+              <p>You can also just ask me anything about it.</p>
+            </div>
+          </div>`;
+        this.paintNextStep();
         return;
       }
       this.$('body').innerHTML = `
@@ -1228,8 +1266,9 @@
            never offers a half-streamed answer and the time is the moment Ray
            actually finished rather than when it started. */
         bub.insertAdjacentHTML('beforeend', Panel.turnFoot(Date.now()));
-        this.$('body').scrollTop = this.$('body').scrollHeight;
         this.busy = false;
+        this.paintNextStep();
+        this.$('body').scrollTop = this.$('body').scrollHeight;
         return out;
       } catch (err) {
         think.remove();
