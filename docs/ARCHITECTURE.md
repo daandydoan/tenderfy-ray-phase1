@@ -373,8 +373,15 @@ which is the right shape but a bigger change than the band itself.
 `refDocs` is `null` until the user edits the list, so the default is "everything
 readable here" and the band is correct before anyone has touched it. Changing
 tender resets it, because a hand-picked list belongs to the tender it was
-picked from. The band holds two rows and scrolls — a tender with a dozen files
-would otherwise push the conversation off the panel.
+picked from.
+
+The band is **one row that scrolls sideways**. A tender can carry a dozen
+documents: wrapped, they ate the conversation; capped at two rows and wrapped,
+the overflow hid behind a vertical scrollbar nobody thinks to look for on a row
+of chips. Sideways keeps it one line — 37px against 63 — and puts the overflow
+on the axis people already drag. Chips are `flex:none` with a 210px cap, or one
+long filename would squeeze every other chip to nothing instead of truncating
+itself.
 
 ## Under each answer
 

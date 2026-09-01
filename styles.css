@@ -853,11 +853,23 @@ html.ray-rail-open .rvw-float{bottom:22px}
 /* A tender can carry a dozen documents. Wrapped without a ceiling the band
    grew taller than the answer it sat under, so it holds two rows and scrolls
    — every chip stays reachable, and the conversation keeps its height. */
-.ray-ctx{padding:0 0 7px;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;
-         max-height:63px;overflow-y:auto}
+/* One row that scrolls sideways, rather than wrapping to two. A tender can
+   carry a dozen documents, and wrapped they ate the conversation; capped and
+   wrapped they hid the overflow behind a vertical scroll nobody looks for.
+   Sideways keeps the band one line tall and the overflow on the axis people
+   already drag on a chip row. */
+.ray-ctx{padding:0 0 7px;display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
+         overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
+         /* room for the scrollbar so it never sits on top of the chips */
+         padding-bottom:9px}
+.ray-ctx::-webkit-scrollbar{height:4px}
+.ray-ctx::-webkit-scrollbar-thumb{background:var(--r-line-2);border-radius:99px}
+.ray-ctx::-webkit-scrollbar-track{background:transparent}
 .ray-ctxnone{font-size:11.5px;color:var(--light)}
 .ray-ctx:empty{display:none}
-.ray-ctxchip{display:inline-flex;align-items:center;gap:5px;max-width:100%;
+/* flex:none or a long filename would squeeze every other chip to nothing;
+   the cap makes that one chip truncate instead of owning the whole row. */
+.ray-ctxchip{display:inline-flex;align-items:center;gap:5px;flex:none;max-width:210px;
              background:var(--st-green-bg);border-radius:100px;padding:5px 5px 5px 10px;
              font-size:12px;font-weight:500;color:var(--st-green-tx)}
 .ray-ctxchip .ms{font-size:14px;flex:none}
