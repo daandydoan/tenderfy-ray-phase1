@@ -182,12 +182,15 @@
         <div class="ray-headbar" data-ray="headbar"></div>
         <div class="ray-list" data-ray="list"></div>
         <div class="ray-body" data-ray="body"></div>
+        <!-- Outside the footer on purpose. Stacked in there with the credit
+             notice, the reference band and the composer, the footer grew to
+             half the panel and the conversation got what was left. Its own
+             zone under the conversation keeps the two notices from reading as
+             one wall of chrome. -->
+        <div class="ray-nextslot" data-ray="nextstep"></div>
         <div class="ray-trace" data-ray="trace"></div>
         <div class="ray-foot">
-          <!-- Both notices sit in the same band and share its margins: they
-               are the same kind of thing — a line of state with one action. -->
           <div class="ray-credit" data-ray="credit"></div>
-          <div class="ray-nextslot" data-ray="nextstep"></div>
           <div class="ray-sec input">
             <div class="ray-seclabel" data-ray="ctxlabel">Reference</div>
             <div class="ray-ctx" data-ray="ctx"></div>

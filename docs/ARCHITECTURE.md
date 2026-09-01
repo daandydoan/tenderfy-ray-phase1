@@ -279,10 +279,18 @@ advances, and there is never more than one thing suggested.
 
 It began as a bordered card, which was wrong twice over: it cost four lines of
 height the answer wanted, and it read as more important than the answer it sat
-under. It is now a strip in the **same family as the credit notice** — same
-band, same margins, same radius, same 11.5px — because they are the same kind
-of thing: a line of state with one action. 40px against the card's 110px.
-Verified they stack cleanly when both are showing.
+under. It is a strip now — 40px shut against the card's 110px.
+
+It sits **outside the footer**, in its own zone under the conversation. Inside,
+it stacked with the credit notice, the reference band and the composer, and
+with credits low and the guide open the footer reached **403px of an 860px
+panel** — the conversation got what was left. Moved out, the footer is 202px
+and the two notices no longer read as one wall of chrome.
+
+It is also **quiet**. The teal tint and teal border made a suggestion look like
+the most important thing on screen, which it never is. Neutral ground, hairline
+border, muted text, and **only Start carries colour** — one active thing, and
+it is the one you press. 6.1:1 body text, 11.2:1 on the step name.
 
 **Three depths, each earning its place.** Shut, it is one line saying what is
 next: enough to act on, small enough to ignore. Pressed, it opens to 189px and
