@@ -284,6 +284,17 @@ band, same margins, same radius, same 11.5px — because they are the same kind
 of thing: a line of state with one action. 40px against the card's 110px.
 Verified they stack cleanly when both are showing.
 
+**Three depths, each earning its place.** Shut, it is one line saying what is
+next: enough to act on, small enough to ignore. Pressed, it opens to 189px and
+adds why this step exists, a meter with *3 done · 5 to go*, and what follows —
+the orientation people want before committing to something. The whole guide,
+with what each step actually does and a *You are here* marker, stays in a
+dialog: that is reference, and reference does not belong in the footer.
+
+The row toggles, but a press on **Start**, **Skip** or **See all** does not —
+otherwise Start would expand the thing it is dismissing. Expanded or shut is
+remembered across steps, so someone who wants the detail keeps it.
+
 It lives in its own slot in the footer band, never in the body. It is an offer
 rather than something Ray said, so it must survive a history repaint without
 being written into the scrollback — otherwise reopening the conversation would

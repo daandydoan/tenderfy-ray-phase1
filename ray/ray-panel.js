@@ -87,6 +87,7 @@
          the list, so the band is right before anyone has touched it. */
       this.refDocs = null;
       this.refPickOpen = false;
+      this.stepOpen = false;      // the guide strip, shut until asked
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
       this.confirmDelete = null;     // session id awaiting confirmation
@@ -296,6 +297,12 @@
         if (step) {
           global.rayStepRun(+step.getAttribute('data-ray-step'), this.context.tenderId);
           return;
+        }
+        /* The row toggles, but not when the press was for a control inside
+           it — otherwise Start would expand the thing it is dismissing. */
+        if (e.target.closest('[data-ray-step-toggle]')
+            && !e.target.closest('[data-ray-step],[data-ray-skip],[data-ray-steps]')) {
+          this.stepOpen = !this.stepOpen; this.paintNextStep(); return;
         }
         const skip = e.target.closest('[data-ray-skip]');
         if (skip) {
@@ -1071,16 +1078,36 @@
           </div>`;
       }
       const st = steps[done];
-      /* One line, in the same family as the credit notice: a strip in the
-         footer that states something and offers one action. It was a bordered
-         card in the conversation, which took four lines of height Ray's answer
-         wanted and read as more important than the answer above it. */
-      return `<div class="ray-nextbar">
-          <span class="ms">arrow_forward</span>
-          <span class="t"><b>Next · ${done + 1} of ${steps.length}</b> ${esc(st.n)}</span>
-          <button class="ray-nextlink" data-ray-steps title="${esc(st.d)}">All steps</button>
-          <button class="ray-nextlink" data-ray-skip="${done}">Skip</button>
-          <button class="ray-nextgo" data-ray-step="${done}">Start</button>
+      const open = this.stepOpen;
+      const pct = Math.round(done / steps.length * 100);
+      /* Three depths, and each earns its place. Shut, it is one line saying
+         what is next — enough to act on, small enough to ignore. Open, it
+         says why, how far along you are and what follows, which is the
+         orientation people want before committing to a step. The whole
+         guide, with what each step actually does, stays in a dialog: that is
+         reference, and reference does not belong in the footer. */
+      const more = !open ? '' : `
+        <div class="ray-nextmore">
+          <p class="d">${esc(st.long || st.d)}</p>
+          <div class="ray-nextprog">
+            <div class="ray-nextmeter"><i style="width:${pct}%"></i></div>
+            <span>${done} done · ${steps.length - done} to go</span>
+          </div>
+          ${steps[done + 1] ? `<p class="then">Then: ${esc(steps[done + 1].n)}${
+            steps[done + 2] ? ` → ${esc(steps[done + 2].n)}` : ''}</p>` : ''}
+          <div class="ray-nextlinks">
+            <button class="ray-nextlink" data-ray-skip="${done}">Skip this step</button>
+            <button class="ray-nextlink" data-ray-steps>See all ${steps.length} steps</button>
+          </div>
+        </div>`;
+      return `<div class="ray-nextbar${open ? ' open' : ''}">
+          <div class="ray-nextrow" data-ray-step-toggle>
+            <span class="ms">arrow_forward</span>
+            <span class="t"><b>Next · ${done + 1} of ${steps.length}</b> ${esc(st.n)}</span>
+            <span class="ms caret">expand_more</span>
+            <button class="ray-nextgo" data-ray-step="${done}">Start</button>
+          </div>
+          ${more}
         </div>`;
     }
 

@@ -613,11 +613,24 @@ html.ray-light .ray-panel{
    read as more important than the answer it sat under.                    */
 .ray-nextslot{flex:none}
 .ray-nextslot:empty{display:none}
-.ray-nextbar{display:flex;align-items:center;gap:7px;margin:12px 14px 0;padding:7px 10px;
-             border:1px solid var(--teal-bright);background:var(--teal-tint);border-radius:10px;
-             font-size:11.5px;line-height:1.4;color:#26685F}
+.ray-nextbar{margin:12px 14px 0;padding:7px 10px;border:1px solid var(--teal-bright);
+             background:var(--teal-tint);border-radius:10px;font-size:11.5px;line-height:1.4;
+             color:#26685F}
+.ray-nextrow{display:flex;align-items:center;gap:7px;cursor:pointer}
 .ray-nextbar .ms{font-size:15px;flex:none}
 .ray-nextbar .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-nextbar .caret{opacity:.6;transition:transform .15s ease}
+.ray-nextbar.open .caret{transform:rotate(180deg)}
+/* The expanded half: why this step, how far along, and what follows. */
+.ray-nextmore{margin-top:9px;padding-top:9px;border-top:1px solid rgba(38,104,95,.18)}
+.ray-nextmore .d{margin:0;font-size:12px;line-height:1.55;opacity:.9}
+.ray-nextprog{display:flex;align-items:center;gap:8px;margin-top:9px}
+.ray-nextmeter{flex:1;height:4px;border-radius:999px;background:rgba(38,104,95,.18);overflow:hidden}
+.ray-nextmeter i{display:block;height:100%;background:currentColor;border-radius:999px;
+                 transition:width .3s ease}
+.ray-nextprog span{flex:none;font-size:11px;opacity:.8}
+.ray-nextmore .then{margin:8px 0 0;font-size:11px;opacity:.75}
+.ray-nextlinks{display:flex;gap:14px;margin-top:10px}
 .ray-nextlink{border:none;background:none;font:inherit;font-size:11.5px;font-weight:700;
               color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;padding:0;flex:none}
 .ray-nextlink:hover{opacity:1}
@@ -631,10 +644,16 @@ html.ray-light .ray-panel{
 .dlg-steps{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 .dlg-step{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:9px}
 .dlg-step .ms{font-size:19px;color:var(--lighter);flex:none;margin-top:1px}
-.dlg-step .t{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35}
-.dlg-step .d{display:block;font-size:12px;font-weight:400;color:var(--light);margin-top:2px}
+.dlg-step .t{flex:1;min-width:0}
+.dlg-step .h{display:block;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.dlg-step .d{display:block;font-size:12.5px;font-weight:400;color:var(--gray);margin-top:3px;
+             line-height:1.55}
+.badge-now{display:inline-block;margin-top:7px;font-size:10px;text-transform:uppercase;
+           letter-spacing:.06em;font-weight:700;background:var(--teal);color:#fff;
+           padding:2px 7px;border-radius:5px}
 .dlg-step.done .ms{color:var(--teal)}
-.dlg-step.done .t{font-weight:500;color:var(--gray)}
+.dlg-step.done .h{font-weight:500;color:var(--gray)}
+.dlg-step.done .d{opacity:.75}
 .dlg-step.now{background:var(--teal-tint)}
 .dlg-step.now .ms{color:var(--teal)}
 

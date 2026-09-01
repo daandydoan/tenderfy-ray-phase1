@@ -75,26 +75,48 @@
   const STEPS = [
     { k: 'read',    n: 'Review the documents',
       d: 'What is in the pack, and how much of it matters',
+      long: 'Ray picks a reading strategy per file — whole-file for the short ones, '
+          + 'page-by-page for a 148-page RFT, OCR for anything scanned — and tells you '
+          + 'what each one is for before you open any of them.',
       q: 'Review all documents for this tender' },
     { k: 'addenda', n: 'Check conflicts and addenda',
       d: 'What the addenda override in the original',
+      long: 'Addenda quietly replace clauses in the original documents. Ray finds where '
+          + 'they conflict and tells you which version governs, so you do not price '
+          + 'against a superseded scope.',
       q: 'What changed in Addendum 2?' },
     { k: 'extract', n: 'Extract the response schedule',
       d: 'The questions you are required to answer',
+      long: 'Pulls every question out of the response schedule with its word limit and '
+          + 'page number, so the list you work from is the list you are marked on.',
       q: 'Extract the response schedule questions' },
     { k: 'match',   n: 'Match against your library',
       d: 'Which answers you have already written',
+      long: 'Checks each question against your Response Library and scores the matches, '
+          + 'so you rewrite only what you have to. Most bids reuse more than people expect.',
       q: 'Find a past answer about safety' },
     { k: 'draft',   n: 'Draft the gaps',
       d: 'Answers for the questions with no match',
+      long: 'Drafts the questions nothing in the library covers, working from the tender '
+          + 'documents and staying inside the word limit. You edit from a start, not a '
+          + 'blank page.',
       q: 'Draft an answer for Q1' },
     { k: 'risk',    n: 'Check commercial risk',
       d: 'Insurance, damages, payment terms, validity',
+      long: 'The terms that cost money if you miss them — liquidated damages, insurance '
+          + 'levels, payment terms, how long your price stays open — each quoted with '
+          + 'the page it came from.',
       q: 'What insurance is required?' },
     { k: 'approve', n: 'Review and approve responses',
-      d: 'Triage what Ray drafted', goto: 'responses' },
+      d: 'Triage what Ray drafted',
+      long: 'Everything Ray wrote, in one list to approve or discard. Tick a response to '
+          + 'hand it back to him for a rewrite, or tick two and ask him to merge them.',
+      goto: 'responses' },
     { k: 'submit',  n: 'Compile the submission',
-      d: 'Assemble and check nothing is missing', todo: true },
+      d: 'Assemble and check nothing is missing',
+      long: 'Assembles the approved responses into the submission and checks the schedule '
+          + 'is complete — every question answered, every word limit respected.',
+      todo: true },
   ];
   global.rayStepList = STEPS;
 
@@ -129,12 +151,15 @@
 
   global.rayStepsDialog = function (tenderId) {
     const done = global.rayStepsDone(tenderId);
-    global.rayDlg('Working through this tender', `
-      <p>Ray suggests these in order, but you can start anywhere.</p>
+    global.rayDlg('Working through a tender', `
+      <p>Ray suggests these in order, but you can start anywhere — and skip
+         anything that does not apply to this bid.</p>
       <div class="dlg-steps">${STEPS.map((st, i) => `
         <div class="dlg-step ${i < done ? 'done' : i === done ? 'now' : ''}">
           <span class="ms">${i < done ? 'check_circle' : i === done ? 'play_circle' : 'radio_button_unchecked'}</span>
-          <span class="t">${st.n}<span class="d">${st.d}</span></span>
+          <div class="t"><span class="h">${i + 1}. ${st.n}</span>
+            <span class="d">${st.long || st.d}</span>
+            ${i === done ? '<span class="badge-now">You are here</span>' : ''}</div>
         </div>`).join('')}</div>`);
   };
 
