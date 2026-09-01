@@ -258,6 +258,37 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
+## The path through a tender
+
+Ray's empty state, when he is pointed at a tender, is **the eight things a bid
+needs, in the order it needs them** — not a set of sample questions.
+
+These are deliberately **not the guided demo's eight**. Those are ordered by
+which part of the brief they prove, which is right for showing the build and
+wrong for doing the work. These are the job: understand the pack, find what the
+addenda changed, get the questions, see what you have already answered, draft
+the rest, price the risk, approve, submit.
+
+The reason to show them as a path rather than a menu is the user base. A bid
+coordinator should not have to know how to phrase a prompt to get started, and
+*"what should I ask it?"* is the question that kills assistants for
+non-technical users. A path answers it before it is asked: read where you are,
+press the next thing.
+
+Three states per row and nothing else — done, the one to do now, the ones
+after. **Later steps stay pressable.** Locking them would be condescending, and
+people jump around real bids constantly; the highlight says what is
+recommended, it does not gate. Progress is per tender.
+
+Six of the eight run for real through the mock provider. `rayStepsDone()` is a
+mocked table — a real one reads the tender's own record. What is being proposed
+here is the shape: the ordering, the three states, the per-tender progress.
+
+> The empty state must be repainted when focus changes, since the path only
+> exists once there is a tender and `focus()` lands after the first paint. It
+> repaints **only while it is still the empty state** — a conversation must
+> never be redrawn out from under someone mid-read.
+
 ## Setup is a dialog, not a card in the session
 
 Ray's session is a **record of a conversation**. A control that was only true
@@ -309,7 +340,7 @@ the other is a question.
 switches states. The spinner slows under `prefers-reduced-motion` rather than
 stopping, so it still reads as busy.
 
-## References are documents, not screens## References are documents, not screens
+## References are documents, not screens
 
 The band above the composer names **the platform's own documents** — the files
 already uploaded against the tender — rather than the page you happen to be
