@@ -299,11 +299,16 @@ you press. 6.1:1 body text, 11.2:1 on the step name.
 > did exactly that once before this was tokenised.
 
 **Three depths, each earning its place.** Shut, it is one line saying what is
-next: enough to act on, small enough to ignore. Pressed, it opens to 189px and
-adds why this step exists, a meter with *3 done · 5 to go*, and what follows —
-the orientation people want before committing to something. The whole guide,
-with what each step actually does and a *You are here* marker, stays in a
-dialog: that is reference, and reference does not belong in the footer.
+next: enough to act on, small enough to ignore. Pressed, it adds why this step
+exists and what follows — the orientation people want before committing to
+something. The whole guide, with what each step actually does and a *You are
+here* marker, stays in a dialog: that is reference, and reference does not
+belong in the footer.
+
+The **progress meter sits outside the collapse**, as a line flush along the
+strip's bottom edge. How far through you are is the one thing worth knowing
+without opening anything, and on the edge it costs no height and no width —
+inside the expanded half it was invisible exactly when it was most useful.
 
 The row toggles, but a press on **Start**, **Skip** or **See all** does not —
 otherwise Start would expand the thing it is dismissing. Expanded or shut is
@@ -555,7 +560,7 @@ duplicates. There is also a one-time sweep for projects seeded before the flag
 existed, identified by exhibit title, history opener, or empty-and-untitled.
 A project the user named or wrote in matches none of those and is never touched.
 
-## Showing the empty state
+## Showing the empty state, and the credit warning
 
 A first-run screen is worth demonstrating and impossible to reach once the
 prototype has seeded two projects. The header's **Empty** switch fakes it:
@@ -568,6 +573,16 @@ have no projects would read as data loss, so it resets on every load. Starting
 a project from the empty state clears the flag too, otherwise the click appears
 to do nothing: the project is created, and the list it lands back on is still
 pretending to be empty.
+
+The **credit warning** works the same way, and for a sharper reason. It used to
+show whenever usage passed 60%, which in a demo meant a permanent orange bar
+warning about an allowance nobody is spending — the loudest thing in the panel,
+and it never went away. It is off unless asked for now: shown on purpose, not
+by accident.
+
+Both switches are **icon-only**. Demo and Light get pressed during a demo and
+earn their labels; these two are set once beforehand, and four labelled pills
+squeezed the page crumb down to a lone home icon.
 
 ## Demo modes
 

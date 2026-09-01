@@ -619,9 +619,9 @@ html.ray-light .ray-panel{
    most important thing in the panel, not the border — so the fill goes neutral
    and the outline stays, which is enough to mark it as Ray's without it
    competing with Send. */
-.ray-nextbar{margin:0 14px 10px;padding:7px 10px;border:1px solid var(--teal-bright);
+.ray-nextbar{margin:0 14px 10px;padding:7px 10px 0;border:1px solid var(--teal-bright);
              background:var(--n-100);border-radius:10px;font-size:11.5px;line-height:1.4;
-             color:var(--gray)}
+             color:var(--gray);overflow:hidden}
 .ray-nextrow{display:flex;align-items:center;gap:7px;cursor:pointer}
 .ray-nextbar .ms{font-size:15px;flex:none}
 .ray-nextbar .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -632,11 +632,11 @@ html.ray-light .ray-panel{
 /* The expanded half: why this step, how far along, and what follows. */
 .ray-nextmore{margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
 .ray-nextmore .d{margin:0;font-size:12px;line-height:1.55;opacity:.9}
-.ray-nextprog{display:flex;align-items:center;gap:8px;margin-top:9px}
-.ray-nextmeter{flex:1;height:4px;border-radius:999px;background:var(--n-200);overflow:hidden}
-.ray-nextmeter i{display:block;height:100%;background:var(--teal);border-radius:999px;
-                 transition:width .3s ease}
-.ray-nextprog span{flex:none;font-size:11px;opacity:.8}
+/* A line on the bottom edge — always there, whether the strip is open or
+   shut. Full width and flush, so it reads as the card's own progress rather
+   than another row of content. */
+.ray-nextmeter{height:3px;margin:7px -10px 0;background:var(--n-200)}
+.ray-nextmeter i{display:block;height:100%;background:var(--teal);transition:width .3s ease}
 .ray-nextmore .then{margin:8px 0 0;font-size:11px;opacity:.75}
 .ray-nextlinks{display:flex;gap:14px;margin-top:10px}
 .ray-nextlink{border:none;background:none;font:inherit;font-size:11.5px;font-weight:700;
@@ -1206,6 +1206,9 @@ html:not(.ray-light) .ray-fab{border-color:rgba(255,255,255,.16)}
 .hthemes{display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.16);
         border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700}
 .hthemes:hover{background:rgba(255,255,255,.26)}
+/* The two state switches are icon-only, so they get a square hit area
+   rather than a pill sized for a missing label. */
+.hthemes:empty,.hthemes:has(> .ms:only-child){padding:5px 7px}
 .hthemes.on{background:#fff;color:var(--cta)}
 .hthemes.on:hover{background:#fff}
 .hthemes .ms{font-size:17px}

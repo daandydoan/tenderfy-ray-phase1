@@ -282,10 +282,12 @@
     global.rayEmptyDemo = !!on;
     const btn = document.querySelector('[data-ray-empty]');
     if (btn) {
-      btn.innerHTML = `<span class="ms">${on ? 'inventory_2' : 'inbox'}</span>`
-        + (on ? 'Empty' : 'Projects');
+      /* Icon only. Demo and Light get pressed during a demo and earn their
+         labels; these two are set once beforehand, and four labelled pills
+         squeezed the page crumb down to a lone home icon. */
+      btn.innerHTML = `<span class="ms">${on ? 'inventory_2' : 'inbox'}</span>`;
       btn.title = on
-        ? 'Showing the empty state — click to show your projects again'
+        ? 'Showing the empty projects state — click to show your projects again'
         : 'Show the empty projects state';
       btn.classList.toggle('on', !!on);
     }
@@ -295,6 +297,24 @@
   global.rayToggleEmpty = function () {
     applyEmpty(!global.rayEmptyDemo);
   };
+
+  /* ── The credit notice, on demand ────────────────────────────────────
+     It is a real state, but in a demo it is a permanent orange bar warning
+     about an allowance nobody is spending — it was the loudest thing in the
+     panel and it never went away. Off unless asked for, like the empty
+     state, and for the same reason: shown on purpose, not by accident. */
+  function applyCredits(on) {
+    global.rayCreditsDemo = !!on;
+    const btn = document.querySelector('[data-ray-credits]');
+    if (btn) {
+      btn.innerHTML = `<span class="ms">${on ? 'bolt' : 'battery_full'}</span>`;
+      btn.title = on ? 'Hide the credit warning' : 'Show the credit warning';
+      btn.classList.toggle('on', !!on);
+    }
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p) p.paintCredits();
+  }
+  global.rayToggleCredits = function () { applyCredits(!global.rayCreditsDemo); };
 
   /* A tender's colour, derived from its id so it is stable everywhere it
      appears — the page title bar here, the session tiles in Ray's list. */
@@ -383,6 +403,7 @@
             <span class="hthemes" data-ray-demo onclick="rayDemoStep()"></span>
             <span class="hthemes" data-ray-theme onclick="rayToggleTheme()"></span>
             <span class="hthemes" data-ray-empty onclick="rayToggleEmpty()"></span>
+            <span class="hthemes" data-ray-credits onclick="rayToggleCredits()"></span>
             <span class="ms fill" title="Notifications">notifications</span>
             <span class="hray" onclick="RayPanel.toggle()" title="Ray — Tenderfy Co-Pilot">
               <img src="${asset('assets/ray.svg')}" alt="Ray"> Ray</span>
@@ -427,6 +448,7 @@
     /* Deliberately not persisted: this is a demo switch, and coming back to a
        panel that claims you have no projects would read as data loss. */
     applyEmpty(false);
+    applyCredits(false);
     paintDemo();
 
     if (typeof global.onPageReady === 'function') global.onPageReady(service, user);

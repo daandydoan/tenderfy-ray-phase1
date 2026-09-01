@@ -940,7 +940,9 @@
     paintCredits() {
       const box = this.$('credit');
       const c = service.credits();
-      if (c.pct < 60) { box.innerHTML = ''; return; }
+      /* Shown when the demo asks for it, not whenever the number drifts past
+         a threshold — see applyCredits(). */
+      if (!global.rayCreditsDemo) { box.innerHTML = ''; return; }
       const low = c.pct >= 85;
       box.innerHTML = `
         <div class="ray-creditbar${low ? ' low' : ''}">
@@ -1092,10 +1094,6 @@
       const more = !open ? '' : `
         <div class="ray-nextmore">
           <p class="d">${esc(st.long || st.d)}</p>
-          <div class="ray-nextprog">
-            <div class="ray-nextmeter"><i style="width:${pct}%"></i></div>
-            <span>${done} done · ${steps.length - done} to go</span>
-          </div>
           ${steps[done + 1] ? `<p class="then">Then: ${esc(steps[done + 1].n)}${
             steps[done + 2] ? ` → ${esc(steps[done + 2].n)}` : ''}</p>` : ''}
           <div class="ray-nextlinks">
@@ -1103,6 +1101,9 @@
             <button class="ray-nextlink" data-ray-steps>See all ${steps.length} steps</button>
           </div>
         </div>`;
+      /* The meter is outside the collapse: how far along you are is the one
+         thing worth knowing without opening anything, and as a line on the
+         bottom edge it costs no height and no width. */
       return `<div class="ray-nextbar${open ? ' open' : ''}">
           <div class="ray-nextrow" data-ray-step-toggle>
             <span class="ms">arrow_forward</span>
@@ -1111,6 +1112,8 @@
             <button class="ray-nextgo" data-ray-step="${done}">Start</button>
           </div>
           ${more}
+          <div class="ray-nextmeter" title="${done} of ${steps.length} done">
+            <i style="width:${pct}%"></i></div>
         </div>`;
     }
 
