@@ -606,6 +606,39 @@ html.ray-light .ray-panel{
 .tn-mi.teal{color:var(--teal)}
 .tn-mi.red{color:var(--accent)}
 
+/* ── The path through a tender ─────────────────────────────────────────
+   Three states per row and nothing else: done, the one to do now, and the
+   ones after it. Later steps stay pressable — locking them out would be
+   condescending, and people jump around real bids all the time.          */
+.ray-empty.path{display:block;text-align:left;padding:14px 2px 4px}
+.ray-pathhead{margin-bottom:10px}
+.ray-pathhead .k{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+                 font-weight:700;color:var(--light)}
+.ray-pathhead .n{display:block;font-size:16px;font-weight:600;color:var(--ink);margin-top:2px;
+                 line-height:1.3}
+.ray-pathbar{height:5px;border-radius:999px;background:var(--n-200);overflow:hidden}
+.ray-pathbar i{display:block;height:100%;background:var(--teal);border-radius:999px;
+               transition:width .3s ease}
+.ray-pathcount{font-size:11.5px;color:var(--light);margin:6px 0 12px}
+.ray-steps-list{display:flex;flex-direction:column;gap:3px}
+.ray-step-row{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;
+              border:1px solid transparent;background:none;font:inherit;cursor:pointer;
+              padding:9px 10px;border-radius:10px;color:var(--ink)}
+.ray-step-row:hover{background:var(--row)}
+.ray-step-row .ms{font-size:19px;flex:none;margin-top:1px;color:var(--lighter)}
+.ray-step-row .t{flex:1;min-width:0;font-size:13.5px;font-weight:600;line-height:1.35}
+.ray-step-row .d{display:block;font-size:11.5px;font-weight:400;color:var(--light);margin-top:2px}
+.ray-step-row .go{flex:none;background:var(--cta);color:#fff;border-radius:8px;padding:5px 11px;
+                  font-size:12px;font-weight:600;align-self:center}
+/* Done: stated, not celebrated. */
+.ray-step-row.done .ms{color:var(--teal)}
+.ray-step-row.done .t{font-weight:500;color:var(--gray)}
+/* Now: the only row that looks like a button, because it is the one to press. */
+.ray-step-row.now{border-color:var(--teal);background:var(--teal-tint)}
+.ray-step-row.now .ms{color:var(--teal)}
+/* Next: legible, not disabled — greyed-out rows read as broken. */
+.ray-step-row.next .t{color:var(--gray)}
+
 /* ── Dialogs ───────────────────────────────────────────────────────────
    Setup lives here rather than in the rail: Ray's session is a record of a
    conversation, and a control that was only true once does not belong in
@@ -1007,6 +1040,20 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-bubble.user{background:var(--r-user-bg);color:var(--r-tx)}
 .ray-bubble blockquote{background:var(--r-sunk);border-left-color:var(--r-accent);color:var(--r-tx-2)}
 .ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
+.ray-pathhead .k{color:var(--r-tx-3)}
+.ray-pathhead .n{color:var(--r-tx)}
+.ray-pathbar{background:var(--r-raise)}
+.ray-pathbar i{background:var(--r-accent)}
+.ray-pathcount{color:var(--r-tx-3)}
+.ray-step-row{color:var(--r-tx)}
+.ray-step-row:hover{background:var(--r-raise)}
+.ray-step-row .ms{color:var(--r-line-2)}
+.ray-step-row .d{color:var(--r-tx-3)}
+.ray-step-row.done .ms{color:var(--r-accent)}
+.ray-step-row.done .t{color:var(--r-tx-2)}
+.ray-step-row.now{border-color:var(--r-accent);background:var(--r-accent-dim)}
+.ray-step-row.now .ms{color:var(--r-accent)}
+.ray-step-row.next .t{color:var(--r-tx-2)}
 .ray-result{background:var(--r-raise);border-color:var(--r-line-2)}
 .ray-resulthead{color:var(--r-tx)}
 .ray-resulthead .ms{color:var(--r-accent)}

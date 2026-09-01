@@ -289,6 +289,11 @@
           this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
         }
+        const step = e.target.closest('[data-ray-step]');
+        if (step) {
+          global.rayStepRun(+step.getAttribute('data-ray-step'), this.context.tenderId);
+          return;
+        }
         const cp = e.target.closest('[data-ray-copy]');
         if (cp) { this.copyAnswer(cp); return; }
         const up = e.target.closest('[data-ray-prompt]');
@@ -952,6 +957,12 @@
       this.paintCredits();
       this.paintAttachments();
       this.paintPrompts();
+      /* The empty state depends on what Ray is pointed at — the path only
+         exists once there is a tender — and focus() lands here after the
+         first paint, so it has to be redrawn. Only while it IS the empty
+         state: a conversation must never be repainted out from under you. */
+      if (this.session && !this.session.history().length
+          && this.$('body').querySelector('.ray-empty')) this.greet();
     }
 
     /* ── Visibility ──────────────────────────────────────────────────────
@@ -1027,10 +1038,49 @@
     /* ── Messages ────────────────────────────────────────────────────────── */
     /** The blank-conversation state. One line, then the things worth asking —
      *  no greeting bubble pretending a conversation has started. */
+    /* The path through a tender, when Ray is pointed at one. It replaces the
+       generic starters because "what's next" has a real answer here, and a
+       user who is not going to phrase a prompt can read it and press it. */
+    stepPath() {
+      const id = this.context.tenderId;
+      const steps = global.rayStepList;
+      if (!id || !steps) return '';
+      let tender = null;
+      try { tender = global.RayPermissions.Repositories.tenders.get(service.guard, id); }
+      catch (e) { return ''; }
+      const done = global.rayStepsDone(id);
+      const pct = Math.round(done / steps.length * 100);
+      const rows = steps.map((st, i) => {
+        const state = i < done ? 'done' : i === done ? 'now' : 'next';
+        const icon = state === 'done' ? 'check_circle'
+                   : state === 'now' ? 'play_circle' : 'radio_button_unchecked';
+        return `<button class="ray-step-row ${state}" data-ray-step="${i}">
+            <span class="ms">${icon}</span>
+            <span class="t">${esc(st.n)}<span class="d">${esc(st.d)}</span></span>
+            ${state === 'now' ? '<span class="go">Start</span>' : ''}
+          </button>`;
+      }).join('');
+      return `
+        <div class="ray-path">
+          <div class="ray-pathhead">
+            <span class="k">Working through</span>
+            <span class="n">${esc(tender.name)}</span>
+          </div>
+          <div class="ray-pathbar"><i style="width:${pct}%"></i></div>
+          <div class="ray-pathcount">${done} of ${steps.length} done</div>
+          <div class="ray-steps-list">${rows}</div>
+        </div>`;
+    }
+
     greet() {
       const g = service.guard;
       const s = global.RaySurfaces.resolve(this.surfaceId);
       const n = service.registry.countsFor(s, g);
+      const path = this.stepPath();
+      if (path) {
+        this.$('body').innerHTML = `<div class="ray-empty path">${path}</div>`;
+        return;
+      }
       this.$('body').innerHTML = `
         <div class="ray-empty">
           <span class="ray-halo lg"><img class="ray-mark lg" src="${this.mark}" alt=""></span>

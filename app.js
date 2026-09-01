@@ -60,6 +60,63 @@
     applyTheme(light);
   };
 
+  /* ── Working through a tender ────────────────────────────────────────
+     The eight things a bid actually needs, in the order it needs them.
+
+     This is not the guided demo's eight — those are ordered by which part of
+     the brief they prove, which is the right order for showing the build and
+     the wrong order for doing the work. These are the job: understand the
+     pack, find what the addenda changed, get the questions, see what you have
+     already answered, draft the rest, price the risk, approve, submit.
+
+     The point of showing them as a path is that nobody has to know what to
+     ask. A bid coordinator should not have to phrase a prompt to get started;
+     they should be able to read where they are and press the next thing. */
+  const STEPS = [
+    { k: 'read',    n: 'Review the documents',
+      d: 'What is in the pack, and how much of it matters',
+      q: 'Review all documents for this tender' },
+    { k: 'addenda', n: 'Check conflicts and addenda',
+      d: 'What the addenda override in the original',
+      q: 'What changed in Addendum 2?' },
+    { k: 'extract', n: 'Extract the response schedule',
+      d: 'The questions you are required to answer',
+      q: 'Extract the response schedule questions' },
+    { k: 'match',   n: 'Match against your library',
+      d: 'Which answers you have already written',
+      q: 'Find a past answer about safety' },
+    { k: 'draft',   n: 'Draft the gaps',
+      d: 'Answers for the questions with no match',
+      q: 'Draft an answer for Q1' },
+    { k: 'risk',    n: 'Check commercial risk',
+      d: 'Insurance, damages, payment terms, validity',
+      q: 'What insurance is required?' },
+    { k: 'approve', n: 'Review and approve responses',
+      d: 'Triage what Ray drafted', goto: 'responses' },
+    { k: 'submit',  n: 'Compile the submission',
+      d: 'Assemble and check nothing is missing', todo: true },
+  ];
+  global.rayStepList = STEPS;
+
+  /* Mocked progress, per tender and in memory — enough to show the three
+     states a row can be in. A real one reads from the tender's own record. */
+  const DONE = { 't-envind': 3, 't-velocity': 0, 't-civic': 6, 't-northside': 1 };
+  global.rayStepsDone = function (tenderId) {
+    return DONE[tenderId] || 0;
+  };
+  global.rayStepRun = function (i, tenderId) {
+    const st = STEPS[i];
+    if (!st) return;
+    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i);   // reaching a step clears the ones before it
+    if (st.goto === 'responses') {
+      location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
+      return;
+    }
+    if (st.todo) { global.RayPanel.toast('Compile the submission — not built in this prototype'); return; }
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p) p.run(st.q);
+  };
+
   /* ── Dialogs ─────────────────────────────────────────────────────────
      Ray owns a persistent session, so one-shot setup does not belong inside
      it — a conversation you scroll back through should not be littered with
