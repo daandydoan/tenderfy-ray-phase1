@@ -287,10 +287,16 @@ with credits low and the guide open the footer reached **403px of an 860px
 panel** — the conversation got what was left. Moved out, the footer is 202px
 and the two notices no longer read as one wall of chrome.
 
-It is also **quiet**. The teal tint and teal border made a suggestion look like
-the most important thing on screen, which it never is. Neutral ground, hairline
-border, muted text, and **only Start carries colour** — one active thing, and
-it is the one you press. 6.1:1 body text, 11.2:1 on the step name.
+It is also **quiet** — but it keeps its green outline. The tinted *fill* was
+what made a suggestion look like the most important thing on screen; the border
+was never the problem. So the ground goes neutral, the outline stays to mark it
+as Ray's, and **only Start carries colour**: one active thing, and it is the one
+you press. 6.1:1 body text, 11.2:1 on the step name.
+
+> The outline is `--r-guide-bd`, not a literal. The rail-surface block at the
+> foot of the stylesheet styles **both** themes — the tokens flip, the block
+> does not — so a hardcoded colour there leaks the dark value into light. It
+> did exactly that once before this was tokenised.
 
 **Three depths, each earning its place.** Shut, it is one line saying what is
 next: enough to act on, small enough to ignore. Pressed, it opens to 189px and

@@ -303,6 +303,7 @@ h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center
   --r-blue-bg:rgba(129,145,224,.16);   --r-blue-tx:#A7B2EA;
   --r-amber-bg:rgba(255,188,74,.14);   --r-amber-tx:#F5C879;
   --r-halo:rgba(255,188,74,.20);       /* the disc behind the full mark */
+  --r-guide-bd:rgba(106,221,181,.45);  /* the guide strip's outline          */
   --r-grey-bg:rgba(255,255,255,.08);   --r-grey-tx:#A8B2B6;
   --r-clay-tx:#D8A88F;
   --r-deny-bg:rgba(249,82,70,.12);     --r-deny-bd:rgba(249,82,70,.35);
@@ -331,6 +332,7 @@ html.ray-light .ray-panel{
   --r-blue-bg:rgba(92,107,192,.14); --r-blue-tx:#414C90;
   --r-amber-bg:#FAEEDA; --r-amber-tx:#633806;
   --r-halo:#FCEBCF;
+  --r-guide-bd:#6ADDB5;
   --r-grey-bg:#EFEFEF;  --r-grey-tx:#5F5E5A;
   --r-clay-tx:#6D4C41;
   --r-deny-bg:#FCEBEB;  --r-deny-bd:#F6DCD9; --r-deny-tx:#A32D2D;
@@ -613,11 +615,11 @@ html.ray-light .ray-panel{
    read as more important than the answer it sat under.                    */
 .ray-nextslot{flex:none}
 .ray-nextslot:empty{display:none}
-/* Quiet. It is a suggestion sitting under an answer, not a call to action
-   competing with Send — the tinted, teal-bordered version read as the most
-   important thing in the panel, which it never is. Neutral ground, hairline
-   border, and only Start carries colour. */
-.ray-nextbar{margin:0 14px 10px;padding:7px 10px;border:1px solid var(--border);
+/* Quiet ground, green outline. The tinted fill was what made this read as the
+   most important thing in the panel, not the border — so the fill goes neutral
+   and the outline stays, which is enough to mark it as Ray's without it
+   competing with Send. */
+.ray-nextbar{margin:0 14px 10px;padding:7px 10px;border:1px solid var(--teal-bright);
              background:var(--n-100);border-radius:10px;font-size:11.5px;line-height:1.4;
              color:var(--gray)}
 .ray-nextrow{display:flex;align-items:center;gap:7px;cursor:pointer}
@@ -643,7 +645,7 @@ html.ray-light .ray-panel{
 .ray-nextgo{border:none;background:var(--cta);color:#fff;border-radius:7px;padding:4px 11px;
             font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
 .ray-nextgo:hover{background:var(--cta-dark)}
-.ray-nextbar.done{border-color:var(--border);background:var(--n-100);color:var(--gray)}
+.ray-nextbar.done{border-color:var(--teal-bright);background:var(--n-100);color:var(--gray)}
 .ray-nextbar.done .ms{color:var(--teal)}
 
 /* The whole list, when someone wants to see where this is going. */
@@ -1076,13 +1078,15 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-bubble.user{background:var(--r-user-bg);color:var(--r-tx)}
 .ray-bubble blockquote{background:var(--r-sunk);border-left-color:var(--r-accent);color:var(--r-tx-2)}
 .ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
-.ray-nextbar{border-color:var(--r-line);background:var(--r-sunk);color:var(--r-tx-2)}
+/* Tokens only in this block: it styles the rail in both themes, and a literal
+   colour here leaks the dark value into light. */
+.ray-nextbar{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}
 .ray-nextbar .ms:first-child{color:var(--r-tx-3)}
 .ray-nextbar .t b{color:var(--r-tx)}
 .ray-nextmore{border-top-color:var(--r-line)}
 .ray-nextmeter{background:var(--r-raise)}
 .ray-nextmeter i{background:var(--r-accent)}
-.ray-nextbar.done{border-color:var(--r-line);background:var(--r-sunk);color:var(--r-tx-2)}
+.ray-nextbar.done{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}
 .ray-nextbar.done .ms{color:var(--r-accent)}
 .ray-result{background:var(--r-raise);border-color:var(--r-line-2)}
 .ray-resulthead{color:var(--r-tx)}
