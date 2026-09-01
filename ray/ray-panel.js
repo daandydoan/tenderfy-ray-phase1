@@ -88,6 +88,7 @@
       this.refDocs = null;
       this.refPickOpen = false;
       this.stepOpen = false;      // the guide strip, shut until asked
+      this.guideOff = false;      // dismissed outright — only from expanded
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
       this.confirmDelete = null;     // session id awaiting confirmation
@@ -315,6 +316,14 @@
         if (e.target.closest('[data-ray-steps]')) {
           global.rayStepsDialog(this.context.tenderId); return;
         }
+        if (e.target.closest('[data-ray-guide-off]')) {
+          this.guideOff = true; this.stepOpen = false; this.paintNextStep();
+          toast('Guide hidden — reopen it from the header');
+          return;
+        }
+        if (e.target.closest('[data-ray-guide-on]')) {
+          this.guideOff = false; this.paintNextStep(); return;
+        }
         const cp = e.target.closest('[data-ray-copy]');
         if (cp) { this.copyAnswer(cp); return; }
         const up = e.target.closest('[data-ray-prompt]');
@@ -447,6 +456,15 @@
 
     /* The size controls, which differ by form. A dialog offers one move —
        become the rail. The rail offers two — widen, or fold back down. */
+    /* The way back to a hidden guide. Only rendered while it is hidden, so
+       it costs nothing the rest of the time — and it is in the header rather
+       than where the strip was, because "closed" should mean closed. */
+    guideBtn() {
+      if (!this.guideOff || !this.context.tenderId || !global.rayStepList) return '';
+      return `<span class="ms ray-hbtn" data-ray-guide-on
+                    title="Show the guide">checklist</span>`;
+    }
+
     formBtns() {
       if (this.mode === 'inline') return '';
       if (this.form === 'dialog') {
@@ -486,6 +504,7 @@
         `<span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>`
         + (dialog ? this.idBlock(name)
                   : `<div class="ray-title">${esc(name)}</div>${this.betaTag}`)
+        + this.guideBtn()
         + `<span class="ms ray-hbtn" data-ray-menu="${this.threadId}" title="Project options">more_horiz</span>`
         + this.formBtns()
         + `<span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
@@ -631,6 +650,7 @@
       if (this.context.tenderId !== wasTender) {
         this.refDocs = null;
         this.refPickOpen = false;
+        this.guideOff = false;    // a different tender gets its guide back
       }
       /* Navigating changes what Ray is looking at, never which session you are
          in — the same way a Figma chat survives moving around a file. */
@@ -1099,6 +1119,7 @@
           <div class="ray-nextlinks">
             <button class="ray-nextlink" data-ray-skip="${done}">Skip this step</button>
             <button class="ray-nextlink" data-ray-steps>See all ${steps.length} steps</button>
+            <button class="ray-nextlink off" data-ray-guide-off>Hide the guide</button>
           </div>
         </div>`;
       /* The meter is outside the collapse: how far along you are is the one
@@ -1109,7 +1130,7 @@
             <span class="ms">arrow_forward</span>
             <span class="t"><b>Next · ${done + 1} of ${steps.length}</b> ${esc(st.n)}</span>
             <span class="ms caret">expand_more</span>
-            <button class="ray-nextgo" data-ray-step="${done}">Start</button>
+            <button class="ray-nextgo" data-ray-step="${done}"${this.busy ? ' disabled' : ''}>Start</button>
           </div>
           ${more}
           <div class="ray-nextmeter" title="${done} of ${steps.length} done">
@@ -1123,7 +1144,8 @@
     paintNextStep() {
       const box = this.$('nextstep');
       if (!box) return;
-      box.innerHTML = (this.view === 'list' || this.busy) ? '' : this.nextStepCard();
+      box.innerHTML = (this.view === 'list' || this.guideOff) ? '' : this.nextStepCard();
+      this.paintHeader();          // the way back in lives in the header
     }
 
     greet() {

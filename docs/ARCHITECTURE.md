@@ -314,6 +314,20 @@ The row toggles, but a press on **Start**, **Skip** or **See all** does not —
 otherwise Start would expand the thing it is dismissing. Expanded or shut is
 remembered across steps, so someone who wants the detail keeps it.
 
+**It does not go away on its own.** It used to vanish while a turn was running
+and come back after, which read as the guide losing its place; it stays put now
+and only **Start** goes dead while Ray works. The one way to be rid of it is
+*Hide the guide*, offered **only in the expanded half** — a one-press dismiss on
+a collapsed strip is too easy to hit by accident and, for someone who does not
+know the feature exists, impossible to undo.
+
+Hidden, a **checklist icon appears in the panel header** and brings it back.
+That is the whole point of putting the way back somewhere else: closed should
+mean closed, not "replaced by a smaller version of itself". The icon is only
+rendered while the guide is hidden, so it costs nothing the rest of the time,
+and dismissal belongs to the tender it was dismissed on — a different tender
+gets its guide back.
+
 It lives in its own slot in the footer band, never in the body. It is an offer
 rather than something Ray said, so it must survive a history repaint without
 being written into the scrollback — otherwise reopening the conversation would
