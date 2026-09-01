@@ -606,29 +606,26 @@ html.ray-light .ray-panel{
 .tn-mi.teal{color:var(--teal)}
 .tn-mi.red{color:var(--accent)}
 
-/* ── The next step, in the conversation ────────────────────────────────
-   One card, always the next move, sitting under whatever Ray last said. A
-   checklist in a panel is something you have to notice; this is where the
-   eye already is.                                                        */
-.ray-nextslot{flex:none;padding:0 16px 10px}
+/* ── The next step ─────────────────────────────────────────────────────
+   One line, in the same family as the credit notice above it: a strip that
+   states something and offers one action. It began as a bordered card in
+   the conversation, which cost four lines of height the answer wanted and
+   read as more important than the answer it sat under.                    */
+.ray-nextslot{flex:none}
 .ray-nextslot:empty{display:none}
-.ray-next{border:1px solid var(--teal);border-radius:12px;padding:11px 12px;background:var(--teal-tint)}
-.ray-nexthead{display:flex;align-items:center;justify-content:space-between;gap:8px;
-              font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;
-              color:var(--teal);margin-bottom:7px}
-.ray-nextall{border:none;background:none;font:inherit;font-size:10.5px;font-weight:700;
-             text-transform:uppercase;letter-spacing:.05em;color:var(--gray);cursor:pointer;
-             padding:2px 4px;border-radius:5px}
-.ray-nextall:hover{color:var(--teal);background:rgba(255,255,255,.5)}
-.ray-nextbody .t{font-size:14px;font-weight:600;color:var(--ink);line-height:1.35}
-.ray-nextbody .d{display:block;font-size:12px;font-weight:400;color:var(--gray);margin-top:2px}
-.ray-nextacts{display:flex;justify-content:flex-end;gap:7px;margin-top:11px}
-.ray-nextacts .ray-act{margin:0}
-.ray-next.done{display:flex;align-items:flex-start;gap:9px;border-color:var(--lighter);
-               background:var(--n-100)}
-.ray-next.done .ms{font-size:19px;color:var(--teal);flex:none}
-.ray-next.done .t{flex:1;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4}
-.ray-next.done .d{display:block;font-size:12px;font-weight:400;color:var(--gray);margin-top:2px}
+.ray-nextbar{display:flex;align-items:center;gap:7px;margin:12px 14px 0;padding:7px 10px;
+             border:1px solid var(--teal-bright);background:var(--teal-tint);border-radius:10px;
+             font-size:11.5px;line-height:1.4;color:#26685F}
+.ray-nextbar .ms{font-size:15px;flex:none}
+.ray-nextbar .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ray-nextlink{border:none;background:none;font:inherit;font-size:11.5px;font-weight:700;
+              color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;padding:0;flex:none}
+.ray-nextlink:hover{opacity:1}
+.ray-nextgo{border:none;background:var(--cta);color:#fff;border-radius:7px;padding:4px 11px;
+            font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
+.ray-nextgo:hover{background:var(--cta-dark)}
+.ray-nextbar.done{border-color:var(--lighter);background:var(--n-100);color:var(--gray)}
+.ray-nextbar.done .ms{color:var(--teal)}
 
 /* The whole list, when someone wants to see where this is going. */
 .dlg-steps{display:flex;flex-direction:column;gap:2px;margin-top:4px}
@@ -1042,16 +1039,9 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-bubble.user{background:var(--r-user-bg);color:var(--r-tx)}
 .ray-bubble blockquote{background:var(--r-sunk);border-left-color:var(--r-accent);color:var(--r-tx-2)}
 .ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
-.ray-next{border-color:var(--r-accent);background:var(--r-accent-dim)}
-.ray-nexthead{color:var(--r-accent)}
-.ray-nextall{color:var(--r-tx-3)}
-.ray-nextall:hover{color:var(--r-accent);background:var(--r-raise)}
-.ray-nextbody .t{color:var(--r-tx)}
-.ray-nextbody .d{color:var(--r-tx-2)}
-.ray-next.done{border-color:var(--r-line-2);background:var(--r-raise)}
-.ray-next.done .ms{color:var(--r-accent)}
-.ray-next.done .t{color:var(--r-tx)}
-.ray-next.done .d{color:var(--r-tx-2)}
+.ray-nextbar{border-color:var(--r-accent);background:var(--r-accent-dim);color:var(--r-accent)}
+.ray-nextbar.done{border-color:var(--r-line-2);background:var(--r-raise);color:var(--r-tx-2)}
+.ray-nextbar.done .ms{color:var(--r-accent)}
 .ray-result{background:var(--r-raise);border-color:var(--r-line-2)}
 .ray-resulthead{color:var(--r-tx)}
 .ray-resulthead .ms{color:var(--r-accent)}

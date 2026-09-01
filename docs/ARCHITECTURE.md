@@ -273,14 +273,22 @@ non-technical users — a sidebar does not answer it, because they are not
 looking at the sidebar. They are reading the conversation.
 
 So the guidance **is** the conversation. Ray opens by saying where you are, and
-one card sits under his last answer offering the next move: what it is, why,
-**Start**, and **Skip**. After every answer it advances. Nothing else changes,
-and there is never more than one thing being suggested.
+a **single line** offers the next move: `Next · 4 of 8 · Match against your
+library`, with **Start**, **Skip** and **All steps**. After every answer it
+advances, and there is never more than one thing suggested.
 
-The card lives in its own slot below the body, not in it. It is an offer rather
-than something Ray said, so it must survive a history repaint without ever
+It began as a bordered card, which was wrong twice over: it cost four lines of
+height the answer wanted, and it read as more important than the answer it sat
+under. It is now a strip in the **same family as the credit notice** — same
+band, same margins, same radius, same 11.5px — because they are the same kind
+of thing: a line of state with one action. 40px against the card's 110px.
+Verified they stack cleanly when both are showing.
+
+It lives in its own slot in the footer band, never in the body. It is an offer
+rather than something Ray said, so it must survive a history repaint without
 being written into the scrollback — otherwise reopening the conversation would
-show every offer ever made, most of them stale.
+show every offer ever made, most of them stale. Contrast measured against the
+composited background, not the translucent fill: 5.1:1 light, 5.8:1 dark.
 
 **Skip** matters as much as Start. Without it the only way past a step is to do
 it, which turns a suggestion into a gate; people jump around real bids

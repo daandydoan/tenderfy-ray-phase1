@@ -181,10 +181,12 @@
         <div class="ray-headbar" data-ray="headbar"></div>
         <div class="ray-list" data-ray="list"></div>
         <div class="ray-body" data-ray="body"></div>
-        <div class="ray-nextslot" data-ray="nextstep"></div>
         <div class="ray-trace" data-ray="trace"></div>
         <div class="ray-foot">
+          <!-- Both notices sit in the same band and share its margins: they
+               are the same kind of thing — a line of state with one action. -->
           <div class="ray-credit" data-ray="credit"></div>
+          <div class="ray-nextslot" data-ray="nextstep"></div>
           <div class="ray-sec input">
             <div class="ray-seclabel" data-ray="ctxlabel">Reference</div>
             <div class="ray-ctx" data-ray="ctx"></div>
@@ -1062,25 +1064,23 @@
       if (!id || !steps) return '';
       const done = global.rayStepsDone(id);
       if (done >= steps.length) {
-        return `<div class="ray-next done">
+        return `<div class="ray-nextbar done">
             <span class="ms">task_alt</span>
-            <div class="t">All eight steps done for this tender.
-              <span class="d">Ask me anything else, or go back over any of them.</span></div>
-            <button class="ray-nextall" data-ray-steps>See the steps</button>
+            <span class="t">All ${steps.length} steps done for this tender</span>
+            <button class="ray-nextlink" data-ray-steps>Review them</button>
           </div>`;
       }
       const st = steps[done];
-      return `<div class="ray-next">
-          <div class="ray-nexthead">Next step · ${done + 1} of ${steps.length}
-            <button class="ray-nextall" data-ray-steps>See all</button></div>
-          <div class="ray-nextbody">
-            <div class="t">${esc(st.n)}<span class="d">${esc(st.d)}</span></div>
-          </div>
-          <div class="ray-nextacts">
-            <button class="ray-act ghost" data-ray-skip="${done}">Skip</button>
-            <button class="ray-act go" data-ray-step="${done}">
-              <span class="ms">play_arrow</span>Start</button>
-          </div>
+      /* One line, in the same family as the credit notice: a strip in the
+         footer that states something and offers one action. It was a bordered
+         card in the conversation, which took four lines of height Ray's answer
+         wanted and read as more important than the answer above it. */
+      return `<div class="ray-nextbar">
+          <span class="ms">arrow_forward</span>
+          <span class="t"><b>Next · ${done + 1} of ${steps.length}</b> ${esc(st.n)}</span>
+          <button class="ray-nextlink" data-ray-steps title="${esc(st.d)}">All steps</button>
+          <button class="ray-nextlink" data-ray-skip="${done}">Skip</button>
+          <button class="ray-nextgo" data-ray-step="${done}">Start</button>
         </div>`;
     }
 
