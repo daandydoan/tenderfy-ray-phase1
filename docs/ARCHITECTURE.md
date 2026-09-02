@@ -436,6 +436,18 @@ it, which turns a suggestion into a gate; people jump around real bids
 constantly. **See all** opens the full eight in a dialog for anyone who wants
 to know where this is going.
 
+**No step navigates on its own.** Step 7 used to jump straight to Responses,
+which threw you off the screen mid-method and lost the panel, the conversation
+and your place in the guide. The way out is offered at the end and pressed on
+purpose.
+
+**Finishing lands.** Eight stages of a bid is a real piece of work, and the
+panel used to mark it with "All 8 steps done" in the same grey as everything
+else — true, and completely flat. All three forms now show a tick, a headline
+and what was actually achieved, with **Review the tender** as the deliberate
+next move. The greeting repaints with progress too, so it cannot sit there
+saying *6 of 8* under a guide that says the method is finished.
+
 Six of the eight run for real through the mock provider. `rayStepsDone()` is a
 mocked table — a real one reads the tender's own record. What is proposed here
 is the shape: the ordering, one suggestion at a time, and progress per tender.

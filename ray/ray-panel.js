@@ -318,6 +318,9 @@
           global.rayStepSkip(+skip.getAttribute('data-ray-skip'), this.context.tenderId);
           return;
         }
+        if (e.target.closest('[data-ray-go-responses]')) {
+          global.rayGoResponses(); return;
+        }
         if (e.target.closest('[data-ray-steps]')) {
           global.rayStepsDialog(this.context.tenderId); return;
         }
@@ -1118,9 +1121,10 @@
       const done = global.rayStepsDone(id);
       if (done >= steps.length) {
         return `<div class="ray-nextbar done">
-            <span class="ms">task_alt</span>
-            <span class="t">All ${steps.length} steps done for this tender</span>
-            <button class="ray-nextlink" data-ray-steps>Review them</button>
+            <span class="ray-wintick sm"><span class="ms">check</span></span>
+            <span class="t"><b>All ${steps.length} stages complete</b> — ready for approval</span>
+            <button class="ray-nextlink" data-ray-steps>See what we did</button>
+            <button class="ray-nextgo" data-ray-go-responses>Review</button>
           </div>`;
       }
       const st = steps[done];
@@ -1175,10 +1179,23 @@
       const steps = global.rayStepList;
       if (!id || !steps || this.guideOff) return '';
       const done = global.rayStepsDone(id);
+      /* Finishing should land. Eight stages of a bid is a real piece of work
+         and the panel said "All 8 steps done" in the same grey as everything
+         else — true, and completely flat. */
       if (done >= steps.length) {
+        let tn = null;
+        try { tn = global.RayPermissions.Repositories.tenders.get(service.guard, id); }
+        catch (e) {}
         return `<div class="ray-offerline">
-            <p>That is all ${steps.length} steps done — the bid is ready to compile.</p>
+            <div class="ray-win">
+              <span class="ray-wintick"><span class="ms">check</span></span>
+              <div class="t"><b>That's the whole method</b>
+                <span>${esc(tn ? tn.name : 'This tender')} has been through all
+                  ${steps.length} stages — assessed, planned, written, built and
+                  checked. It's ready for your final approval.</span></div>
+            </div>
             <div class="ray-offeracts">
+              <button class="ray-offergo" data-ray-go-responses>Review the tender</button>
               <button class="ray-offerlink" data-ray-steps>See what we did</button>
             </div>
           </div>`;
@@ -1232,6 +1249,17 @@
                         data-ray-seg="${i}" title="${esc((i + 1) + '. ' + x.n)}"></button>`;
       }).join('');
       const isNext = at === done;
+      if (done >= steps.length && this.stepAt == null) {
+        return `<div class="ray-stepper done">
+            <div class="ray-segs">${segs}</div>
+            <div class="ray-stepnow">
+              <span class="ray-wintick sm"><span class="ms">check</span></span>
+              <span class="t"><b>All ${steps.length} stages complete</b></span>
+              <button class="ray-nextlink" data-ray-steps>See what we did</button>
+              <button class="ray-nextgo" data-ray-go-responses>Review</button>
+            </div>
+          </div>`;
+      }
       return `<div class="ray-stepper">
           <div class="ray-segs">${segs}</div>
           <div class="ray-stepnow">
@@ -1285,6 +1313,17 @@
     paintNextStep() {
       const body = this.$('body');
       const slot = this.$('nextstep');
+      /* The greeting states progress too, so it has to move with it —
+         otherwise it sits there saying "6 of 8" under a guide that says the
+         method is finished. Only while it IS the greeting: never repaint a
+         conversation someone is reading. */
+      if (body && this.session && !this.session.history().length
+          && body.querySelector('.ray-empty') && !this._regreet) {
+        this._regreet = true;          // greet() calls back into here
+        this.greet();
+        this._regreet = false;
+        return;
+      }
       const stale = body && body.querySelector('.ray-offerline');
       if (stale) stale.remove();
       if (slot) slot.innerHTML = '';
@@ -1333,7 +1372,9 @@
           <div class="ray-empty">
             <span class="ray-halo lg"><img class="ray-mark lg" src="${this.mark}" alt=""></span>
             <h3>How can Ray help?</h3>
-            <p>${done
+            <p>${done >= steps.length
+                 ? `<b>${name}</b> has been through all ${steps.length} stages.`
+                 : done
                  ? `You're <b>${done} of ${steps.length}</b> of the way through <b>${name}</b>.`
                  : `Let's work through <b>${name}</b>. There are ${steps.length} steps,
                     and I'll offer the next one each time.`}
@@ -1362,102 +1403,6 @@
         </div>`;
     }
 
-    /* ── Guidance as a stepper ───────────────────────────────────────────
-       The third way. Both others live at the bottom, near the composer, and
-       both show one step at a time. This shows the whole method at once,
-       pinned under the header where it cannot scroll away.
-
-       That matters for what the brief actually asks of this: the saved
-       prompts are how someone is "introduced to the Tenderfy Method and
-       taken through all the relevant steps". You cannot learn a method from
-       a control that only ever names the next thing.
-
-       Eight segments, because eight labels will not fit in 420px — the
-       segments carry position, the line beneath carries the name.          */
-    stepperBar() {
-      const id = this.context.tenderId;
-      const steps = global.rayStepList;
-      if (!id || !steps || this.guideOff) return '';
-      const done = global.rayStepsDone(id);
-      const at = Math.min(this.stepAt == null ? done : this.stepAt, steps.length - 1);
-      const st = steps[at];
-      const segs = steps.map((x, i) => {
-        const state = i < done ? 'done' : i === done ? 'now' : 'next';
-        return `<button class="ray-seg ${state}${i === at ? ' at' : ''}"
-                        data-ray-seg="${i}" title="${esc((i + 1) + '. ' + x.n)}"></button>`;
-      }).join('');
-      const isNext = at === done;
-      return `<div class="ray-stepper">
-          <div class="ray-segs">${segs}</div>
-          <div class="ray-stepnow">
-            <span class="t"><b>${at + 1}</b> ${esc(st.n)}${
-              at < done ? ' <span class="tick ms">check</span>' : ''}</span>
-            <button class="ray-nextlink" data-ray-steps>Details</button>
-            ${isNext ? `<button class="ray-nextlink" data-ray-skip="${done}">Skip</button>` : ''}
-            <button class="ray-nextgo" data-ray-step="${at}"${this.busy ? ' disabled' : ''}>${
-              at < done ? 'Again' : 'Start'}</button>
-          </div>
-        </div>`;
-    }
-
-    /* Orientation, with no content cost: a hairline under the header. It is
-       the one thing worth knowing at a glance, and it does not need words. */
-    paintProgress() {
-      const box = this.$('progline');
-      if (!box) return;
-      const id = this.context.tenderId;
-      const steps = global.rayStepList;
-      if (!id || !steps || this.view === 'list' || this.guideOff
-          || global.rayGuideStyle !== 'chat') { box.innerHTML = ''; return; }
-      const done = global.rayStepsDone(id);
-      box.innerHTML = `<div class="ray-progline" title="${done} of ${steps.length} steps done">
-          <i style="width:${Math.round(done / steps.length * 100)}%"></i></div>`;
-    }
-
-    /* Kept in its own slot under the conversation so it survives a history
-       repaint and never becomes a message — it is an offer, not something
-       Ray said, and it must not end up in the scrollback twice. */
-    /* Lives at the end of the conversation, inside the body — it reads as
-       part of what Ray said. It is still never persisted: paintHistory
-       rebuilds the turns from storage and then calls this, so the offer is
-       always the current one and old offers never pile up in the scrollback. */
-    /** Two presentations of the same thing, switched from the app header so
-     *  they can be put side by side in a demo:
-     *
-     *    strip — a control docked below the conversation. Always in the same
-     *            place, always visible, and unmistakably a piece of UI.
-     *    chat  — Ray says what he can do next at the end of what he just
-     *            said. No chrome; it reads as him talking.
-     *
-     *  Neither is persisted. The old offer is removed before the new one is
-     *  drawn, so it is always the current step and the scrollback never
-     *  fills with stale suggestions. */
-    /* Looking at an earlier segment is browsing, not a new position — the
-       moment the list advances, the stepper goes back to pointing at what is
-       actually next. */
-    resetStepAt() { this.stepAt = null; }
-
-    paintNextStep() {
-      const body = this.$('body');
-      const slot = this.$('nextstep');
-      const stale = body && body.querySelector('.ray-offerline');
-      if (stale) stale.remove();
-      if (slot) slot.innerHTML = '';
-      this.paintProgress();
-      this.paintHeader();          // the way back in lives in the header
-      if (this.view === 'list') return;
-      if (global.rayGuideStyle === 'steps') {
-        const bar = this.$('progline');
-        if (bar) bar.innerHTML = this.stepperBar();
-        return;
-      }
-      if (global.rayGuideStyle === 'chat') {
-        const html = this.offerLine();
-        if (html && body) body.insertAdjacentHTML('beforeend', html);
-        return;
-      }
-      if (slot && !this.guideOff) slot.innerHTML = this.nextStepCard();
-    }
 
 
     paintHistory() {

@@ -143,7 +143,7 @@
           + 'specific bid — resumes, project profiles, methodologies, value-adds — rather than '
           + 'reusing it unchanged. Edits stay on the tender copy; master library content is '
           + 'never overwritten.',
-      goto: 'responses' },
+      todo: 'Build the tender — needs the Tenderfy templates and the assembled submission' },
 
     { k: 'final',   n: 'Final review',
       d: 'Compliance, quality and readiness to submit',
@@ -173,10 +173,9 @@
     DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);   // doing it completes it
     const back = global.RayPanel && global.RayPanel.current;
     if (back) back.resetStepAt();
-    if (st.goto === 'responses') {
-      location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
-      return;
-    }
+/* No step navigates on its own. Being thrown onto another screen mid-method
+   loses the panel, the conversation and your place in the guide — the way
+   out is offered at the end and pressed on purpose. */
     /* Steps with no mocked answer say what they would do and why they are
        not here, rather than running something adjacent and looking wrong. */
     if (st.todo) {
@@ -187,6 +186,10 @@
     }
     const p = global.RayPanel && global.RayPanel.current;
     if (p) p.run(st.q);
+  };
+
+  global.rayGoResponses = function () {
+    location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
   };
 
   global.rayStepsDialog = function (tenderId) {
@@ -266,7 +269,7 @@
     if (go) go.onclick = () => {
       global.rayDlgClose();
       global.rayProgress(null);
-      location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
+      global.rayGoResponses();
     };
   };
 

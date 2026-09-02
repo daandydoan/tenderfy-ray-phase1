@@ -697,6 +697,22 @@ html.ray-light .ray-panel{
 .ray-offerlink:hover{opacity:1;color:var(--teal);background:var(--r-hover,rgba(0,0,0,.05))}
 .ray-offerlink.off{margin-left:auto;opacity:.6;font-weight:500}
 
+/* Finishing the method. Warmer than everything around it on purpose — this
+   is the one moment in the panel worth marking, and eight stages of a bid is
+   a real piece of work to have got through. */
+.ray-win{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:11px;
+         background:var(--r-teal-bg);border:1px solid var(--teal-bright)}
+.ray-win .t{flex:1;min-width:0;font-size:13.5px;line-height:1.45;color:var(--ink)}
+.ray-win .t b{display:block;font-size:14.5px;margin-bottom:3px}
+.ray-win .t span{display:block;font-size:12.5px;line-height:1.55;color:var(--gray);font-weight:400}
+.ray-wintick{width:26px;height:26px;border-radius:50%;flex:none;background:var(--cta);color:#fff;
+             display:flex;align-items:center;justify-content:center}
+.ray-wintick .ms{font-size:17px}
+.ray-wintick.sm{width:19px;height:19px}
+.ray-wintick.sm .ms{font-size:13px}
+.ray-nextbar.done .t b{font-weight:700}
+.ray-stepper.done .ray-seg{background:var(--teal)}
+
 /* ── Guidance as a stepper ─────────────────────────────────────────────
    Pinned under the header, so it cannot scroll away and never competes
    with the composer. Eight segments carry position — eight labels will
@@ -1191,6 +1207,10 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-stepnow .tick{color:var(--r-accent)}
 .ray-progline{background:var(--r-raise)}
 .ray-progline i{background:var(--r-accent)}
+.ray-win{background:var(--r-accent-dim);border-color:var(--r-guide-bd)}
+.ray-win .t{color:var(--r-tx)}
+.ray-win .t span{color:var(--r-tx-2)}
+.ray-stepper.done .ray-seg{background:var(--r-accent)}
 .ray-nextbar{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}
 .ray-nextbar .ms:first-child{color:var(--r-tx-3)}
 .ray-nextbar .t b{color:var(--r-tx)}
