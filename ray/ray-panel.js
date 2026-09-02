@@ -88,6 +88,7 @@
       this.refDocs = null;
       this.refPickOpen = false;
       this.stepOpen = false;      // the guide strip, shut until asked
+      this.stepAt = null;         // stepper: which segment is being looked at
       this.guideOff = false;      // dismissed outright — only from expanded
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
@@ -299,6 +300,8 @@
           this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
         }
+        const seg = e.target.closest('[data-ray-seg]');
+        if (seg) { this.stepAt = +seg.getAttribute('data-ray-seg'); this.paintNextStep(); return; }
         const step = e.target.closest('[data-ray-step]');
         if (step) {
           global.rayStepRun(+step.getAttribute('data-ray-step'), this.context.tenderId);
@@ -1181,6 +1184,44 @@
         </div>`;
     }
 
+    /* ── Guidance as a stepper ───────────────────────────────────────────
+       The third way. Both others live at the bottom, near the composer, and
+       both show one step at a time. This shows the whole method at once,
+       pinned under the header where it cannot scroll away.
+
+       That matters for what the brief actually asks of this: the saved
+       prompts are how someone is "introduced to the Tenderfy Method and
+       taken through all the relevant steps". You cannot learn a method from
+       a control that only ever names the next thing.
+
+       Eight segments, because eight labels will not fit in 420px — the
+       segments carry position, the line beneath carries the name.          */
+    stepperBar() {
+      const id = this.context.tenderId;
+      const steps = global.rayStepList;
+      if (!id || !steps || this.guideOff) return '';
+      const done = global.rayStepsDone(id);
+      const at = Math.min(this.stepAt == null ? done : this.stepAt, steps.length - 1);
+      const st = steps[at];
+      const segs = steps.map((x, i) => {
+        const state = i < done ? 'done' : i === done ? 'now' : 'next';
+        return `<button class="ray-seg ${state}${i === at ? ' at' : ''}"
+                        data-ray-seg="${i}" title="${esc((i + 1) + '. ' + x.n)}"></button>`;
+      }).join('');
+      const isNext = at === done;
+      return `<div class="ray-stepper">
+          <div class="ray-segs">${segs}</div>
+          <div class="ray-stepnow">
+            <span class="t"><b>${at + 1}</b> ${esc(st.n)}${
+              at < done ? ' <span class="tick ms">check</span>' : ''}</span>
+            <button class="ray-nextlink" data-ray-steps>Details</button>
+            ${isNext ? `<button class="ray-nextlink" data-ray-skip="${done}">Skip</button>` : ''}
+            <button class="ray-nextgo" data-ray-step="${at}"${this.busy ? ' disabled' : ''}>${
+              at < done ? 'Again' : 'Start'}</button>
+          </div>
+        </div>`;
+    }
+
     /* Orientation, with no content cost: a hairline under the header. It is
        the one thing worth knowing at a glance, and it does not need words. */
     paintProgress() {
@@ -1213,6 +1254,11 @@
      *  Neither is persisted. The old offer is removed before the new one is
      *  drawn, so it is always the current step and the scrollback never
      *  fills with stale suggestions. */
+    /* Looking at an earlier segment is browsing, not a new position — the
+       moment the list advances, the stepper goes back to pointing at what is
+       actually next. */
+    resetStepAt() { this.stepAt = null; }
+
     paintNextStep() {
       const body = this.$('body');
       const slot = this.$('nextstep');
@@ -1222,6 +1268,11 @@
       this.paintProgress();
       this.paintHeader();          // the way back in lives in the header
       if (this.view === 'list') return;
+      if (global.rayGuideStyle === 'steps') {
+        const bar = this.$('progline');
+        if (bar) bar.innerHTML = this.stepperBar();
+        return;
+      }
       if (global.rayGuideStyle === 'chat') {
         const html = this.offerLine();
         if (html && body) body.insertAdjacentHTML('beforeend', html);

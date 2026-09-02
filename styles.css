@@ -688,6 +688,27 @@ html.ray-light .ray-panel{
 .ray-offerlink:hover{opacity:1;color:var(--teal)}
 .ray-offerlink.off{margin-left:auto;opacity:.55;font-weight:400}
 
+/* ── Guidance as a stepper ─────────────────────────────────────────────
+   Pinned under the header, so it cannot scroll away and never competes
+   with the composer. Eight segments carry position — eight labels will
+   not fit in 420px — and the line beneath carries the name.             */
+.ray-stepper{padding:9px 14px 10px;border-bottom:1px solid var(--border);background:var(--n-100)}
+.ray-segs{display:flex;gap:3px}
+.ray-seg{flex:1;height:5px;border:none;border-radius:99px;padding:0;cursor:pointer;
+         background:var(--n-200);transition:background .2s,transform .12s}
+.ray-seg.done{background:var(--teal)}
+.ray-seg.now{background:var(--teal-bright)}
+.ray-seg:hover{transform:scaleY(1.8)}
+/* The one being looked at, which is not necessarily the one that is next. */
+.ray-seg.at{box-shadow:0 0 0 2px var(--n-100),0 0 0 3.5px var(--teal)}
+.ray-stepnow{display:flex;align-items:center;gap:10px;margin-top:9px;font-size:12px}
+.ray-stepnow .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+                color:var(--ink)}
+.ray-stepnow .t b{display:inline-flex;align-items:center;justify-content:center;width:17px;
+                  height:17px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;
+                  margin-right:6px;vertical-align:-3px}
+.ray-stepnow .tick{font-size:14px;color:var(--teal);vertical-align:-3px;margin-left:3px}
+
 /* Orientation with no words and no height: a hairline under the header. */
 .ray-progline{height:2px;background:var(--n-200)}
 .ray-progline i{display:block;height:100%;background:var(--teal);transition:width .3s ease}
@@ -1111,6 +1132,14 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-offerline p b{color:var(--r-tx)}
 .ray-offerlink{color:var(--r-tx-2)}
 .ray-offerlink:hover{color:var(--r-accent)}
+.ray-stepper{background:var(--r-sunk);border-bottom-color:var(--r-line)}
+.ray-seg{background:var(--r-raise)}
+.ray-seg.done{background:var(--r-accent)}
+.ray-seg.now{background:var(--r-guide-bd)}
+.ray-seg.at{box-shadow:0 0 0 2px var(--r-sunk),0 0 0 3.5px var(--r-accent)}
+.ray-stepnow .t{color:var(--r-tx)}
+.ray-stepnow .t b{background:var(--r-accent);color:var(--r-sunk)}
+.ray-stepnow .tick{color:var(--r-accent)}
 .ray-progline{background:var(--r-raise)}
 .ray-progline i{background:var(--r-accent)}
 .ray-nextbar{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}

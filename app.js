@@ -165,12 +165,14 @@
   global.rayStepSkip = function (i, tenderId) {
     DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);
     const p = global.RayPanel && global.RayPanel.current;
-    if (p) p.paintNextStep();
+    if (p) { p.resetStepAt(); p.paintNextStep(); }
   };
   global.rayStepRun = function (i, tenderId) {
     const st = STEPS[i];
     if (!st) return;
     DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);   // doing it completes it
+    const back = global.RayPanel && global.RayPanel.current;
+    if (back) back.resetStepAt();
     if (st.goto === 'responses') {
       location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
       return;
@@ -365,22 +367,28 @@
        chat  — Ray says what he can do next at the end of his answer. No
                chrome at all, and it lands where the eye already is; but it
                scrolls away with the conversation and has no fixed home.  */
+  const GUIDE_STYLES = ['strip', 'chat', 'steps'];
+  const GUIDE_META = {
+    strip: { ic: 'dock_to_bottom', say: 'a docked strip' },
+    chat:  { ic: 'forum',          say: 'Ray asking in the conversation' },
+    steps: { ic: 'linear_scale',   say: 'a stepper under the header' },
+  };
   function applyGuide(style) {
-    global.rayGuideStyle = style === 'chat' ? 'chat' : 'strip';
+    global.rayGuideStyle = GUIDE_STYLES.indexOf(style) >= 0 ? style : 'strip';
     const btn = document.querySelector('[data-ray-guide]');
     if (btn) {
-      const chat = global.rayGuideStyle === 'chat';
-      btn.innerHTML = `<span class="ms">${chat ? 'forum' : 'dock_to_bottom'}</span>`;
-      btn.title = chat
-        ? 'Guidance: Ray asks in the conversation — click for the docked strip'
-        : 'Guidance: docked strip — click to have Ray ask in the conversation';
-      btn.classList.toggle('on', chat);
+      const cur = global.rayGuideStyle;
+      const nxt = GUIDE_STYLES[(GUIDE_STYLES.indexOf(cur) + 1) % GUIDE_STYLES.length];
+      btn.innerHTML = `<span class="ms">${GUIDE_META[cur].ic}</span>`;
+      btn.title = `Guidance: ${GUIDE_META[cur].say} — click for ${GUIDE_META[nxt].say}`;
+      btn.classList.toggle('on', cur !== 'strip');
     }
     const p = global.RayPanel && global.RayPanel.current;
     if (p) p.paintNextStep();
   }
   global.rayToggleGuide = function () {
-    applyGuide(global.rayGuideStyle === 'chat' ? 'strip' : 'chat');
+    const i = GUIDE_STYLES.indexOf(global.rayGuideStyle);
+    applyGuide(GUIDE_STYLES[(i + 1) % GUIDE_STYLES.length]);
   };
 
   /* A tender's colour, derived from its id so it is stable everywhere it

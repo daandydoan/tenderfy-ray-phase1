@@ -258,12 +258,12 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
-## Two ways to guide, switchable
+## Three ways to guide, switchable
 
-There are two presentations of the same eight steps, swapped from the header
-so they can be put side by side in a room rather than argued about in the
-abstract. `rayGuideStyle` picks; `paintNextStep()` renders one or the other,
-and neither is ever persisted.
+Three presentations of the same eight steps, cycled from one header switch so
+they can be put side by side in a room rather than argued about in the
+abstract. `rayGuideStyle` picks; `paintNextStep()` renders one of them, and
+none is ever persisted.
 
 **strip** — a control docked below the conversation. Always in one place,
 always visible, unmistakably a piece of UI. Easy to find, easy to ignore, and
@@ -284,8 +284,21 @@ dropped into a sentence, reads as a fragment. Both phrasings take the bare
 clause (*"Would you like me to …?"*, *"Next I can …"*), which the first
 attempt did not: *"Shall I start by read through the documents"*.
 
-Dismissing, the header way back, and per-tender state work identically in
-both, and switching style while hidden does not resurrect it.
+**steps** — a stepper pinned under the header. Both the others live at the
+bottom near the composer, and both show one step at a time; this shows the
+**whole method at once** and cannot scroll away. That matters for what the
+brief actually asks: the saved prompts are how someone is *"introduced to the
+Tenderfy Method and taken through all the relevant steps"*, and you cannot
+learn a method from a control that only ever names the next thing.
+
+Eight segments carry position — eight labels will not fit in 420px — and the
+line beneath carries the name. Segments are **browsable**: tap a finished one
+and it offers *Again*, tap ahead and it offers *Start*, with a ring marking
+what you are looking at as distinct from what is next. Browsing is not a
+position, so anything that advances the list resets it (`resetStepAt`).
+
+Dismissing, the header way back, and per-tender state work identically in all
+three, and switching style while hidden does not resurrect it.
 
 ## Guiding, in the conversation
 
