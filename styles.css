@@ -871,6 +871,130 @@ html.ray-light .ray-panel{
 .dlg-body{padding:22px;overflow:auto;font-size:14px;line-height:1.6;color:var(--gray)}
 .dlg-body p{margin:0 0 14px}
 .dlg-body p:last-child{margin-bottom:0}
+/* ── AI Manager ────────────────────────────────────────────────────────
+   Saved prompts and workflows: the two things a business configures about
+   Ray. A page rather than a panel because it is settings, not conversation. */
+.ai-tabs{display:flex;gap:26px;border-bottom:1px solid var(--border);margin:0 0 18px}
+.ai-tab{padding:10px 2px 12px;font-size:15px;font-weight:600;color:var(--gray);cursor:pointer;
+        border-bottom:2px solid transparent;margin-bottom:-1px}
+.ai-tab:hover{color:var(--ink)}
+.ai-tab.on{color:var(--teal);border-bottom-color:var(--teal)}
+.ai-card{padding:22px 24px 26px}
+.ai-head{display:flex;align-items:flex-start;gap:20px;margin-bottom:18px}
+.ai-head h2{margin:0 0 4px;font-size:21px;font-weight:600;color:var(--teal)}
+.ai-head .sub{margin:0;max-width:62ch}
+.ai-head .btn{margin-left:auto;flex:none}
+
+/* The table from the live screen: numbered, status first, the prompt itself
+   clamped to two lines so a long one cannot set the row height. */
+.ai-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.ai-tbl th{text-align:left;font-weight:500;font-size:11.5px;letter-spacing:.06em;
+           text-transform:uppercase;color:var(--light);padding:12px 14px;
+           border-bottom:1px solid var(--border);white-space:nowrap}
+.ai-tbl td{padding:14px;border-bottom:1px solid var(--border);vertical-align:middle;
+           color:var(--ink)}
+.ai-tbl tr:last-child td{border-bottom:none}
+.ai-tbl .n{width:34px;color:var(--gray)}
+.ai-tbl .st{width:96px}
+.ai-tbl .dt{width:120px;color:var(--gray);white-space:nowrap}
+.ai-tbl .ac{width:72px;text-align:right;white-space:nowrap}
+.ai-tbl .ti{font-weight:500;max-width:38ch}
+.ai-tbl .pr{color:var(--gray);max-width:34ch}
+/* Clamped to two lines. -webkit-box needs the height pinned as well as the
+   line count, or a table cell lets a sliver of the third line through. */
+.ai-tbl .ti span.x,.ai-tbl .pr span.x{display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;line-height:1.5;max-height:3em}
+/* Inactive rows stay legible — they are still yours to switch back on. */
+.ai-tbl tr.off{background:var(--row)}
+.ai-tbl tr.off .ti,.ai-tbl tr.off .pr,.ai-tbl tr.off .dt{color:var(--light)}
+.ai-none{padding:26px 14px;text-align:center;color:var(--light)}
+.ai-status{font-weight:600;font-size:13px}
+.ai-status.yes{color:var(--teal)}
+.ai-status.no{color:var(--light)}
+.ai-badge{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:100px;
+          background:var(--st-green-bg);color:var(--st-green-tx);
+          font-size:10.5px;font-weight:600;vertical-align:middle}
+.ai-ic{background:none;border:none;cursor:pointer;color:var(--teal);padding:4px;
+       border-radius:7px;line-height:0}
+.ai-ic:hover{background:var(--row)}
+.ai-ic.del{color:var(--accent)}
+.ai-ic:disabled{color:var(--lighter);cursor:default;background:none}
+.ai-ic .ms{font-size:18px}
+
+/* ── Workflows ─────────────────────────────────────────────────────────── */
+.ai-wfs{display:flex;flex-direction:column;gap:12px}
+.ai-wf{display:flex;align-items:flex-start;gap:14px;border:1px solid var(--border);
+       border-radius:12px;padding:16px 18px}
+.ai-wf:hover{border-color:var(--lighter)}
+.ai-wfic{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;
+         justify-content:center;background:var(--teal-tint);color:var(--teal)}
+.ai-wfic .ms{font-size:20px}
+.ai-wftx{flex:1;min-width:0}
+.ai-wftx .h{font-size:15px;font-weight:600;color:var(--ink)}
+.ai-wftx .d{display:block;font-size:13px;line-height:1.55;color:var(--gray);margin:4px 0 0;
+            max-width:74ch}
+.ai-wftx .m{display:block;font-size:12px;color:var(--light);margin-top:7px}
+.ai-wfacts{display:flex;align-items:center;gap:6px;flex:none}
+
+/* ── The prompt dialog ─────────────────────────────────────────────────── */
+.ai-f{display:block;font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:16px}
+.ai-f input,.ai-f textarea{display:block;width:100%;margin-top:7px;padding:11px 13px;
+  border:1px solid var(--lighter);border-radius:9px;font:inherit;font-size:13.5px;
+  font-weight:400;color:var(--ink);background:#fff;resize:vertical}
+.ai-f textarea{line-height:1.6;min-height:88px}
+.ai-f input:focus,.ai-f textarea:focus{outline:none;border-color:var(--teal)}
+.ai-f input:disabled,.ai-f textarea:disabled{background:var(--row);color:var(--gray)}
+.ai-f input::placeholder,.ai-f textarea::placeholder{color:var(--lighter)}
+.ai-lock{display:flex;align-items:flex-start;gap:9px;background:var(--row);border-radius:9px;
+         padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--gray);margin:0 0 16px}
+.ai-lock .ms{font-size:17px;color:var(--light);flex:none}
+/* The Active switch rides in the dialog head, beside the close button. */
+.ai-sw{display:flex;align-items:center;gap:9px;margin-left:auto;margin-right:14px;
+       background:none;border:none;cursor:pointer;color:#fff;font:inherit;font-size:13.5px;
+       font-weight:500}
+.ai-sw .k{width:38px;height:21px;border-radius:100px;background:rgba(255,255,255,.28);
+          position:relative;transition:background .15s ease;flex:none}
+.ai-sw .k:after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;
+                border-radius:50%;background:#fff;transition:transform .15s ease}
+.ai-sw.on .k{background:var(--teal-bright)}
+.ai-sw.on .k:after{transform:translateX(17px)}
+.dlg-foot .btn+.btn{margin-left:10px}
+.dlg-foot{display:flex;justify-content:flex-end}
+.btn.danger{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger:hover{background:#d8443a;border-color:#d8443a}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri:disabled:hover{background:var(--cta);border-color:var(--cta)}
+
+/* ── Steps inside the workflow editor ──────────────────────────────────── */
+.ai-steplab{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;
+            color:var(--ink);margin:2px 0 9px}
+.ai-steplab span{background:var(--row);border-radius:100px;padding:1px 9px;font-size:11.5px;
+                 color:var(--gray)}
+.ai-steps{display:flex;flex-direction:column;gap:8px}
+.ai-step{display:flex;align-items:flex-start;gap:11px;border:1px solid var(--border);
+         border-radius:10px;padding:11px 12px}
+.ai-step .nm{width:22px;height:22px;border-radius:50%;background:var(--teal-tint);
+             color:var(--teal);font-size:11.5px;font-weight:700;flex:none;display:flex;
+             align-items:center;justify-content:center;margin-top:1px}
+.ai-step .t{flex:1;min-width:0}
+.ai-step .h{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+.ai-step .d{display:block;font-size:12px;line-height:1.5;color:var(--gray);margin-top:3px;
+            display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ai-step .a{display:flex;gap:1px;flex:none}
+.ai-addstep{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+            margin-top:10px;padding:10px;border:1px dashed var(--lighter);border-radius:10px;
+            background:none;font:inherit;font-size:13px;font-weight:600;color:var(--teal);
+            cursor:pointer}
+.ai-addstep:hover{background:var(--teal-tint);border-color:var(--teal)}
+.ai-addstep .ms{font-size:17px}
+
+/* The header's way into this screen, in the icon cluster beside the Ray pill. */
+.hicon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+       justify-content:center;background:rgba(255,255,255,.16);cursor:pointer;flex:none}
+.hicon:hover{background:rgba(255,255,255,.26)}
+.hicon.on{background:#fff}
+.hicon img{width:19px;height:19px;display:block}
+
 .dlg-ic{width:44px;height:44px;border-radius:50%;background:var(--teal);color:#fff;
         display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .dlg-ic .ms{font-size:24px}

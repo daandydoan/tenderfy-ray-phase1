@@ -21,6 +21,7 @@
         'response_library.read', 'response_library.write',
         'subbie.read', 'staff.read', 'conversation.read', 'conversation.write',
         'prompt_library.read', 'prompt_library.write',
+        'workflow.read', 'workflow.write',
         'business.read', 'pricing.read',
       ],
     },
@@ -31,6 +32,7 @@
         'tender.read', 'document.read',
         'response_library.read', 'response_library.write',
         'prompt_library.read', 'prompt_library.write',
+        'workflow.read', 'workflow.write',
         'conversation.read', 'conversation.write', 'pricing.read',
       ],
     },
@@ -38,7 +40,8 @@
       id: 'u-jl', name: 'Jordan Lee', initials: 'JL', role: 'Bid Coordinator (read-only)',
       businessId: 'biz-tc', tenderIds: ['t-envind'],
       scopes: ['tender.read', 'document.read', 'response_library.read',
-               'prompt_library.read', 'conversation.read', 'conversation.write'],
+               'prompt_library.read', 'workflow.read',
+               'conversation.read', 'conversation.write'],
     },
     {
       id: 'u-ext', name: 'Sam Ortiz', initials: 'SO', role: 'External Reviewer',
@@ -162,15 +165,80 @@
      front of you. Business-scoped like the Response Library, and read/write
      gated the same way — a read-only role can run a saved prompt but not add
      one.                                                                     */
+  /* `isDefault` rows ship with Tenderfy; the rest the business wrote. Only
+     `active` rows reach the composer's picker, so switching one off retires
+     it without losing the wording — which is the whole reason status is a
+     field rather than a delete. */
   const PROMPT_LIBRARY = [
-    { id: 'p-conflict', businessId: 'biz-tc', label: 'Find conflicts across documents',
+    { id: 'p-gonogo', businessId: 'biz-tc', isDefault: true, active: true,
+      created: '2024-01-07',
+      label: 'Compare scope to specs and flag any risks for our Go/No-Go check.',
+      text: 'Produce a structured bid / no-bid (Go/No-Go) assessment of this tender. Cover EVERY item in the Tenderfy criteria — strategic fit, capability, commercial viability, mandatory requirements and risk — rating each Green, Amber or Red with the reason. Name anything you could not find rather than assuming it.' },
+    { id: 'p-dates', businessId: 'biz-tc', isDefault: true, active: true,
+      created: '2024-01-07',
+      label: 'Identify any ambiguous requirements, unrealistic timelines, or scope gaps that could affect our bid decision.',
+      text: 'Extract every date, deadline, milestone, lead time, validity period and notice period mentioned anywhere in these documents, then flag the ones that conflict with each other or leave too little time to deliver. Quote the clause for each.' },
+    { id: 'p-capability', businessId: 'biz-tc', isDefault: true, active: false,
+      created: '2024-01-07',
+      label: 'Assess our capability alignment against the client’s stated experience and resource requirements.',
+      text: 'Summarise the technical approach the issuer expects in this tender so we can frame our response against it, then compare each expectation to what our company has actually delivered before. Separate what we can evidence from what we would have to claim.' },
+    { id: 'p-compliance', businessId: 'biz-tc', isDefault: true, active: false,
+      created: '2024-01-07',
+      label: 'Flag any contractual red flags, unusual liability clauses, or onerous conditions we should review before proceeding.',
+      text: 'Audit every mandatory compliance requirement the proponent must meet to bid AND to deliver this tender. Treat liability caps, indemnities, liquidated damages and insurance levels as red flags where they sit outside market norms, and say which are negotiable.' },
+    { id: 'p-conflict', businessId: 'biz-tc', active: true, created: '2024-03-19',
+      label: 'Find conflicts across documents',
       text: 'Review every document on this tender and list anything that conflicts between them — especially where an addendum overrides the original.' },
-    { id: 'p-schedule', businessId: 'biz-tc', label: 'Pull the response schedule',
+    { id: 'p-schedule', businessId: 'biz-tc', active: true, created: '2024-03-19',
+      label: 'Pull the response schedule',
       text: 'Extract the response schedule questions with their word limits and page numbers, and tell me which ones we already have a library answer for.' },
-    { id: 'p-risk', businessId: 'biz-tc', label: 'Commercial risk check',
+    { id: 'p-risk', businessId: 'biz-tc', active: true, created: '2024-05-02',
+      label: 'Commercial risk check',
       text: 'What are the commercial risks in this tender? Cover liquidated damages, insurance levels, payment terms and tender validity.' },
-    { id: 'p-draft', businessId: 'biz-tc', label: 'Draft from our best answer',
+    { id: 'p-draft', businessId: 'biz-tc', active: false, created: '2024-05-02',
+      label: 'Draft from our best answer',
       text: 'Draft an answer for this question using our highest-scoring Response Library entry, updated against this tender’s requirements. Stay inside the word limit.' },
+  ];
+
+  /* ── Workflows ──────────────────────────────────────────────────────────
+     A workflow is an ordered list of prompts Ray runs one at a time, pausing
+     for approval between each. The Tenderfy Method is the one that ships;
+     a business can copy it, edit it, or write its own. Step `k` matches the
+     keys in app.js's STEPS, which is what lets the panel's guide and this
+     screen describe the same eight things.                                  */
+  const WORKFLOWS = [
+    { id: 'wf-tenderfy', businessId: 'biz-tc', isDefault: true, active: true,
+      created: '2024-01-07', name: 'Tenderfy Method',
+      description: 'The eight steps Tenderfy recommends for every bid, from the Go / No-Go call through to the final compliance check. Each one ends with your review and approval before Ray moves on.',
+      steps: [
+        { k: 'gonogo', title: 'Go / No-Go',
+          prompt: 'Rate this opportunity against the Tenderfy Go / No-Go criteria — strategic fit, capability, commercial viability, mandatory requirements and risk — as Green, Amber or Red with a reason for each. Then recommend GO, GO SUBJECT TO CONDITIONS, HOLD or NO-GO. Name any missing information rather than assuming it.' },
+        { k: 'plan', title: 'Plan the tender',
+          prompt: 'Work backwards from the closing date to a task list — title, brief, due date, priority, suggested assignee — and a Delivery Plan covering milestones, responsibilities, risks and approvals. Mark which tasks you could do yourself, but start none of them until I say so.' },
+        { k: 'buyer', title: 'Understand the buyer',
+          prompt: 'Research this buyer’s goals, initiatives and public commitments, compare them against what our company genuinely does, and propose specific value-adds. Not "strong communication" — a named plan, programme or measurable improvement, each with how it would be implemented and what evidence supports it.' },
+        { k: 'feedback', title: 'Learn from feedback',
+          prompt: 'Search our previous tenders to this same buyer for scores, evaluator comments and outcomes, then turn them into things to repeat and things to fix. Do not apply feedback from other buyers, and if none exists for this one, say so.' },
+        { k: 'schedule', title: 'Complete the responses',
+          prompt: 'Pull out every question in the response schedule with its word limit, mandatory flag and evaluation weighting, then answer each one against the buyer’s requirements using company knowledge and everything approved earlier in this bid. Flag anything needing specialist input rather than inventing it.' },
+        { k: 'method', title: 'Methodology & technical',
+          prompt: 'Build project-specific methodology from the scope, programme and technical documents — sequencing, resources, interfaces, risk, commissioning — as a narrative of how the work actually gets done. Raise technical gaps for an SME rather than filling them in.' },
+        { k: 'build', title: 'Build the tender',
+          prompt: 'Choose the template and structure, then select and rework content for this specific bid — resumes, project profiles, methodologies, value-adds — rather than reusing it unchanged. Keep edits on the tender copy; never overwrite master library content.' },
+        { k: 'final', title: 'Final review',
+          prompt: 'Check the submission against the original documents — every mandatory requirement, every question, word limits, schedules, signatures — then read it as an evaluator would and sort what you find into Critical, Recommended and Optional. I make the call that it is ready.' },
+      ] },
+    { id: 'wf-quick', businessId: 'biz-tc', active: true, created: '2024-06-11',
+      name: 'Quick qualification', 
+      description: 'A three-step pass for the tenders that arrive on a Friday afternoon — enough to decide whether they are worth a proper look on Monday.',
+      steps: [
+        { k: 'scan', title: 'Scan the pack',
+          prompt: 'List what is in this tender pack, what each document is for, and anything that appears to be missing from a standard set.' },
+        { k: 'gates', title: 'Check the gates',
+          prompt: 'Find the mandatory requirements we would be excluded on — licences, insurance levels, turnover, certifications, local content — and tell me plainly whether we meet each one.' },
+        { k: 'call', title: 'Make the call',
+          prompt: 'On what you have found, recommend whether this is worth a full Go / No-Go, and give me the two or three things that would decide it.' },
+      ] },
   ];
 
   /* ── Seeded conversation ────────────────────────────────────────────────
@@ -359,5 +427,5 @@
   ];
 
   global.RayFixtures = { USERS, TENDERS, DOCUMENTS, PAGE_TEXT, RESPONSE_LIBRARY,
-                         PROMPT_LIBRARY, SEED_CONVERSATION, UI_CATALOGUE, CREDITS };
+                         PROMPT_LIBRARY, WORKFLOWS, SEED_CONVERSATION, UI_CATALOGUE, CREDITS };
 })(window);

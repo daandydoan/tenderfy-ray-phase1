@@ -309,6 +309,13 @@
      it was scrolling over; a footer gives the content somewhere to end. */
   global.rayDlg = function (title, body, footer) {
     const el = dlgEl();
+    /* The head is part of the dialog's state, so reopening resets it too.
+       A caller may add its own control there — the AI Manager hangs an Active
+       switch beside the title — and without this each reopen stacked another
+       one on top of the last. */
+    el.querySelectorAll('.dlg-head > *').forEach((n) => {
+      if (n.id !== 'rayDlgTitle' && !n.classList.contains('dlg-x')) n.remove();
+    });
     el.querySelector('#rayDlgTitle').textContent = title;
     el.querySelector('#rayDlgBody').innerHTML = body;
     const foot = el.querySelector('#rayDlgFoot');
@@ -558,6 +565,9 @@
           <div class="r">
             ${identity}
 
+            <a class="hicon${cfg.nav === 'ai' ? ' on' : ''}" href="${rel('pages/ai-manager.html')}"
+               title="AI Manager — saved prompts and workflows">
+              <img src="${asset('assets/ray.svg')}" alt="AI Manager"></a>
             <span class="ms fill" title="Notifications">notifications</span>
             <span class="hray" onclick="RayPanel.toggle()" title="Ray — Tenderfy Co-Pilot">
               <img src="${asset('assets/ray.svg')}" alt="Ray"> Ray</span>

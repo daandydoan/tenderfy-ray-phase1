@@ -933,8 +933,13 @@
       if (!this.promptsOpen) { box.innerHTML = ''; return; }
       const guard = service.guard;
       let rows = [];
-      try { rows = global.RayPermissions.Repositories.promptLibrary.list(guard); }
-      catch (e) { rows = []; }
+      /* Only live prompts. Switching one off in the AI Manager is how you
+         retire it without losing the wording, so an inactive row must not
+         still be offered here. */
+      try {
+        rows = global.RayPermissions.Repositories.promptLibrary.list(guard)
+          .filter((r) => r.active !== false);
+      } catch (e) { rows = []; }
       const canWrite = guard.scopes.indexOf('prompt_library.write') >= 0;
       const draft = (this.$('input').value || '').trim();
 
