@@ -967,8 +967,8 @@ html.ray-rail-open .rvw-float{bottom:22px}
    wrapped they hid the overflow behind a vertical scroll nobody looks for.
    Sideways keeps the band one line tall and the overflow on the axis people
    already drag on a chip row. */
-.ray-ctx{padding:0 0 7px;display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
-         overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
+.ray-ctx{padding:0 0 9px;display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
+         overflow-x:auto;overflow-y:hidden}
 /* No scrollbar. `scrollbar-width` and ::-webkit-scrollbar are mutually
    exclusive in Chrome — setting the standard property makes the pseudo-element
    rules inert — so an earlier `thin` silently disabled the 4px styling below
