@@ -35,6 +35,10 @@
   const RAY_FULL = ART + 'ray-panel.svg';
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
+  /* How many chats "Recent" shows before it defers to its own chip. Enough
+     to cover today's work without pushing Projects off the first screen. */
+  const RECENT_CAP = 6;
+
   const OPEN_KEY = 'ray_rail_open';
   const WIDE_KEY = 'ray_rail_wide';
   const FORM_KEY = 'ray_form';       // 'dialog' | 'rail' — see setForm()
@@ -77,7 +81,7 @@
          inside something. */
       this.form = this.mode === 'inline' ? 'rail'
         : store.getStr(FORM_KEY, 'rail') === 'dialog' ? 'dialog' : 'rail';
-      this.view = 'chat';            // 'list' | 'chat' — Figma's two screens
+      this.view = 'chat';            // 'list' | 'project' | 'chat'
       this.query = '';               // session search
       this.attachments = [];         // files pinned to the next message
       this.attachOpen = false;
@@ -89,8 +93,7 @@
       this.refPickOpen = false;
       this.stepOpen = false;      // the guide strip, shut until asked
       this.stepAt = null;         // stepper: which segment is being looked at
-      this.openProject = null;
-      this.shutProject = null;
+      this.openProject = null;      // the project whose page you are on
       this.listFilter = null;    // which project is expanded in the list
       this.guideOff = false;      // dismissed outright — only from expanded
       this.menuFor = null;           // session id whose actions are open
@@ -156,7 +159,7 @@
       if (global.rayEmptyDemo && global.rayToggleEmpty) global.rayToggleEmpty();
       const into = tenderId === 'free' ? null
         : tenderId != null ? tenderId : this.context.tenderId;
-      if (into) { this.openProject = into; this.shutProject = null; }
+      if (into) this.openProject = into;
       const t = service.newThread(into);
       this.openThread(t.id);
     }
@@ -386,22 +389,21 @@
         const fil = e.target.closest('[data-ray-filter]');
         if (fil) {
           const k = fil.getAttribute('data-ray-filter');
-          this.listFilter = this.listFilter === k ? null : k;
+          /* "Show all" only ever turns the filter on; a chip toggles it. */
+          this.listFilter = (fil.classList.contains('ray-chip')
+                             && this.listFilter === k) ? null : k;
           this.paintList();
           return;
         }
         const proj = e.target.closest('[data-ray-proj]');
         if (proj) {
-          const id = proj.getAttribute('data-ray-proj');
-          const wasOpen = proj.parentElement.classList.contains('open');
-          this.shutProject = wasOpen ? id : null;
-          this.openProject = wasOpen ? null : id;
-          this.paintList();
+          this.openProject = proj.getAttribute('data-ray-proj');
+          this.setView('project');
           return;
         }
         const nin = e.target.closest('[data-ray-new-in]');
         if (nin) { this.newSession(nin.getAttribute('data-ray-new-in')); return; }
-        if (e.target.closest('[data-ray-list]')) { this.setView('list'); return; }
+        if (e.target.closest('[data-ray-list]')) { this.goBack(); return; }
         const nw = e.target.closest('[data-ray-new]');
         if (nw) { this.newSession(nw.getAttribute('data-ray-new') || undefined); return; }
 
@@ -487,14 +489,29 @@
        session from, and the session itself. The back chevron is the only way
        between them, which is what keeps a 420px rail legible — no tab strip
        competing with the conversation for the same 40px.                    */
+    /** The back chevron walks out one level. From a chat that belongs to the
+     *  project you drilled into, that is the project page — landing back at
+     *  the index would throw away the step you just took. */
+    goBack() {
+      if (this.view === 'chat' && this.openProject) {
+        const t = service.threadIndex.get(service.guard.user.id, this.threadId);
+        if (t && t.tenderId === this.openProject) { this.setView('project'); return; }
+      }
+      this.openProject = null;
+      this.setView('list');
+    }
+
     setView(view) {
       this.view = view;
       this.menuFor = this.renaming = this.confirmDelete = null;
-      this.el.classList.toggle('view-list', view === 'list');
-      this.el.classList.toggle('view-chat', view !== 'list');
+      /* 'project' is a second list screen, not a third kind of thing: it
+         shares the list container and hides the composer exactly as the
+         index does. Only the contents differ. */
+      this.el.classList.toggle('view-list', view !== 'chat');
+      this.el.classList.toggle('view-chat', view === 'chat');
       this.paintHeader();
-      if (view === 'list') this.paintList();
-      else this.$('input').focus();
+      if (view === 'chat') this.$('input').focus();
+      else this.paintList();
     }
 
     /* The size controls, which differ by form. A dialog offers one move —
@@ -530,6 +547,17 @@
     paintHeader() {
       const head = this.$('head');
       const dialog = this.form === 'dialog' && this.mode !== 'inline';
+      if (this.view === 'project') {
+        head.innerHTML =
+          `<span class="ms ray-back" data-ray-list title="All projects">chevron_left</span>`
+          + (dialog ? this.idBlock(this.tenderName(this.openProject))
+                    : `<div class="ray-title">${esc(this.tenderName(this.openProject))}</div>`)
+          + `<span class="ms ray-hbtn" data-ray-new="${this.openProject}"
+                   title="New chat in this project">add</span>`
+          + this.formBtns()
+          + `<span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
+        return;
+      }
       if (this.view === 'list') {
         head.innerHTML = (dialog
           ? this.idBlock('Tenderfy Co-Pilot')
@@ -581,15 +609,16 @@
      *  preview, so a row gets a mark tinted by the tender the session was
      *  started from — deterministic, so the same tender is always the same
      *  colour and a long list becomes scannable. */
-    static tile(thread) {
+    static tile(thread, icon) {
+      const ic = icon || 'chat_bubble';
       const key = (thread && thread.tenderId) || '';
       if (!key || key === global.RayContext.NO_TENDER || !global.rayTenderColour) {
-        return `<span class="ray-tile"><span class="ms">chat_bubble</span></span>`;
+        return `<span class="ray-tile"><span class="ms">${ic}</span></span>`;
       }
       /* Shared with the page chrome, so a tender is the same colour in Ray's
          list as it is on its own page. */
       return `<span class="ray-tile ${global.rayTenderColour(key)}">`
-        + `<span class="ms">chat_bubble</span></span>`;
+        + `<span class="ms">${ic}</span></span>`;
     }
 
     /** The rename + delete affordances, shared by a list row and the session
@@ -625,36 +654,25 @@
         rows = rows.filter((t) => (t.title + ' ' + (t.snippet || '')).toLowerCase().indexOf(q) >= 0);
       }
 
-      /* Two levels. A project is a tender and holds the chats about it; a
-         chat with no tender is free chat and sits on its own. The grouping
-         key was already there — ThreadIndex has recorded `tenderId` on every
-         thread since the start — so this is a query, not a migration. */
+      /* Two levels. A project is a tender and holds the chats about it; the
+         grouping key was already there — ThreadIndex has recorded `tenderId`
+         on every thread since the start — so this is a query, not a
+         migration. */
       const NONE = global.RayContext.NO_TENDER;
       const byTender = {};
-      const free = [];
       rows.forEach((t) => {
-        if (!t.tenderId || t.tenderId === NONE) { free.push(t); return; }
-        (byTender[t.tenderId] = byTender[t.tenderId] || []).push(t);
+        const k = (!t.tenderId || t.tenderId === NONE) ? '' : t.tenderId;
+        if (k) (byTender[k] = byTender[k] || []).push(t);
       });
       const ids = Object.keys(byTender).sort((a, b) =>
         (byTender[b][0].at || 0) - (byTender[a][0].at || 0));
 
-      /* The filter narrows the list to one kind; picking the active chip
-         again clears it. Both sections show when nothing is picked, so the
-         filter is a shortcut rather than a mode you can get stuck in. */
-      const only = this.listFilter;
-      const chip = (key, label, n) => `
-        <button class="ray-chip${only === key ? ' on' : ''}" data-ray-filter="${key}">
-          ${label}<span class="n">${n}</span></button>`;
+      if (this.view === 'project') { this.paintProject(box, byTender); return; }
 
       let out = `
         <div class="ray-search">
           <span class="ms">search</span>
           <input type="text" placeholder="Search projects and chats" data-ray="q" value="${esc(this.query)}">
-        </div>
-        <div class="ray-chips">
-          ${chip('chats', 'Free chat', free.length)}
-          ${chip('projects', 'Projects', ids.length)}
         </div>`;
 
       if (!rows.length) {
@@ -670,65 +688,101 @@
         return;
       }
 
-      /* Free chat leads: it is the shorter list and the one you land in
-         when you have not picked a tender. Projects sit below it. */
-      if (free.length && only !== 'projects') {
-        out += `<div class="ray-group">Free chat</div>`
-             + free.map((t) => this.chatRow(t, false)).join('');
+      /* Recent leads, and it is every chat by recency — a chat inside a
+         project is still the one you had five minutes ago, and hiding it
+         behind a drill-in would be the slowest possible route back to it. */
+      const only = this.listFilter;
+      const chip = (key, label, n) => `
+        <button class="ray-chip${only === key ? ' on' : ''}" data-ray-filter="${key}">
+          ${label}<span class="n">${n}</span></button>`;
+      out += `
+        <div class="ray-chips">
+          ${chip('recent', 'Recent', rows.length)}
+          ${chip('projects', 'Projects', ids.length)}
+        </div>`;
+
+      if (only !== 'projects') {
+        /* Capped in the combined view so Projects stays above the fold.
+           Nothing is lost — the chip opens the full list. */
+        const cap = only === 'recent' ? rows.length : RECENT_CAP;
+        out += `<div class="ray-group">Recent</div>`
+             + rows.slice(0, cap).map((t) => this.chatRow(t, false)).join('');
+        if (rows.length > cap) {
+          out += `<button class="ray-showall" data-ray-filter="recent">
+                    Show all ${rows.length} chats</button>`;
+        }
       }
 
-      if (ids.length && only !== 'chats') {
+      if (ids.length && only !== 'recent') {
         out += `<div class="ray-group">Projects</div>`;
         ids.forEach((tid) => {
-          let tender = null;
-          try { tender = global.RayPermissions.Repositories.tenders.get(service.guard, tid); }
-          catch (e) { /* out of scope now — its chats stay reachable below */ }
           const chats = byTender[tid];
-          /* Open when it holds the chat you are in, or when searching: a
-             collapsed match is the same as no match. */
-          /* A deliberate collapse outranks every reason to open: the click
-             must always do something visible, even on the project you are
-             currently chatting in. */
-          const open = this.shutProject === tid ? false
-            : (this.openProject === tid || this.query
-               || chats.some((c) => c.id === this.threadId));
           const steps = global.rayStepList;
           const done = steps ? global.rayStepsDone(tid) : 0;
           out += `
-            <div class="ray-proj${open ? ' open' : ''}">
-              <button class="ray-projrow" data-ray-proj="${tid}">
-                <span class="ms car">expand_more</span>
-                ${Panel.tile({ tenderId: tid, title: tender ? tender.name : 'Tender' })}
-                <span class="ray-rowtx">
-                  <span class="ray-rowt">${esc(tender ? tender.name : 'A tender you can no longer read')}</span>
-                  <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${
-                    steps ? ` · ${done} of ${steps.length} steps` : ''}</span>
-                </span>
-              </button>
-              ${open ? chats.map((t) => this.chatRow(t, true)).join('')
-                     + `<button class="ray-projnew" data-ray-new-in="${tid}">
-                          <span class="ms">add</span>New chat in this project</button>` : ''}
-            </div>`;
+            <button class="ray-projrow" data-ray-proj="${tid}">
+              ${Panel.tile({ tenderId: tid }, 'folder')}
+              <span class="ray-rowtx">
+                <span class="ray-rowt">${esc(this.tenderName(tid))}</span>
+                <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${
+                  steps ? ` \u00b7 ${done} of ${steps.length} steps` : ''}</span>
+              </span>
+              <span class="ms car">chevron_right</span>
+            </button>`;
         });
       }
 
-      if (only === 'chats' && !free.length) {
-        out += `<p class="ray-nofilter">No free chats yet — every chat you have
-                belongs to a project.</p>`;
-      } else if (only === 'projects' && !ids.length) {
+      if (only === 'projects' && !ids.length) {
         out += `<p class="ray-nofilter">No projects yet. Open a tender and start
                 a chat there to make one.</p>`;
       }
       box.innerHTML = out;
     }
 
-    /* One chat row, used inside a project and in free chat alike. */
-    chatRow(t, nested) {
+    /** A tender's name, or a readable stand-in once it leaves your scope —
+     *  the chats stay yours either way. */
+    tenderName(tid) {
+      try {
+        const t = global.RayPermissions.Repositories.tenders.get(service.guard, tid);
+        if (t) return t.name;
+      } catch (e) { /* fall through */ }
+      return 'A tender you can no longer read';
+    }
+
+    /** The project page: one tender's chats, and nothing else competing for
+     *  the column. Reached by drilling in, left by the back chevron. */
+    paintProject(box, byTender) {
+      const tid = this.openProject;
+      const chats = byTender[tid] || [];
+      /* Deleting the last chat dissolves the project — there is no record of
+         it apart from its chats, so there is nothing left to show. */
+      if (!chats.length) { this.openProject = null; this.setView('list'); return; }
+      const steps = global.rayStepList;
+      const done = steps ? global.rayStepsDone(tid) : 0;
+      box.innerHTML = `
+        <div class="ray-projhead">
+          ${Panel.tile({ tenderId: tid }, 'folder')}
+          <span class="ray-rowtx">
+            <span class="ray-rowt">${esc(this.tenderName(tid))}</span>
+            <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${
+              steps ? ` \u00b7 ${done} of ${steps.length} steps` : ''}</span>
+          </span>
+        </div>
+        <button class="ray-projnew" data-ray-new-in="${tid}">
+          <span class="ms">add</span>New chat in this project</button>
+        <div class="ray-group">Chats</div>
+        ${chats.map((t) => this.chatRow(t, true)).join('')}`;
+    }
+
+    /* One chat row. `known` drops the tender tile for a dot: on a project
+       page every chat carries the same tender, so the colour says nothing
+       the header has not already said. */
+    chatRow(t, known) {
       const open = this.menuFor === t.id;
       return `
-        <div class="ray-rowwrap${open ? ' open' : ''}${nested ? ' nested' : ''}">
+        <div class="ray-rowwrap${open ? ' open' : ''}${known ? ' known' : ''}">
           <button class="ray-row${t.id === this.threadId ? ' on' : ''}" data-ray-thread="${t.id}">
-            ${nested ? '<span class="ray-rowdot"></span>' : Panel.tile(t)}
+            ${known ? '<span class="ray-rowdot"></span>' : Panel.tile(t)}
             <span class="ray-rowtx">
               <span class="ray-rowt">${esc(t.untitled ? 'New chat' : t.title)}</span>
               <span class="ray-rows">${esc(t.snippet || 'No messages yet')}</span>

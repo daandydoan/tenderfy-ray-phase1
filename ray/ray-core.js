@@ -312,8 +312,9 @@
     /** Every session, newest first. */
     allThreads() { return this.threadIndex.recent(this.user.id); }
 
-    /** `tenderId` is recorded for provenance and colour — nothing groups on
-     *  it. A session is a "Project" in the UI; this is the tender. */
+    /** `tenderId` is what makes a chat part of a project: the panel groups
+     *  the index on it, and a project page is a query for one value of it.
+     *  Null means the chat belongs to no project. */
     newThread(tenderId) {
       return this.threadIndex.create(this.user.id, tenderId, Date.now());
     }

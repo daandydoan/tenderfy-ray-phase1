@@ -526,25 +526,25 @@ html.ray-light .ray-panel{
 .ray-chip .n{font-size:11px;font-weight:700}
 .ray-nofilter{margin:0;padding:18px 16px;font-size:12.5px;line-height:1.5}
 
-/* ── Projects hold chats ───────────────────────────────────────────────
-   A project is a tender; the chats about it live inside. A chat with no
-   tender is free chat and sits on its own below.                         */
-.ray-proj{border-bottom:1px solid transparent}
+/* ── Projects ──────────────────────────────────────────────────────────
+   A project is a tender. Its row is a way in, not a disclosure: the chats
+   live on their own page, so the index never makes room for them. */
 .ray-projrow{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;
              border:none;font:inherit;padding:10px 14px;cursor:pointer}
-.ray-projrow .car{font-size:20px;transition:transform .15s ease;flex:none;
-                  transform:rotate(-90deg)}
-.ray-proj.open .ray-projrow .car{transform:none}
-.ray-proj:not(.open) .ray-rowwrap.nested,
-.ray-proj:not(.open) .ray-projnew{display:none}
+.ray-projrow .car{font-size:20px;flex:none;margin-left:auto}
 .ray-projnew{display:flex;align-items:center;gap:7px;width:100%;text-align:left;background:none;
              border:none;font:inherit;font-size:12.5px;font-weight:600;
-             cursor:pointer;padding:8px 14px 12px 46px}
+             cursor:pointer;padding:9px 16px}
 .ray-projnew .ms{font-size:16px}
-/* Nested chats are indented and take a dot rather than the tender's tile —
-   the tile says which tender, and inside a project that is already known. */
-.ray-rowwrap.nested .ray-row{padding-left:46px}
-.ray-rowdot{width:6px;height:6px;border-radius:50%;flex:none;margin-left:2px}
+.ray-showall{display:block;width:100%;text-align:left;background:none;border:none;font:inherit;
+             font-size:12.5px;font-weight:600;cursor:pointer;padding:8px 16px 12px}
+/* The project page's own masthead: which tender, and how far into it. */
+.ray-projhead{display:flex;align-items:center;gap:10px;padding:14px 16px 12px;
+              border-bottom:1px solid transparent}
+.ray-projhead .ray-rowt{font-size:14px}
+/* On a project page every chat shares one tender, so the coloured tile says
+   nothing the header has not. A dot keeps the row quiet instead. */
+.ray-rowdot{width:6px;height:6px;border-radius:50%;flex:none;margin-left:4px}
 
 .ray-listempty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;
                justify-content:center;gap:2px;padding:24px 28px;text-align:center}
@@ -1377,16 +1377,18 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-chip.on .n{color:rgba(255,255,255,.78)}
 .ray-chip.on:hover{background:var(--r-accent);color:#fff}
 .ray-nofilter{color:var(--r-tx-3)}
-.ray-proj{border-bottom-color:var(--r-line)}
 .ray-projrow{color:var(--r-tx)}
 .ray-projrow:hover{background:var(--r-raise)}
 .ray-projrow .car{color:var(--r-tx-3)}
 .ray-projnew{color:var(--r-accent)}
 .ray-projnew:hover{background:var(--r-raise)}
+.ray-showall{color:var(--r-accent)}
+.ray-showall:hover{background:var(--r-raise)}
+.ray-projhead{border-bottom-color:var(--r-line);color:var(--r-tx)}
 /* --r-line-2 is near-white on the light rail, so the dot vanished there.
    The muted text colour is the one grey that reads on both surfaces. */
 .ray-rowdot{background:var(--r-tx-3);opacity:.55}
-.ray-rowwrap.nested .ray-row.on .ray-rowdot{background:var(--r-accent);opacity:1}
+.ray-rowwrap.known .ray-row.on .ray-rowdot{background:var(--r-accent);opacity:1}
 .ray-listempty{color:var(--r-tx-3)}
 .ray-emptyhead{color:var(--r-tx)}
 .ray-emptysub{color:var(--r-tx-3)}
