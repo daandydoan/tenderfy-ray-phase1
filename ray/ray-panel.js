@@ -1212,12 +1212,17 @@
          approval has not gone anywhere: it moved to the button, which is
          where a human in the loop actually belongs. */
       const line = esc(st.say || st.d.toLowerCase());
+      const pct = Math.round(done / steps.length * 100);
       return `<div class="ray-offerline">
+          <div class="ray-offerprog">
+            <span>Step ${done + 1} of ${steps.length}</span>
+            <div class="ray-offermeter"><i style="width:${pct}%"></i></div>
+          </div>
           <p>${first ? `Let me ${line}.` : `Next, let me ${line}.`}</p>
           <div class="ray-offeracts">
             <button class="ray-offergo" data-ray-step="${done}"${this.busy ? ' disabled' : ''}>
               Go ahead</button>
-            <button class="ray-offerlink" data-ray-skip="${done}">Not this one</button>
+            <button class="ray-offerlink" data-ray-skip="${done}">Skip</button>
             <button class="ray-offerlink" data-ray-steps>See all ${steps.length} steps</button>
             <button class="ray-offerlink off" data-ray-guide-off>Stop suggesting</button>
           </div>
