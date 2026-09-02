@@ -212,8 +212,7 @@
           <div class="t"><span class="h">${i + 1}. ${st.n}</span>
             <span class="d">${st.long || st.d}</span>
             ${i === done ? '<span class="badge-now">You are here</span>' : ''}</div>
-        </div>`).join('')}</div>
-      ${cta}`);
+        </div>`).join('')}</div>`, cta);
     const el = document.getElementById('rayDlg');
     const go = el.querySelector('[data-ray-start-workflow]');
     if (go) go.onclick = () => {
@@ -241,6 +240,7 @@
         <div class="dlg-head"><span id="rayDlgTitle"></span>
           <button class="dlg-x" data-dlg-close aria-label="Close"><span class="ms">close</span></button></div>
         <div class="dlg-body" id="rayDlgBody"></div>
+        <div class="dlg-foot" id="rayDlgFoot" hidden></div>
       </div>`;
     document.body.appendChild(el);
     /* Backdrop and ✕ close; the dialog itself does not. */
@@ -252,12 +252,18 @@
     });
     return el;
   }
-  global.rayDlg = function (title, body) {
+  /* An optional third argument pins content to the foot of the dialog, outside
+     the scrolling body. A sticky button inside the body sat on top of the text
+     it was scrolling over; a footer gives the content somewhere to end. */
+  global.rayDlg = function (title, body, footer) {
     const el = dlgEl();
     el.querySelector('#rayDlgTitle').textContent = title;
     el.querySelector('#rayDlgBody').innerHTML = body;
+    const foot = el.querySelector('#rayDlgFoot');
+    foot.innerHTML = footer || '';
+    foot.hidden = !footer;
     el.hidden = false;
-    const first = el.querySelector('.dlg-body button, .dlg-body input');
+    const first = el.querySelector('.dlg-foot button, .dlg-body button, .dlg-body input');
     if (first) first.focus();
     return el.querySelector('#rayDlgBody');
   };
@@ -281,7 +287,8 @@
       <p>Where similar questions were found, you’ll see the <b>Combine and Craft</b>
          option — use it to merge them into a single, polished AI-generated response.</p>
       <p>Let me know if you need anything else — <b>I’m here to help</b>.</p>
-      <button class="btn pri dlg-wide" data-ray-goto-responses>View Responses</button>`);
+      `,
+      `<button class="btn pri dlg-wide" data-ray-goto-responses>View Responses</button>`);
     const el = document.getElementById('rayDlg');
     const go = el.querySelector('[data-ray-goto-responses]');
     if (go) go.onclick = () => {

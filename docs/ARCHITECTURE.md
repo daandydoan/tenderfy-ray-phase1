@@ -585,9 +585,12 @@ on the tender.
 The dialog is where the method is read, so it is also where it is started: a
 full-width **Start the workflow**, or **Continue from step N** once some are
 done. A list of what Ray could do with no way to set him going is a brochure.
-It is `position: sticky` at the foot of the scrolling body — eight steps with a
-paragraph each is taller than the dialog, and the one action should not need
-scrolling to.
+It lives in the dialog's **footer**, a band of its own below the scrolling
+body — `rayDlg(title, body, footer)`. Sticky inside the body was the first
+attempt and was wrong: the button floated on top of the text it was scrolling
+over, so the last step was permanently half-hidden behind it. A footer gives
+the content a floor to stop at, and the same treatment applies to the review
+notice's *View Responses*.
 
 ## The composer
 
