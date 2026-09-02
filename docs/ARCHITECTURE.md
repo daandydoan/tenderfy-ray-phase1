@@ -258,6 +258,35 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
+## Two ways to guide, switchable
+
+There are two presentations of the same eight steps, swapped from the header
+so they can be put side by side in a room rather than argued about in the
+abstract. `rayGuideStyle` picks; `paintNextStep()` renders one or the other,
+and neither is ever persisted.
+
+**strip** — a control docked below the conversation. Always in one place,
+always visible, unmistakably a piece of UI. Easy to find, easy to ignore, and
+it costs height whether or not it is wanted.
+
+**chat** — Ray simply says what he can do next, at the end of what he just
+said. No card, no border, no background: a sentence and two things to press,
+in the same column as the answer. The bet is that people read Ray's answer to
+the end and stop there, so anything docked below that is furniture they have to
+learn to look at, while a sentence in the flow is just the next thing he said.
+Orientation moves to a **2px hairline under the header** — the one thing worth
+knowing at a glance, needing no words and no height.
+
+The chat form needs its copy to actually be dialogue. Each step carries a
+`say` clause written in Ray's voice — *"check those against your Response
+Library and see what you have already written"* — because the `d` subtitle,
+dropped into a sentence, reads as a fragment. Both phrasings take the bare
+clause (*"Would you like me to …?"*, *"Next I can …"*), which the first
+attempt did not: *"Shall I start by read through the documents"*.
+
+Dismissing, the header way back, and per-tender state work identically in
+both, and switching style while hidden does not resurrect it.
+
 ## Guiding, in the conversation
 
 There are **eight things a bid needs, in the order it needs them** — understand

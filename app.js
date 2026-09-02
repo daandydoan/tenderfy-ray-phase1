@@ -75,45 +75,53 @@
   const STEPS = [
     { k: 'read',    n: 'Review the documents',
       d: 'What is in the pack, and how much of it matters',
+      say: 'read through the documents and tell you what is in the pack',
       long: 'Ray picks a reading strategy per file — whole-file for the short ones, '
           + 'page-by-page for a 148-page RFT, OCR for anything scanned — and tells you '
           + 'what each one is for before you open any of them.',
       q: 'Review all documents for this tender' },
     { k: 'addenda', n: 'Check conflicts and addenda',
       d: 'What the addenda override in the original',
+      say: 'check what the addenda change in the original documents',
       long: 'Addenda quietly replace clauses in the original documents. Ray finds where '
           + 'they conflict and tells you which version governs, so you do not price '
           + 'against a superseded scope.',
       q: 'What changed in Addendum 2?' },
     { k: 'extract', n: 'Extract the response schedule',
       d: 'The questions you are required to answer',
+      say: 'pull out the questions you are required to answer',
       long: 'Pulls every question out of the response schedule with its word limit and '
           + 'page number, so the list you work from is the list you are marked on.',
       q: 'Extract the response schedule questions' },
     { k: 'match',   n: 'Match against your library',
       d: 'Which answers you have already written',
+      say: 'check those against your Response Library and see what you have already written',
       long: 'Checks each question against your Response Library and scores the matches, '
           + 'so you rewrite only what you have to. Most bids reuse more than people expect.',
       q: 'Find a past answer about safety' },
     { k: 'draft',   n: 'Draft the gaps',
       d: 'Answers for the questions with no match',
+      say: 'draft the questions nothing in your library covers',
       long: 'Drafts the questions nothing in the library covers, working from the tender '
           + 'documents and staying inside the word limit. You edit from a start, not a '
           + 'blank page.',
       q: 'Draft an answer for Q1' },
     { k: 'risk',    n: 'Check commercial risk',
       d: 'Insurance, damages, payment terms, validity',
+      say: 'go through the commercial terms — insurance, damages, payment, validity',
       long: 'The terms that cost money if you miss them — liquidated damages, insurance '
           + 'levels, payment terms, how long your price stays open — each quoted with '
           + 'the page it came from.',
       q: 'What insurance is required?' },
     { k: 'approve', n: 'Review and approve responses',
       d: 'Triage what Ray drafted',
+      say: 'take you to the responses so you can approve or discard them',
       long: 'Everything Ray wrote, in one list to approve or discard. Tick a response to '
           + 'hand it back to him for a rewrite, or tick two and ask him to merge them.',
       goto: 'responses' },
     { k: 'submit',  n: 'Compile the submission',
       d: 'Assemble and check nothing is missing',
+      say: 'assemble the approved responses into the submission',
       long: 'Assembles the approved responses into the submission and checks the schedule '
           + 'is complete — every question answered, every word limit respected.',
       todo: true },
@@ -316,6 +324,35 @@
   }
   global.rayToggleCredits = function () { applyCredits(!global.rayCreditsDemo); };
 
+  /* ── Which guidance to show ──────────────────────────────────────────
+     Two ways of putting the same eight steps in front of someone, kept
+     side by side so they can be compared in the room rather than argued
+     about in the abstract:
+
+       strip — docked below the conversation. Always in one place, always
+               visible, unmistakably a control. Easy to find, easy to
+               ignore, and it costs height whether or not it is wanted.
+       chat  — Ray says what he can do next at the end of his answer. No
+               chrome at all, and it lands where the eye already is; but it
+               scrolls away with the conversation and has no fixed home.  */
+  function applyGuide(style) {
+    global.rayGuideStyle = style === 'chat' ? 'chat' : 'strip';
+    const btn = document.querySelector('[data-ray-guide]');
+    if (btn) {
+      const chat = global.rayGuideStyle === 'chat';
+      btn.innerHTML = `<span class="ms">${chat ? 'forum' : 'dock_to_bottom'}</span>`;
+      btn.title = chat
+        ? 'Guidance: Ray asks in the conversation — click for the docked strip'
+        : 'Guidance: docked strip — click to have Ray ask in the conversation';
+      btn.classList.toggle('on', chat);
+    }
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p) p.paintNextStep();
+  }
+  global.rayToggleGuide = function () {
+    applyGuide(global.rayGuideStyle === 'chat' ? 'strip' : 'chat');
+  };
+
   /* A tender's colour, derived from its id so it is stable everywhere it
      appears — the page title bar here, the session tiles in Ray's list. */
   const TENDER_RAMP = ['c-teal', 'c-indigo', 'c-orange', 'c-brown', 'c-cyan'];
@@ -404,6 +441,7 @@
             <span class="hthemes" data-ray-theme onclick="rayToggleTheme()"></span>
             <span class="hthemes" data-ray-empty onclick="rayToggleEmpty()"></span>
             <span class="hthemes" data-ray-credits onclick="rayToggleCredits()"></span>
+            <span class="hthemes" data-ray-guide onclick="rayToggleGuide()"></span>
             <span class="ms fill" title="Notifications">notifications</span>
             <span class="hray" onclick="RayPanel.toggle()" title="Ray — Tenderfy Co-Pilot">
               <img src="${asset('assets/ray.svg')}" alt="Ray"> Ray</span>
@@ -449,6 +487,7 @@
        panel that claims you have no projects would read as data loss. */
     applyEmpty(false);
     applyCredits(false);
+    applyGuide('strip');
     paintDemo();
 
     if (typeof global.onPageReady === 'function') global.onPageReady(service, user);

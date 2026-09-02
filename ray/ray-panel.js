@@ -181,14 +181,16 @@
       el.innerHTML = `
         <div class="ray-head" data-ray="head"></div>
         <div class="ray-headbar" data-ray="headbar"></div>
+        <div data-ray="progline"></div>
         <div class="ray-list" data-ray="list"></div>
         <div class="ray-body" data-ray="body"></div>
+        <div class="ray-nextslot" data-ray="nextstep"></div>
         <!-- Outside the footer on purpose. Stacked in there with the credit
              notice, the reference band and the composer, the footer grew to
              half the panel and the conversation got what was left. Its own
              zone under the conversation keeps the two notices from reading as
              one wall of chrome. -->
-        <div class="ray-nextslot" data-ray="nextstep"></div>
+
         <div class="ray-trace" data-ray="trace"></div>
         <div class="ray-foot">
           <div class="ray-credit" data-ray="credit"></div>
@@ -1138,14 +1140,94 @@
         </div>`;
     }
 
+    /* ── Guidance as dialogue ────────────────────────────────────────────
+       The other way to show this. Instead of a control docked above the
+       composer, Ray simply says what he can do next, in his own voice, at
+       the end of what he just said — the way a person who was helping you
+       would. There is no card, no border and no chrome: it is a sentence and
+       two things to press.
+
+       The bet is that a bid coordinator reads Ray's answer to the end and
+       stops there. Anything docked below that is furniture they have to
+       learn to look at; a sentence in the same column as the answer is just
+       the next thing he said.                                              */
+    offerLine() {
+      const id = this.context.tenderId;
+      const steps = global.rayStepList;
+      if (!id || !steps || this.guideOff) return '';
+      const done = global.rayStepsDone(id);
+      if (done >= steps.length) {
+        return `<div class="ray-offerline">
+            <p>That is all ${steps.length} steps done — the bid is ready to compile.</p>
+            <div class="ray-offeracts">
+              <button class="ray-offerlink" data-ray-steps>See what we did</button>
+            </div>
+          </div>`;
+      }
+      const st = steps[done];
+      const first = done === 0;
+      /* `say` is a clause, not a label: this is Ray speaking, and a subtitle
+         dropped into a sentence reads as a fragment. */
+      const line = esc(st.say || st.d.toLowerCase());
+      return `<div class="ray-offerline">
+          <p>${first ? `Would you like me to ${line}?` : `Next I can ${line}.`}</p>
+          <div class="ray-offeracts">
+            <button class="ray-offergo" data-ray-step="${done}"${this.busy ? ' disabled' : ''}>
+              ${first ? 'Yes, start' : 'Do that'}</button>
+            <button class="ray-offerlink" data-ray-skip="${done}">Not this one</button>
+            <button class="ray-offerlink" data-ray-steps>See all ${steps.length} steps</button>
+            <button class="ray-offerlink off" data-ray-guide-off>Stop suggesting</button>
+          </div>
+        </div>`;
+    }
+
+    /* Orientation, with no content cost: a hairline under the header. It is
+       the one thing worth knowing at a glance, and it does not need words. */
+    paintProgress() {
+      const box = this.$('progline');
+      if (!box) return;
+      const id = this.context.tenderId;
+      const steps = global.rayStepList;
+      if (!id || !steps || this.view === 'list' || this.guideOff
+          || global.rayGuideStyle !== 'chat') { box.innerHTML = ''; return; }
+      const done = global.rayStepsDone(id);
+      box.innerHTML = `<div class="ray-progline" title="${done} of ${steps.length} steps done">
+          <i style="width:${Math.round(done / steps.length * 100)}%"></i></div>`;
+    }
+
     /* Kept in its own slot under the conversation so it survives a history
        repaint and never becomes a message — it is an offer, not something
        Ray said, and it must not end up in the scrollback twice. */
+    /* Lives at the end of the conversation, inside the body — it reads as
+       part of what Ray said. It is still never persisted: paintHistory
+       rebuilds the turns from storage and then calls this, so the offer is
+       always the current one and old offers never pile up in the scrollback. */
+    /** Two presentations of the same thing, switched from the app header so
+     *  they can be put side by side in a demo:
+     *
+     *    strip — a control docked below the conversation. Always in the same
+     *            place, always visible, and unmistakably a piece of UI.
+     *    chat  — Ray says what he can do next at the end of what he just
+     *            said. No chrome; it reads as him talking.
+     *
+     *  Neither is persisted. The old offer is removed before the new one is
+     *  drawn, so it is always the current step and the scrollback never
+     *  fills with stale suggestions. */
     paintNextStep() {
-      const box = this.$('nextstep');
-      if (!box) return;
-      box.innerHTML = (this.view === 'list' || this.guideOff) ? '' : this.nextStepCard();
+      const body = this.$('body');
+      const slot = this.$('nextstep');
+      const stale = body && body.querySelector('.ray-offerline');
+      if (stale) stale.remove();
+      if (slot) slot.innerHTML = '';
+      this.paintProgress();
       this.paintHeader();          // the way back in lives in the header
+      if (this.view === 'list') return;
+      if (global.rayGuideStyle === 'chat') {
+        const html = this.offerLine();
+        if (html && body) body.insertAdjacentHTML('beforeend', html);
+        return;
+      }
+      if (slot && !this.guideOff) slot.innerHTML = this.nextStepCard();
     }
 
     greet() {

@@ -669,6 +669,29 @@ html.ray-light .ray-panel{
 .dlg-step.now{background:var(--teal-tint)}
 .dlg-step.now .ms{color:var(--teal)}
 
+/* ── Guidance, said rather than docked ─────────────────────────────────
+   The other presentation. No card, no border, no background — it sits in
+   the conversation column as prose, because the bet is that people read
+   Ray's answer to the end and stop there. Anything docked below that is
+   furniture they must learn to look at.                                  */
+.ray-offerline{margin-top:-8px;padding:0 0 2px}
+.ray-offerline p{margin:0;font-size:13.5px;line-height:1.6;color:var(--gray)}
+.ray-offerline p b{color:var(--ink);font-weight:600}
+.ray-offeracts{display:flex;align-items:center;gap:12px;margin-top:9px;flex-wrap:wrap}
+.ray-offergo{border:none;background:var(--cta);color:#fff;border-radius:9px;padding:7px 14px;
+             font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
+.ray-offergo:hover{background:var(--cta-dark)}
+.ray-offergo:disabled{opacity:.5;cursor:default}
+.ray-offerlink{border:none;background:none;font:inherit;font-size:12.5px;font-weight:600;
+               color:var(--gray);cursor:pointer;padding:0;flex:none;text-decoration:underline;
+               text-underline-offset:3px;opacity:.8}
+.ray-offerlink:hover{opacity:1;color:var(--teal)}
+.ray-offerlink.off{margin-left:auto;opacity:.55;font-weight:400}
+
+/* Orientation with no words and no height: a hairline under the header. */
+.ray-progline{height:2px;background:var(--n-200)}
+.ray-progline i{display:block;height:100%;background:var(--teal);transition:width .3s ease}
+
 /* ── Dialogs ───────────────────────────────────────────────────────────
    Setup lives here rather than in the rail: Ray's session is a record of a
    conversation, and a control that was only true once does not belong in
@@ -1084,6 +1107,12 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-bubble code{background:var(--r-sunk);color:var(--r-tx)}
 /* Tokens only in this block: it styles the rail in both themes, and a literal
    colour here leaks the dark value into light. */
+.ray-offerline p{color:var(--r-tx-2)}
+.ray-offerline p b{color:var(--r-tx)}
+.ray-offerlink{color:var(--r-tx-2)}
+.ray-offerlink:hover{color:var(--r-accent)}
+.ray-progline{background:var(--r-raise)}
+.ray-progline i{background:var(--r-accent)}
 .ray-nextbar{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}
 .ray-nextbar .ms:first-child{color:var(--r-tx-3)}
 .ray-nextbar .t b{color:var(--r-tx)}
