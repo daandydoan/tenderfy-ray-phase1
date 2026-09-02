@@ -184,16 +184,13 @@
         F().PROMPT_LIBRARY.push(rec);
         return rec;
       },
-      /* Editing and retiring both live here because the manager screen owns
-         them. A default prompt's wording is Tenderfy's, so it can be switched
-         off but not rewritten — same rule as the default workflow. */
+      /* Editing lives here because the manager screen owns it. `isDefault`
+         says a prompt shipped with Tenderfy, not that it is frozen — the
+         wording that suits one business rarely suits the next. */
       update(guard, id, patch) {
         guard.assertScope('prompt_library.write', 'prompt_library');
         const r = this.list(guard).find((x) => x.id === id);
         if (!r) return null;
-        if (r.isDefault && ('label' in patch || 'text' in patch)) {
-          throw { reason: 'A default prompt’s wording cannot be changed. You can switch it off, or add your own.' };
-        }
         return Object.assign(r, patch);
       },
       /* Nothing in the rail calls this: the picker only selects and adds,
@@ -209,9 +206,9 @@
     },
     /* Workflows are business configuration, not tender content: everyone in
        the business sees the same ones, and only a role holding
-       workflow.write can change them. The default that ships with Tenderfy
-       is read-only — copying it is how you get an editable version, so a
-       business can never break the method it was sold. */
+       workflow.write can change them. `isDefault` records what shipped with
+       Tenderfy — it is provenance, not a lock. A business that wants the
+       method to match how it actually bids has to be able to change it. */
     workflows: {
       list(guard) {
         guard.assertScope('workflow.read', 'workflows');
@@ -232,20 +229,13 @@
         guard.assertScope('workflow.write', 'workflows');
         const w = this.get(guard, id);
         if (!w) return null;
-        if (w.isDefault) {
-          throw { reason: 'The Tenderfy Method cannot be edited. Duplicate it to make your own version.' };
-        }
         return Object.assign(w, patch);
       },
       remove(guard, id) {
         guard.assertScope('workflow.write', 'workflows');
         const rows = F().WORKFLOWS;
         const i = rows.findIndex((w) => w.id === id && w.businessId === guard.user.businessId);
-        if (i < 0) return;
-        if (rows[i].isDefault) {
-          throw { reason: 'The Tenderfy Method cannot be deleted.' };
-        }
-        rows.splice(i, 1);
+        if (i >= 0) rows.splice(i, 1);
       },
     },
     responseLibrary: {

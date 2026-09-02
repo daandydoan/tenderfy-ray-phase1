@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="stylesheet" href="../styles.css?v=6b9b0134">
+<link rel="stylesheet" href="../styles.css?v=de69548a">
 </head>
 <body>
 <div id="screen" style="display:none">
@@ -27,7 +27,7 @@
 </div>
 
 <script src="../data/fixtures.js?v=eb14f1f6"></script>
-<script src="../ray/ray-permissions.js?v=39f35cdc"></script>
+<script src="../ray/ray-permissions.js?v=b1b780ca"></script>
 <script src="../ray/ray-documents.js?v=da7bc666"></script>
 <script src="../ray/ray-context.js?v=203841fd"></script>
 <script src="../ray/ray-tools.js?v=9c4b4724"></script>
@@ -105,54 +105,54 @@ function aiPrompts() {
 }
 
 /* The dialog from the third mock: a title, the prompt itself, and an Active
-   switch in the head. Used unchanged for adding a prompt to the library and
-   for adding a step to a workflow — they are the same object. */
-function aiPromptDialog(opts) {
-  const o = opts || {};
+   switch in the head. It serves the library only — a workflow step is edited
+   where it lives, inside the workflow, rather than by swapping this same modal
+   out from under you. */
+function aiPromptDialog(o) {
   const isNew = !o.id;
-  const locked = !!o.locked;
-  rayDlg(o.title || (isNew ? 'Add Prompt' : 'Edit Prompt'), `
+  rayDlg(isNew ? 'Add Prompt' : 'Edit Prompt', `
     <label class="ai-f">Prompt Title
-      <input id="aiPT" placeholder="Enter Prompt Title" value="${aiEsc(o.label)}"
-             ${locked ? 'disabled' : ''}></label>
+      <input id="aiPT" placeholder="Enter Prompt Title" value="${aiEsc(o.label)}"></label>
     <label class="ai-f">Prompt
-      <textarea id="aiPX" rows="9" placeholder="Enter Prompt …"
-                ${locked ? 'disabled' : ''}>${aiEsc(o.text)}</textarea></label>
-    ${locked ? `<p class="ai-lock"><span class="ms">lock</span>
-      This prompt ships with Tenderfy, so its wording is fixed. You can switch it
-      off, or add your own version.</p>` : ''}`,
+      <textarea id="aiPX" rows="9" placeholder="Enter Prompt …">${aiEsc(o.text)}</textarea></label>
+    ${o.isDefault ? `<p class="ai-lock"><span class="ms">info</span>
+      This one ships with Tenderfy. Edit it freely — the Default label only
+      records where it came from.</p>` : ''}`,
     `<button class="btn" data-dlg-close>Cancel</button>
-     <button class="btn pri" id="aiPSave">${o.cta || (isNew ? 'Add Prompt' : 'Save changes')}</button>`);
+     <button class="btn pri" id="aiPSave">${isNew ? 'Add Prompt' : 'Save changes'}</button>`);
 
-  /* The Active switch belongs to the dialog head, beside the title — it is a
-     property of the whole prompt, not a third field under the textarea. */
+  aiHeadSwitch(o.active);
+  const title = document.getElementById('aiPT');
+  const text = document.getElementById('aiPX');
+  const save = document.getElementById('aiPSave');
+  const sync = () => { save.disabled = !(title.value.trim() && text.value.trim()); };
+  title.oninput = text.oninput = sync; sync();
+  save.onclick = () => {
+    const v = { label: title.value.trim(), text: text.value.trim(), active: aiSwitchOn() };
+    rayDlgClose();
+    o.onSave(v);
+  };
+  title.focus();
+}
+
+/* Both dialogs carry the same Active switch in the same place, which is most
+   of what stops them reading as two unrelated screens. */
+function aiHeadSwitch(active) {
   const head = document.querySelector('#rayDlg .dlg-head');
   const sw = document.createElement('button');
-  sw.className = 'ai-sw' + (o.active === false ? '' : ' on');
+  sw.className = 'ai-sw' + (active === false ? '' : ' on');
   sw.type = 'button';
-  sw.innerHTML = `<span class="k"></span><span class="l">${o.active === false ? 'Inactive' : 'Active'}</span>`;
+  sw.innerHTML = `<span class="k"></span><span class="l">${active === false ? 'Inactive' : 'Active'}</span>`;
   sw.onclick = () => {
     sw.classList.toggle('on');
     sw.querySelector('.l').textContent = sw.classList.contains('on') ? 'Active' : 'Inactive';
   };
   head.insertBefore(sw, head.querySelector('.dlg-x'));
-
-  const title = document.getElementById('aiPT');
-  const text = document.getElementById('aiPX');
-  const save = document.getElementById('aiPSave');
-  /* Both fields are required, the way the mock's disabled button implies. */
-  const sync = () => { save.disabled = !(title.value.trim() && text.value.trim()); };
-  title.oninput = text.oninput = sync; sync();
-  /* Close before handing back, not after: a step handler re-opens this same
-     dialog element with the workflow behind it, and closing afterwards would
-     hide the thing it had just re-opened. */
-  save.onclick = () => {
-    const v = { label: title.value.trim(), text: text.value.trim(),
-                active: sw.classList.contains('on') };
-    rayDlgClose();
-    o.onSave(v);
-  };
-  if (!locked) title.focus();
+  return sw;
+}
+function aiSwitchOn() {
+  const sw = document.querySelector('#rayDlg .ai-sw');
+  return !sw || sw.classList.contains('on');
 }
 
 function aiAddPrompt() {
@@ -169,12 +169,10 @@ function aiEditPrompt(id) {
   const r = (aiTry(() => aiRepo('promptLibrary').list(aiGuard)) || []).find((x) => x.id === id);
   if (!r) return;
   aiPromptDialog({
-    title: 'Edit Prompt', id: r.id, label: r.label, text: r.text,
-    active: r.active, locked: !!r.isDefault,
+    id: r.id, label: r.label, text: r.text,
+    active: r.active, isDefault: !!r.isDefault,
     onSave: (v) => {
-      /* A default's wording is fixed, so only the switch travels. */
-      aiTry(() => aiRepo('promptLibrary')
-        .update(aiGuard, id, r.isDefault ? { active: v.active } : v));
+      aiTry(() => aiRepo('promptLibrary').update(aiGuard, id, v));
       aiPaint();
     },
   });
@@ -186,7 +184,7 @@ function aiDelPrompt(id) {
   rayDlg('Delete prompt', `
     <p>Delete <b>${aiEsc(r.label)}</b>? It will stop appearing in Ray's composer
        for everyone in your business.</p>
-    ${r.isDefault ? `<p class="ai-lock"><span class="ms">lock</span>
+    ${r.isDefault ? `<p class="ai-lock"><span class="ms">info</span>
        This one ships with Tenderfy. Switching it to Inactive keeps it available
        to turn back on later.</p>` : ''}`,
     `<button class="btn" data-dlg-close>Cancel</button>
@@ -206,27 +204,31 @@ function aiWorkflows() {
       <div>
         <h2>Workflow Manager</h2>
         <p class="sub">An ordered set of prompts Ray runs one at a time, pausing for
-           your approval between each. The Tenderfy Method is the one we ship.</p>
+           your approval between each. The Tenderfy Method is the one we ship —
+           edit it to match how your team actually bids.</p>
       </div>
       ${canWrite ? `<button class="btn pri" data-ai-add-wf>Create Workflow</button>` : ''}
     </div>
     <div class="ai-wfs">${rows.map((w) => `
-      <div class="ai-wf">
+      <div class="ai-wf${w.active === false ? ' off' : ''}">
         <div class="ai-wfic"><span class="ms">play_lesson</span></div>
         <div class="ai-wftx">
           <div class="h">${aiEsc(w.name)}
-            ${w.isDefault ? '<span class="ai-badge">Default</span>' : ''}</div>
+            ${w.isDefault ? '<span class="ai-badge">Default</span>' : ''}
+            ${w.active === false ? '<span class="ai-badge off">Inactive</span>' : ''}</div>
           <div class="d">${aiEsc(w.description)}</div>
           <div class="m">${w.steps.length} step${w.steps.length === 1 ? '' : 's'}
             · Created ${aiDate(w.created)}</div>
         </div>
         <div class="ai-wfacts">
           <button class="btn" data-ai-view-wf="${w.id}">View</button>
-          ${canWrite ? `<button class="ai-ic" data-ai-edit-wf="${w.id}"
-              title="${w.isDefault ? 'Duplicate to edit' : 'Edit workflow'}">
-              <span class="ms">${w.isDefault ? 'content_copy' : 'edit'}</span></button>` : ''}
-          ${canWrite && !w.isDefault ? `<button class="ai-ic del" data-ai-del-wf="${w.id}"
-              title="Delete workflow"><span class="ms">delete</span></button>` : ''}
+          ${canWrite ? `
+            <button class="ai-ic" data-ai-edit-wf="${w.id}" title="Edit workflow">
+              <span class="ms">edit</span></button>
+            <button class="ai-ic" data-ai-dup-wf="${w.id}" title="Duplicate workflow">
+              <span class="ms">content_copy</span></button>
+            <button class="ai-ic del" data-ai-del-wf="${w.id}" title="Delete workflow">
+              <span class="ms">delete</span></button>` : ''}
         </div>
       </div>`).join('')}</div>`;
 }
@@ -237,6 +239,7 @@ function aiWorkflows() {
 function aiViewWorkflow(id) {
   const w = aiTry(() => aiRepo('workflows').get(aiGuard, id));
   if (!w) return;
+  const canWrite = aiCan('workflow.write');
   rayDlg(w.name, `
     <p>${aiEsc(w.description)}</p>
     <div class="dlg-steps">${w.steps.map((st, i) => `
@@ -245,101 +248,163 @@ function aiViewWorkflow(id) {
         <div class="t"><span class="h">${i + 1}. ${aiEsc(st.title)}</span>
           <span class="d">${aiEsc(st.prompt)}</span></div>
       </div>`).join('')}</div>`,
-    `<button class="btn dlg-wide" data-dlg-close>Close</button>`);
+    canWrite
+      ? `<button class="btn" data-dlg-close>Close</button>
+         <button class="btn pri" id="aiViewEdit">Edit workflow</button>`
+      : `<button class="btn dlg-wide" data-dlg-close>Close</button>`);
+  const go = document.getElementById('aiViewEdit');
+  /* Straight from reading it to changing it, without going back to the list
+     to find the row again. */
+  if (go) go.onclick = () => aiEditWorkflow(id);
 }
 
 /* Editing works on a copy and commits on save, so abandoning the dialog leaves
-   the stored workflow untouched. The default is duplicated rather than opened,
-   which is what keeps the shipped method intact. */
-function aiEditWorkflow(id) {
+   the stored workflow untouched. `dup` starts a new one from an existing one —
+   the Tenderfy Method included, though it is editable in place as well. */
+function aiEditWorkflow(id, dup) {
   const src = id ? aiTry(() => aiRepo('workflows').get(aiGuard, id)) : null;
   if (id && !src) return;
-  const dup = src && src.isDefault;
   aiEditing = src
     ? { id: dup ? null : src.id,
         name: dup ? src.name + ' (copy)' : src.name,
         description: src.description,
-        steps: src.steps.map((s) => Object.assign({}, s)) }
-    : { id: null, name: '', description: '', steps: [] };
-  aiPaintWfDialog(dup);
+        active: src.active !== false,
+        steps: src.steps.map((x) => Object.assign({}, x)),
+        edit: null, draft: null }
+    : { id: null, name: '', description: '', active: true,
+        steps: [], edit: null, draft: null };
+  aiPaintWfDialog();
 }
 
-function aiPaintWfDialog(dup) {
+/* One dialog for the whole job. Adding or editing a step opens a card in the
+   list rather than swapping this modal for another one — the step is part of
+   the workflow, so it is edited without leaving it. Repaints happen only on
+   structural changes (add, remove, reorder, open, close), never on a
+   keystroke, so nothing steals focus while you type. */
+function aiPaintWfDialog() {
   const w = aiEditing;
+  const editing = w.edit !== null;
+
+  const stepCard = (st, i) => `
+    <div class="ai-step">
+      <span class="nm">${i + 1}</span>
+      <div class="t"><span class="h">${aiEsc(st.title)}</span>
+        <span class="d">${aiEsc(st.prompt)}</span></div>
+      <div class="a">
+        <button class="ai-ic" data-ai-step-up="${i}" ${i ? '' : 'disabled'}
+                title="Move up"><span class="ms">arrow_upward</span></button>
+        <button class="ai-ic" data-ai-step-dn="${i}"
+                ${i === w.steps.length - 1 ? 'disabled' : ''}
+                title="Move down"><span class="ms">arrow_downward</span></button>
+        <button class="ai-ic" data-ai-step-ed="${i}" title="Edit step">
+          <span class="ms">edit</span></button>
+        <button class="ai-ic del" data-ai-step-rm="${i}" title="Remove step">
+          <span class="ms">delete</span></button>
+      </div>
+    </div>`;
+
+  const editCard = (n) => `
+    <div class="ai-step open">
+      <span class="nm">${n}</span>
+      <div class="t">
+        <label class="ai-f sm">Step title
+          <input id="aiST" placeholder="What this step is called"
+                 value="${aiEsc(w.draft.title)}"></label>
+        <label class="ai-f sm">Prompt
+          <textarea id="aiSX" rows="5"
+                    placeholder="What Ray should do at this step">${aiEsc(w.draft.prompt)}</textarea></label>
+        <div class="ai-stepacts">
+          <button class="btn sm" data-ai-step-cancel>Cancel</button>
+          <button class="btn sm pri" data-ai-step-ok>${w.edit === 'new' ? 'Add step' : 'Done'}</button>
+        </div>
+      </div>
+    </div>`;
+
+  const list = w.steps.map((st, i) =>
+    w.edit === i ? editCard(i + 1) : stepCard(st, i)).join('')
+    + (w.edit === 'new' ? editCard(w.steps.length + 1) : '');
+
   rayDlg(w.id ? 'Edit workflow' : 'Create workflow', `
-    ${dup ? `<p class="ai-lock"><span class="ms">content_copy</span>
-       The Tenderfy Method cannot be changed, so this is a copy of it. Edit it
-       freely — the original stays where it is.</p>` : ''}
     <label class="ai-f">Workflow name
       <input id="aiWN" placeholder="Enter workflow name" value="${aiEsc(w.name)}"></label>
     <label class="ai-f">Workflow description
       <textarea id="aiWD" rows="3"
                 placeholder="What this workflow is for, and when to use it">${aiEsc(w.description)}</textarea></label>
     <div class="ai-steplab">Steps<span>${w.steps.length}</span></div>
-    <div class="ai-steps">${w.steps.length ? w.steps.map((st, i) => `
-      <div class="ai-step">
-        <span class="nm">${i + 1}</span>
-        <div class="t"><span class="h">${aiEsc(st.title)}</span>
-          <span class="d">${aiEsc(st.prompt)}</span></div>
-        <div class="a">
-          <button class="ai-ic" data-ai-step-up="${i}" ${i ? '' : 'disabled'}
-                  title="Move up"><span class="ms">arrow_upward</span></button>
-          <button class="ai-ic" data-ai-step-dn="${i}"
-                  ${i === w.steps.length - 1 ? 'disabled' : ''}
-                  title="Move down"><span class="ms">arrow_downward</span></button>
-          <button class="ai-ic" data-ai-step-ed="${i}" title="Edit step">
-            <span class="ms">edit</span></button>
-          <button class="ai-ic del" data-ai-step-rm="${i}" title="Remove step">
-            <span class="ms">delete</span></button>
-        </div>
-      </div>`).join('')
-      : `<p class="ai-none">No steps yet. Add the first prompt Ray should run.</p>`}
-    </div>
-    <button class="ai-addstep" data-ai-step-add>
-      <span class="ms">add</span>Add a step</button>`,
+    <div class="ai-steps">${list || `<p class="ai-none">No steps yet. Add the first prompt Ray should run.</p>`}</div>
+    ${editing ? '' : `<button class="ai-addstep" data-ai-step-add>
+      <span class="ms">add</span>Add a step</button>`}`,
     `<button class="btn" data-dlg-close>Cancel</button>
      <button class="btn pri" id="aiWSave">${w.id ? 'Save changes' : 'Create workflow'}</button>`);
+
+  aiHeadSwitch(w.active);
 
   const nm = document.getElementById('aiWN');
   const ds = document.getElementById('aiWD');
   const save = document.getElementById('aiWSave');
+  /* Read the fields back before any repaint, so a half-typed name survives
+     adding a step. */
   const hold = () => { w.name = nm.value; w.description = ds.value; };
+  const holdDraft = () => {
+    const t = document.getElementById('aiST'), x = document.getElementById('aiSX');
+    if (t && x) w.draft = { title: t.value, prompt: x.value };
+  };
   const sync = () => { save.disabled = !(nm.value.trim() && w.steps.length); };
   nm.oninput = ds.oninput = () => { hold(); sync(); };
   sync();
 
-  /* Every step control re-enters this same painter, so the dialog is only ever
-     described in one place. The name and description are read back first so a
-     half-typed name survives adding a step. */
+  const st = document.getElementById('aiST');
+  if (st) { st.focus(); st.setSelectionRange(st.value.length, st.value.length); }
+
   const body = document.querySelector('#rayDlg .dlg-body');
+  const commit = () => {
+    holdDraft();
+    const d = w.draft;
+    if (!d || !d.title.trim() || !d.prompt.trim()) return false;
+    const rec = { title: d.title.trim(), prompt: d.prompt.trim() };
+    if (w.edit === 'new') w.steps.push(rec);
+    else w.steps[w.edit] = Object.assign({}, w.steps[w.edit], rec);
+    w.edit = null; w.draft = null;
+    return true;
+  };
+
   body.onclick = (e) => {
-    const hit = (a) => { const el = e.target.closest(`[${a}]`);
+    const num = (a) => { const el = e.target.closest(`[${a}]`);
                          return el ? +el.getAttribute(a) : null; };
     const swap = (a, b) => { const t = w.steps[a]; w.steps[a] = w.steps[b]; w.steps[b] = t; };
     let i;
-    if ((i = hit('data-ai-step-up')) !== null) { hold(); swap(i, i - 1); aiPaintWfDialog(); return; }
-    if ((i = hit('data-ai-step-dn')) !== null) { hold(); swap(i, i + 1); aiPaintWfDialog(); return; }
-    if ((i = hit('data-ai-step-rm')) !== null) { hold(); w.steps.splice(i, 1); aiPaintWfDialog(); return; }
-    if ((i = hit('data-ai-step-ed')) !== null) {
-      hold();
-      const st = w.steps[i];
-      aiPromptDialog({ title: 'Edit step', id: 'step', label: st.title, text: st.prompt,
-        cta: 'Save step',
-        onSave: (v) => { w.steps[i] = { k: st.k, title: v.label, prompt: v.text };
-                         aiPaintWfDialog(); } });
-      return;
+    if (e.target.closest('[data-ai-step-ok]')) { hold(); commit(); aiPaintWfDialog(); return; }
+    if (e.target.closest('[data-ai-step-cancel]')) {
+      hold(); w.edit = null; w.draft = null; aiPaintWfDialog(); return;
     }
     if (e.target.closest('[data-ai-step-add]')) {
-      hold();
-      aiPromptDialog({ title: 'Add a step', cta: 'Add step',
-        onSave: (v) => { w.steps.push({ title: v.label, prompt: v.text });
-                         aiPaintWfDialog(); } });
+      hold(); w.edit = 'new'; w.draft = { title: '', prompt: '' };
+      aiPaintWfDialog(); return;
+    }
+    if ((i = num('data-ai-step-ed')) !== null) {
+      hold(); w.edit = i; w.draft = Object.assign({}, w.steps[i]);
+      aiPaintWfDialog(); return;
+    }
+    if ((i = num('data-ai-step-up')) !== null) { hold(); holdDraft(); swap(i, i - 1); aiPaintWfDialog(); return; }
+    if ((i = num('data-ai-step-dn')) !== null) { hold(); holdDraft(); swap(i, i + 1); aiPaintWfDialog(); return; }
+    if ((i = num('data-ai-step-rm')) !== null) {
+      hold(); holdDraft();
+      w.steps.splice(i, 1);
+      /* The open editor tracks an index, so removing a row above it would
+         otherwise leave it pointing at the wrong step. */
+      if (w.edit === i) { w.edit = null; w.draft = null; }
+      else if (typeof w.edit === 'number' && w.edit > i) w.edit--;
+      aiPaintWfDialog(); return;
     }
   };
 
   save.onclick = () => {
     hold();
-    const patch = { name: w.name.trim(), description: w.description.trim(), steps: w.steps };
+    /* A step still open and filled in is what you meant to keep; an empty one
+       is not. Either way Save is never a dead end. */
+    if (w.edit !== null) commit();
+    const patch = { name: w.name.trim(), description: w.description.trim(),
+                    active: aiSwitchOn(), steps: w.steps };
     const ok = w.id
       ? aiTry(() => aiRepo('workflows').update(aiGuard, w.id, patch))
       : aiTry(() => aiRepo('workflows').add(aiGuard, Object.assign({ created: aiToday() }, patch)));
@@ -392,6 +457,7 @@ window.onPageReady = function (service) {
     if (e.target.closest('[data-ai-add-wf]')) return aiEditWorkflow(null);
     if ((v = at('data-ai-view-wf'))) return aiViewWorkflow(v);
     if ((v = at('data-ai-edit-wf'))) return aiEditWorkflow(v);
+    if ((v = at('data-ai-dup-wf'))) return aiEditWorkflow(v, true);
     if ((v = at('data-ai-del-wf'))) return aiDelWorkflow(v);
   };
 };

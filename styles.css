@@ -914,6 +914,9 @@ html.ray-light .ray-panel{
 .ai-badge{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:100px;
           background:var(--st-green-bg);color:var(--st-green-tx);
           font-size:10.5px;font-weight:600;vertical-align:middle}
+.ai-badge.off{background:var(--row);color:var(--light)}
+.ai-wf.off .ai-wfic{background:var(--row);color:var(--light)}
+.ai-wf.off .ai-wftx .h,.ai-wf.off .ai-wftx .d{color:var(--light)}
 .ai-ic{background:none;border:none;cursor:pointer;color:var(--teal);padding:4px;
        border-radius:7px;line-height:0}
 .ai-ic:hover{background:var(--row)}
@@ -981,6 +984,14 @@ html.ray-light .ray-panel{
 .ai-step .d{display:block;font-size:12px;line-height:1.5;color:var(--gray);margin-top:3px;
             display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ai-step .a{display:flex;gap:1px;flex:none}
+/* An open step is the same card, grown — not a different dialog. The list
+   keeps its numbering and its place, so editing never loses your position. */
+.ai-step.open{border-color:var(--teal);background:var(--teal-tint);align-items:flex-start}
+.ai-step.open .nm{background:var(--teal);color:#fff}
+.ai-f.sm{margin-bottom:11px;font-size:12.5px}
+.ai-f.sm input,.ai-f.sm textarea{margin-top:5px;padding:9px 11px;font-size:13px;background:#fff}
+.ai-f.sm textarea{min-height:70px}
+.ai-stepacts{display:flex;justify-content:flex-end;gap:8px}
 .ai-addstep{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
             margin-top:10px;padding:10px;border:1px dashed var(--lighter);border-radius:10px;
             background:none;font:inherit;font-size:13px;font-weight:600;color:var(--teal);
