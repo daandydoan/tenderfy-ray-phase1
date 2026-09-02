@@ -590,8 +590,14 @@ html.ray-light .ray-panel{
 .ray-result li{font-size:13px;line-height:1.6;color:var(--gray);margin-bottom:3px}
 .ray-result li b{color:var(--ink)}
 /* Full width: it is the one thing to do next, not one option among several. */
-.btn.dlg-wide{display:flex;width:100%;justify-content:center;margin:20px 0 0;padding:11px 14px;
-              font-size:14px}
+/* Pinned to the foot of the scrolling body: eight steps with a paragraph
+   each is taller than the dialog, and the one action should not need
+   scrolling to. */
+.btn.dlg-wide{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
+              margin:20px 0 0;padding:11px 14px;font-size:14px;
+              position:sticky;bottom:-22px}
+.dlg-body:has(.btn.dlg-wide){padding-bottom:22px}
+.btn.dlg-wide .ms{font-size:19px}
 .dlg-list{margin:0 0 14px;padding-left:20px}
 .dlg-list li{margin-bottom:6px}
 .dlg-list b{color:var(--ink)}

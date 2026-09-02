@@ -570,6 +570,25 @@ secure context and a permission that can be refused, so there is an
 `execCommand` fallback behind it. The icon becomes a tick for a moment rather
 than raising a toast — a toast for something this small is noise.
 
+## Where the workflow lives
+
+The composer's **left slot is the method**. `play_lesson` opens *Working
+through a tender*, which gives the workflow a permanent home rather than
+existing only inside whichever guidance form happens to be showing — and the
+guidance forms can then be switched, collapsed or dismissed without the method
+becoming unreachable.
+
+Attach moved across to sit with Send as a paperclip, next to saved prompts. All
+three of those act on **the message you are about to send**; the workflow acts
+on the tender.
+
+The dialog is where the method is read, so it is also where it is started: a
+full-width **Start the workflow**, or **Continue from step N** once some are
+done. A list of what Ray could do with no way to set him going is a brochure.
+It is `position: sticky` at the foot of the scrolling body — eight steps with a
+paragraph each is taller than the dialog, and the one action should not need
+scrolling to.
+
 ## The composer
 
 It is a `textarea`, not an input: Enter sends, Shift+Enter breaks a line, and

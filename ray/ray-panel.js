@@ -207,11 +207,17 @@
               <div class="ray-attpick" data-ray="prompts"></div>
               <div class="ray-attpick" data-ray="refpick"></div>
               <form class="ray-composer" data-ray="composer">
-                <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
-                  <span class="ms">add</span></button>
+                <!-- The left slot is the method, not a paperclip. Everything
+                     Ray can be asked to do as a process starts here, which
+                     gives the workflow a permanent home rather than living
+                     only in whatever guidance form happens to be showing. -->
+                <button type="button" class="ray-attach" data-ray-workflow
+                        title="Working through a tender"><span class="ms">play_lesson</span></button>
                 <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
-                <!-- Saved prompts sits with Send, not with Attach: both act on
-                     what you are about to say, while + acts on what you bring. -->
+                <!-- Attach and saved prompts sit with Send: all three act on
+                     the message you are about to send. -->
+                <button type="button" class="ray-attach" data-ray-attach title="Attach a document">
+                  <span class="ms">attach_file</span></button>
                 <button type="button" class="ray-attach" data-ray-prompts title="Saved prompts">
                   <span class="ms">bookmark</span></button>
                 <button type="submit" class="ray-send" title="Send"><span class="ms">arrow_upward</span></button>
@@ -321,7 +327,8 @@
         if (e.target.closest('[data-ray-go-responses]')) {
           global.rayGoResponses(); return;
         }
-        if (e.target.closest('[data-ray-steps]')) {
+        if (e.target.closest('[data-ray-steps]')
+            || e.target.closest('[data-ray-workflow]')) {
           global.rayStepsDialog(this.context.tenderId); return;
         }
         if (e.target.closest('[data-ray-guide-off]')) {

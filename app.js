@@ -194,16 +194,34 @@
 
   global.rayStepsDialog = function (tenderId) {
     const done = global.rayStepsDone(tenderId);
+    const finished = done >= STEPS.length;
+    /* The dialog is where the method is read, so it is also where it is
+       started — a list of what Ray could do with no way to set him going is
+       a brochure. */
+    const cta = finished
+      ? `<button class="btn dlg-wide" data-dlg-close>Close</button>`
+      : `<button class="btn pri dlg-wide" data-ray-start-workflow>
+           <span class="ms">play_arrow</span>${done ? `Continue from step ${done + 1}`
+                                                    : 'Start the workflow'}</button>`;
     global.rayDlg('Working through a tender', `
-      <p>Ray suggests these in order, but you can start anywhere — and skip
-         anything that does not apply to this bid.</p>
+      <p>Ray works through these in order and checks in at each one. You can
+         start anywhere, and skip anything that does not apply to this bid.</p>
       <div class="dlg-steps">${STEPS.map((st, i) => `
         <div class="dlg-step ${i < done ? 'done' : i === done ? 'now' : ''}">
           <span class="ms">${i < done ? 'check_circle' : i === done ? 'play_circle' : 'radio_button_unchecked'}</span>
           <div class="t"><span class="h">${i + 1}. ${st.n}</span>
             <span class="d">${st.long || st.d}</span>
             ${i === done ? '<span class="badge-now">You are here</span>' : ''}</div>
-        </div>`).join('')}</div>`);
+        </div>`).join('')}</div>
+      ${cta}`);
+    const el = document.getElementById('rayDlg');
+    const go = el.querySelector('[data-ray-start-workflow]');
+    if (go) go.onclick = () => {
+      global.rayDlgClose();
+      const p = global.RayPanel && global.RayPanel.current;
+      if (p) { p.guideOff = false; p.paintNextStep(); }
+      global.rayStepRun(global.rayStepsDone(tenderId), tenderId);
+    };
   };
 
   /* ── Dialogs ─────────────────────────────────────────────────────────
