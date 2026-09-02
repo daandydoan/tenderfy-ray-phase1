@@ -289,11 +289,32 @@ both, and switching style while hidden does not resurrect it.
 
 ## Guiding, in the conversation
 
-There are **eight things a bid needs, in the order it needs them** — understand
-the pack, find what the addenda changed, get the questions, see what is already
-answered, draft the rest, price the risk, approve, submit. They are deliberately
-**not the guided demo's eight**, which are ordered by which part of the brief
-they prove: right for showing the build, wrong for doing the work.
+The eight are the **Tenderfy Method**, taken from the company brief:
+
+1. **Go / No-Go** — whether this one is worth bidding
+2. **Plan the tender** — the task list and delivery plan
+3. **Understand the buyer** — their priorities, and where we add real value
+4. **Learn from feedback** — what this buyer said about our last bids
+5. **Complete the responses** — every question in the response schedule
+6. **Methodology & technical** — how we will actually deliver the work
+7. **Build the tender** — assemble and tailor the submission
+8. **Final review** — compliance, quality and readiness to submit
+
+Every one of them ends in **Human Review & Approval** in the brief, and that is
+the point rather than a detail: Ray is aiming to complete 80%+ of the tender
+with the human in the loop to guide, review and approve. Nothing here should be
+built as fire-and-forget.
+
+An earlier version of this list was invented and document-shaped — review the
+pack, extract the questions, draft the rest. Those describe what Ray can do to a
+file. These describe how a bid is won, which is what the method is for. They are
+also **not the guided demo's eight**, which are ordered by which part of the
+Phase 1 brief they prove: right for showing the build, wrong for doing the work.
+
+Four steps run against the mock provider. Step 7 navigates to Responses. Three
+— *Plan the tender*, *Understand the buyer*, *Final review* — carry a `todo`
+string naming what they would do and what they need, and say so instead of
+running something adjacent that would look wrong.
 
 They were first drawn as a checklist panel in the empty state. That was wrong
 for the people who need them. A panel is something you have to notice and read,

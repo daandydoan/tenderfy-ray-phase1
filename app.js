@@ -72,59 +72,87 @@
      The point of showing them as a path is that nobody has to know what to
      ask. A bid coordinator should not have to phrase a prompt to get started;
      they should be able to read where they are and press the next thing. */
+  /* The Tenderfy Method, from the company brief. Eight stages of a bid, each
+     of which Agent Ray works and a human reviews and approves — that pattern
+     is the point of the brief, not a detail: "the human only in the loop to
+     guide, review and approve", against a target of Ray completing 80%+.
+
+     These replace an earlier invented eight that were document-shaped —
+     review the pack, extract questions, draft. Those described what Ray can
+     do to a file. These describe how a bid is actually won, which is what
+     the method is for. */
   const STEPS = [
-    { k: 'read',    n: 'Review the documents',
-      d: 'What is in the pack, and how much of it matters',
-      say: 'read through the documents and tell you what is in the pack',
-      long: 'Ray picks a reading strategy per file — whole-file for the short ones, '
-          + 'page-by-page for a 148-page RFT, OCR for anything scanned — and tells you '
-          + 'what each one is for before you open any of them.',
+    { k: 'gonogo',  n: 'Go / No-Go',
+      d: 'Whether this one is worth bidding',
+      say: 'assess this against your Go / No-Go criteria and give you a recommendation',
+      long: 'Rates the opportunity against the Tenderfy criteria — strategic fit, capability, '
+          + 'commercial viability, mandatory requirements, risk — as Green, Amber or Red with '
+          + 'a reason for each, then recommends GO, GO SUBJECT TO CONDITIONS, HOLD or NO-GO. '
+          + 'Missing information is named, never assumed.',
       q: 'Review all documents for this tender' },
-    { k: 'addenda', n: 'Check conflicts and addenda',
-      d: 'What the addenda override in the original',
-      say: 'check what the addenda change in the original documents',
-      long: 'Addenda quietly replace clauses in the original documents. Ray finds where '
-          + 'they conflict and tells you which version governs, so you do not price '
-          + 'against a superseded scope.',
-      q: 'What changed in Addendum 2?' },
-    { k: 'extract', n: 'Extract the response schedule',
-      d: 'The questions you are required to answer',
-      say: 'pull out the questions you are required to answer',
-      long: 'Pulls every question out of the response schedule with its word limit and '
-          + 'page number, so the list you work from is the list you are marked on.',
-      q: 'Extract the response schedule questions' },
-    { k: 'match',   n: 'Match against your library',
-      d: 'Which answers you have already written',
-      say: 'check those against your Response Library and see what you have already written',
-      long: 'Checks each question against your Response Library and scores the matches, '
-          + 'so you rewrite only what you have to. Most bids reuse more than people expect.',
+
+    { k: 'plan',    n: 'Plan the tender',
+      d: 'The task list and delivery plan',
+      say: 'build the task list and delivery plan, working back from the closing date',
+      long: 'Works backwards from the closing date to a task list — title, brief, due date, '
+          + 'priority, suggested assignee — and a Delivery Plan covering milestones, '
+          + 'responsibilities, risks and approvals. Ray marks which tasks he could do himself, '
+          + 'but starts none of them until you say so.',
+      todo: 'Plan the tender — needs the Tenderfy task and Delivery Plan templates' },
+
+    { k: 'buyer',   n: 'Understand the buyer',
+      d: 'Their priorities, and where we add real value',
+      say: 'research the buyer and find where we can add real value',
+      long: 'Researches the buyer\u2019s goals, initiatives and commitments, compares them against '
+          + 'what the company genuinely does, and proposes specific value-adds — not '
+          + '"strong communication" but a named plan, programme or measurable improvement, '
+          + 'each with how it would be implemented and what evidence supports it.',
+      todo: 'Understand the buyer — needs web research, not built in this prototype' },
+
+    { k: 'feedback', n: 'Learn from feedback',
+      d: 'What this buyer said about our last bids',
+      say: 'look at what this buyer said about our previous submissions',
+      long: 'Searches previous tenders to this same buyer for scores, evaluator comments and '
+          + 'outcomes, then turns them into things to repeat and things to fix. Feedback from '
+          + 'other buyers is never applied, and if none exists it says so rather than '
+          + 'substituting something unrelated.',
       q: 'Find a past answer about safety' },
-    { k: 'draft',   n: 'Draft the gaps',
-      d: 'Answers for the questions with no match',
-      say: 'draft the questions nothing in your library covers',
-      long: 'Drafts the questions nothing in the library covers, working from the tender '
-          + 'documents and staying inside the word limit. You edit from a start, not a '
-          + 'blank page.',
+
+    { k: 'schedule', n: 'Complete the responses',
+      d: 'Every question in the response schedule',
+      say: 'work through the response schedule and draft the answers',
+      long: 'Pulls out every question with its word limit, mandatory flag and evaluation '
+          + 'weighting, then answers each one against the buyer\u2019s requirements using company '
+          + 'knowledge and everything approved earlier in the bid. Anything needing specialist '
+          + 'input is flagged rather than invented.',
+      q: 'Extract the response schedule questions' },
+
+    { k: 'method',  n: 'Methodology & technical',
+      d: 'How we will actually deliver the work',
+      say: 'develop the methodology and technical content for this project',
+      long: 'Builds project-specific methodology from the scope, programme and technical '
+          + 'documents — sequencing, resources, interfaces, risk, commissioning — as a '
+          + 'narrative of how the work gets done. Technical gaps are raised for an SME rather '
+          + 'than filled in.',
       q: 'Draft an answer for Q1' },
-    { k: 'risk',    n: 'Check commercial risk',
-      d: 'Insurance, damages, payment terms, validity',
-      say: 'go through the commercial terms — insurance, damages, payment, validity',
-      long: 'The terms that cost money if you miss them — liquidated damages, insurance '
-          + 'levels, payment terms, how long your price stays open — each quoted with '
-          + 'the page it came from.',
-      q: 'What insurance is required?' },
-    { k: 'approve', n: 'Review and approve responses',
-      d: 'Triage what Ray drafted',
-      say: 'take you to the responses so you can approve or discard them',
-      long: 'Everything Ray wrote, in one list to approve or discard. Tick a response to '
-          + 'hand it back to him for a rewrite, or tick two and ask him to merge them.',
+
+    { k: 'build',   n: 'Build the tender',
+      d: 'Assemble and tailor the submission',
+      say: 'assemble the submission and tailor the content to this buyer',
+      long: 'Chooses the template and structure, then selects and reworks content for this '
+          + 'specific bid — resumes, project profiles, methodologies, value-adds — rather than '
+          + 'reusing it unchanged. Edits stay on the tender copy; master library content is '
+          + 'never overwritten.',
       goto: 'responses' },
-    { k: 'submit',  n: 'Compile the submission',
-      d: 'Assemble and check nothing is missing',
-      say: 'assemble the approved responses into the submission',
-      long: 'Assembles the approved responses into the submission and checks the schedule '
-          + 'is complete — every question answered, every word limit respected.',
-      todo: true },
+
+    { k: 'final',   n: 'Final review',
+      d: 'Compliance, quality and readiness to submit',
+      say: 'run the final compliance and quality check before submission',
+      long: 'Checks the submission against the original documents — every mandatory '
+          + 'requirement, every question, word limits, schedules, signatures — then reads it '
+          + 'as an evaluator would and sorts what it finds into Critical, Recommended and '
+          + 'Optional. You make the call that it is ready.',
+      todo: 'Final review — needs the assembled tender to check against' },
   ];
   global.rayStepList = STEPS;
 
@@ -147,8 +175,10 @@
       location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
       return;
     }
+    /* Steps with no mocked answer say what they would do and why they are
+       not here, rather than running something adjacent and looking wrong. */
     if (st.todo) {
-      global.RayPanel.toast('Compile the submission — not built in this prototype');
+      global.RayPanel.toast(st.todo);
       const p0 = global.RayPanel && global.RayPanel.current;
       if (p0) p0.paintNextStep();
       return;
