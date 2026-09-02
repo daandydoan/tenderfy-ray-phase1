@@ -90,7 +90,8 @@
       this.stepOpen = false;      // the guide strip, shut until asked
       this.stepAt = null;         // stepper: which segment is being looked at
       this.openProject = null;
-      this.shutProject = null;    // which project is expanded in the list
+      this.shutProject = null;
+      this.listFilter = null;    // which project is expanded in the list
       this.guideOff = false;      // dismissed outright — only from expanded
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
@@ -382,6 +383,13 @@
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick();
           return;
         }
+        const fil = e.target.closest('[data-ray-filter]');
+        if (fil) {
+          const k = fil.getAttribute('data-ray-filter');
+          this.listFilter = this.listFilter === k ? null : k;
+          this.paintList();
+          return;
+        }
         const proj = e.target.closest('[data-ray-proj]');
         if (proj) {
           const id = proj.getAttribute('data-ray-proj');
@@ -617,10 +625,36 @@
         rows = rows.filter((t) => (t.title + ' ' + (t.snippet || '')).toLowerCase().indexOf(q) >= 0);
       }
 
+      /* Two levels. A project is a tender and holds the chats about it; a
+         chat with no tender is free chat and sits on its own. The grouping
+         key was already there — ThreadIndex has recorded `tenderId` on every
+         thread since the start — so this is a query, not a migration. */
+      const NONE = global.RayContext.NO_TENDER;
+      const byTender = {};
+      const free = [];
+      rows.forEach((t) => {
+        if (!t.tenderId || t.tenderId === NONE) { free.push(t); return; }
+        (byTender[t.tenderId] = byTender[t.tenderId] || []).push(t);
+      });
+      const ids = Object.keys(byTender).sort((a, b) =>
+        (byTender[b][0].at || 0) - (byTender[a][0].at || 0));
+
+      /* The filter narrows the list to one kind; picking the active chip
+         again clears it. Both sections show when nothing is picked, so the
+         filter is a shortcut rather than a mode you can get stuck in. */
+      const only = this.listFilter;
+      const chip = (key, label, n) => `
+        <button class="ray-chip${only === key ? ' on' : ''}" data-ray-filter="${key}">
+          ${label}<span class="n">${n}</span></button>`;
+
       let out = `
         <div class="ray-search">
           <span class="ms">search</span>
           <input type="text" placeholder="Search projects and chats" data-ray="q" value="${esc(this.query)}">
+        </div>
+        <div class="ray-chips">
+          ${chip('chats', 'Free chat', free.length)}
+          ${chip('projects', 'Projects', ids.length)}
         </div>`;
 
       if (!rows.length) {
@@ -636,22 +670,14 @@
         return;
       }
 
-      /* Two levels. A project is a tender and holds the chats about it; a
-         chat with no tender is free chat and sits on its own. The grouping
-         key was already there — ThreadIndex has recorded `tenderId` on every
-         thread since the start — so this is a query, not a migration. */
-      const NONE = global.RayContext.NO_TENDER;
-      const byTender = {};
-      const free = [];
-      rows.forEach((t) => {
-        if (!t.tenderId || t.tenderId === NONE) { free.push(t); return; }
-        (byTender[t.tenderId] = byTender[t.tenderId] || []).push(t);
-      });
+      /* Free chat leads: it is the shorter list and the one you land in
+         when you have not picked a tender. Projects sit below it. */
+      if (free.length && only !== 'projects') {
+        out += `<div class="ray-group">Free chat</div>`
+             + free.map((t) => this.chatRow(t, false)).join('');
+      }
 
-      const ids = Object.keys(byTender).sort((a, b) =>
-        (byTender[b][0].at || 0) - (byTender[a][0].at || 0));
-
-      if (ids.length) {
+      if (ids.length && only !== 'chats') {
         out += `<div class="ray-group">Projects</div>`;
         ids.forEach((tid) => {
           let tender = null;
@@ -686,9 +712,12 @@
         });
       }
 
-      if (free.length) {
-        out += `<div class="ray-group">Free chat</div>`
-             + free.map((t) => this.chatRow(t, false)).join('');
+      if (only === 'chats' && !free.length) {
+        out += `<p class="ray-nofilter">No free chats yet — every chat you have
+                belongs to a project.</p>`;
+      } else if (only === 'projects' && !ids.length) {
+        out += `<p class="ray-nofilter">No projects yet. Open a tender and start
+                a chat there to make one.</p>`;
       }
       box.innerHTML = out;
     }
