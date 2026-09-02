@@ -86,6 +86,7 @@
       this.attachments = [];         // files pinned to the next message
       this.attachOpen = false;
       this.promptsOpen = false;
+      this.wfOpen = false;
       /* Which of the platform's documents Ray is pointed at. null means "not
          chosen" — the tender's own documents stand in until the user edits
          the list, so the band is right before anyone has touched it. */
@@ -218,13 +219,14 @@
               <div class="ray-attpick" data-ray="attpick"></div>
               <div class="ray-attpick" data-ray="prompts"></div>
               <div class="ray-attpick" data-ray="refpick"></div>
+              <div class="ray-attpick" data-ray="wfpick"></div>
               <form class="ray-composer" data-ray="composer">
                 <!-- The left slot is the method, not a paperclip. Everything
                      Ray can be asked to do as a process starts here, which
                      gives the workflow a permanent home rather than living
                      only in whatever guidance form happens to be showing. -->
                 <button type="button" class="ray-attach" data-ray-workflow
-                        title="Working through a tender"><span class="ms">play_lesson</span></button>
+                        title="Start a workflow"><span class="ms">play_lesson</span></button>
                 <textarea rows="1" placeholder="Reply to Ray…" data-ray="input"></textarea>
                 <!-- Attach and saved prompts sit with Send: all three act on
                      the message you are about to send. -->
@@ -311,12 +313,14 @@
         const tt = e.target.closest('[data-ray-trace-toggle]');
         if (tt) { this.traceOpen = !this.traceOpen; this.paintTrace(); return; }
         if (e.target.closest('[data-ray-attach]')) {
-          this.attachOpen = !this.attachOpen; this.promptsOpen = this.refPickOpen = false;
-          this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
+          this.attachOpen = !this.attachOpen;
+          this.promptsOpen = this.refPickOpen = this.wfOpen = false;
+          this.paintPickers(); return;
         }
         if (e.target.closest('[data-ray-prompts]')) {
-          this.promptsOpen = !this.promptsOpen; this.attachOpen = this.refPickOpen = false;
-          this.paintAttachments(); this.paintPrompts(); this.paintRefPick(); return;
+          this.promptsOpen = !this.promptsOpen;
+          this.attachOpen = this.refPickOpen = this.wfOpen = false;
+          this.paintPickers(); return;
         }
         const seg = e.target.closest('[data-ray-seg]');
         if (seg) { this.stepAt = +seg.getAttribute('data-ray-seg'); this.paintNextStep(); return; }
@@ -339,8 +343,24 @@
         if (e.target.closest('[data-ray-go-responses]')) {
           global.rayGoResponses(); return;
         }
-        if (e.target.closest('[data-ray-steps]')
-            || e.target.closest('[data-ray-workflow]')) {
+        /* The workflow button opens a picker in the composer, the way saved
+           prompts do — choosing which of several methods to run is the same
+           kind of small choice, and a modal to reach a modal was one screen
+           too many. [data-ray-steps] comes from the guide, which is already
+           inside a workflow, so it opens that one directly. */
+        if (e.target.closest('[data-ray-workflow]')) {
+          this.wfOpen = !this.wfOpen;
+          this.attachOpen = this.promptsOpen = this.refPickOpen = false;
+          this.paintPickers(); return;
+        }
+        const pick = e.target.closest('[data-ray-pick-wf]');
+        if (pick) {
+          this.wfOpen = false; this.paintPickers();
+          global.rayStartWorkflow(pick.getAttribute('data-ray-pick-wf'),
+                                  this.context.tenderId);
+          return;
+        }
+        if (e.target.closest('[data-ray-steps]')) {
           global.rayStepsDialog(this.context.tenderId); return;
         }
         if (e.target.closest('[data-ray-guide-off]')) {
@@ -382,7 +402,7 @@
         }
         if (e.target.closest('[data-ray-refpick]')) {
           this.refPickOpen = !this.refPickOpen;
-          this.attachOpen = this.promptsOpen = false;
+          this.attachOpen = this.promptsOpen = this.wfOpen = false;
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick();
           return;
         }
@@ -928,6 +948,40 @@
        Instructions worth reusing. Picking one puts it in the composer rather
        than sending it — a saved prompt is a starting point, and the thing in
        front of you usually needs a word changed.                            */
+    /* Four pickers share the band above the composer and only one may be
+       open. Repainting them together is what keeps that true — adding a
+       fifth to one branch and forgetting another is how they drift apart. */
+    paintPickers() {
+      this.paintAttachments(); this.paintPrompts();
+      this.paintRefPick(); this.paintWorkflows();
+    }
+
+    /** The workflows this business can run, in the same shape as the saved
+     *  prompt list: pick one and it opens. */
+    paintWorkflows() {
+      const box = this.$('wfpick');
+      if (!box) return;
+      if (!this.wfOpen) { box.innerHTML = ''; return; }
+      let rows = [];
+      try {
+        rows = global.RayPermissions.Repositories.workflows
+          .list(service.guard).filter((w) => w.active !== false);
+      } catch (e) { rows = []; }
+      const cur = global.rayActiveWorkflow && global.rayActiveWorkflow();
+      box.innerHTML = `<div class="ray-pickhead">Start a workflow</div>`
+        + (rows.length ? rows.map((w) => `
+            <div class="ray-promptrow">
+              <button class="ray-pickrow${cur && cur.id === w.id ? ' on' : ''}"
+                      data-ray-pick-wf="${w.id}">
+                <span class="ms">play_lesson</span>
+                <span class="t">${esc(w.name)}<span class="s">${
+                  w.steps.length} step${w.steps.length === 1 ? '' : 's'} · ${
+                  esc(w.description)}</span></span>
+              </button>
+            </div>`).join('')
+          : '<div class="ray-pickempty">No workflows yet.</div>');
+    }
+
     paintPrompts() {
       const box = this.$('prompts');
       if (!this.promptsOpen) { box.innerHTML = ''; return; }

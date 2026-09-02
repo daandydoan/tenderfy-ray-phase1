@@ -711,6 +711,13 @@ html.ray-light .ray-panel{
 .ray-nextbar .t strong,.ray-stepnow .t strong{font-weight:700;color:var(--ink)}
 
 /* The whole list, when someone wants to see where this is going. */
+/* The way back to the choice, above the list it leads out of. Not .dlg-back —
+   that name is already the dialog's own backdrop. */
+.dlg-again{display:inline-flex;align-items:center;gap:3px;background:none;border:none;
+           font:inherit;font-size:12.5px;font-weight:600;color:var(--teal);cursor:pointer;
+           padding:0;margin:-4px 0 14px}
+.dlg-again:hover{text-decoration:underline}
+.dlg-again .ms{font-size:17px}
 .dlg-steps{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 .dlg-step{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:9px}
 .dlg-step .ms{font-size:19px;color:var(--lighter);flex:none;margin-top:1px}
@@ -1357,6 +1364,9 @@ html.ray-rail-open .rvw-float{bottom:22px}
    text IS the thing you are choosing between. */
 .ray-promptrow{display:flex;align-items:flex-start}
 .ray-promptrow .ray-pickrow{align-items:flex-start}
+/* The one already in play, so reopening the list says where you are. */
+.ray-pickrow.on .ms{color:var(--r-accent)}
+.ray-pickrow.on .t{font-weight:600}
 .ray-promptrow .ray-pickrow .ms{margin-top:1px}
 .ray-promptrow .t{white-space:normal;overflow:visible}
 .ray-promptrow .t .s{white-space:normal;line-height:1.45;margin-top:2px;

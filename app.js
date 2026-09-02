@@ -156,21 +156,72 @@
   ];
   global.rayStepList = STEPS;
 
+  /* ── The workflow in play ───────────────────────────────────────────────
+     STEPS is the Tenderfy Method as the guide needs it: each step carries the
+     mocked question or the note saying why it is not built. A stored workflow
+     carries only a title and a prompt, so picking one maps it onto that shape.
+     A step whose `k` matches a shipped one keeps the mock behind it — that is
+     what lets the demo still run after the Method has been edited — and
+     anything else simply sends its own prompt, which is what a custom step is. */
+  let activeWf = null;
+  global.rayActiveWorkflow = () => activeWf;
+
+  const shorten = (t) => (t.length > 92 ? t.slice(0, 90).replace(/\s+\S*$/, '') + '…' : t);
+
+  function stepsFor(wf) {
+    if (!wf) return STEPS;
+    return wf.steps.map((st, i) => {
+      const base = st.k ? STEPS.find((x) => x.k === st.k) : null;
+      return {
+        k: st.k || ('wf' + i),
+        n: st.title,
+        d: base ? base.d : shorten(st.prompt),
+        long: st.prompt,
+        say: base ? base.say
+                  : 'work through ' + st.title.charAt(0).toLowerCase() + st.title.slice(1),
+        q: base ? base.q : st.prompt,
+        todo: base ? base.todo : undefined,
+      };
+    });
+  }
+
+  global.raySetWorkflow = function (wf) {
+    activeWf = wf || null;
+    global.rayStepList = stepsFor(wf);
+    const p = global.RayPanel && global.RayPanel.current;
+    if (p) { p.resetStepAt(); p.paintNextStep(); }
+  };
+
+  function activeWorkflows() {
+    try {
+      return global.RayPermissions.Repositories.workflows
+        .list(global.ray.guard).filter((w) => w.active !== false);
+    } catch (e) { return []; }
+  }
+
   /* Mocked progress, per tender and in memory — enough to show the three
      states a row can be in. A real one reads from the tender's own record. */
   const DONE = { 't-envind': 3, 't-velocity': 0, 't-civic': 6, 't-northside': 1 };
+  /* Progress belongs to a tender and a workflow together: three steps into the
+     Method says nothing about a three-step qualification pass. The Method keeps
+     the bare tender key so the seeded progress above still reads. */
+  function progKey(tenderId) {
+    return activeWf && !activeWf.isDefault ? tenderId + '|' + activeWf.id : tenderId;
+  }
   global.rayStepsDone = function (tenderId) {
-    return DONE[tenderId] || 0;
+    return DONE[progKey(tenderId)] || 0;
   };
   global.rayStepSkip = function (i, tenderId) {
-    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);
+    const k = progKey(tenderId);
+    DONE[k] = Math.max(DONE[k] || 0, i + 1);
     const p = global.RayPanel && global.RayPanel.current;
     if (p) { p.resetStepAt(); p.paintNextStep(); }
   };
   global.rayStepRun = function (i, tenderId) {
-    const st = STEPS[i];
+    const st = global.rayStepList[i];
     if (!st) return;
-    DONE[tenderId] = Math.max(DONE[tenderId] || 0, i + 1);   // doing it completes it
+    const dk = progKey(tenderId);
+    DONE[dk] = Math.max(DONE[dk] || 0, i + 1);               // doing it completes it
     const back = global.RayPanel && global.RayPanel.current;
     if (back) back.resetStepAt();
 /* No step navigates on its own. Being thrown onto another screen mid-method
@@ -192,7 +243,31 @@
     location.href = (/\/pages\//.test(location.pathname) ? '' : 'pages/') + 'responses.html';
   };
 
+  /* ── Which workflow? ────────────────────────────────────────────────────
+     Chosen in the composer, the way a saved prompt is — see the panel's
+     paintWorkflows(). This is what the choice lands on: make it the one in
+     play, then open it. */
+  global.rayStartWorkflow = function (wfId, tenderId) {
+    const wf = activeWorkflows().find((w) => w.id === wfId);
+    if (!wf) return;
+    global.raySetWorkflow(wf);
+    global.rayStepsDialog(tenderId);
+  };
+
+  /* Reopening the picker means closing this dialog and dropping back to the
+     composer, since that is where the choice now lives. */
+  global.rayPickWorkflow = function () {
+    global.rayDlgClose();
+    const p = global.RayPanel && global.RayPanel.current;
+    if (!p) return;
+    p.show();
+    p.wfOpen = true;
+    p.attachOpen = p.promptsOpen = p.refPickOpen = false;
+    p.paintPickers();
+  };
+
   global.rayStepsDialog = function (tenderId) {
+    const STEPS = global.rayStepList;
     const done = global.rayStepsDone(tenderId);
     const finished = done >= STEPS.length;
     /* The dialog is where the method is read, so it is also where it is
@@ -203,9 +278,12 @@
       : `<button class="btn pri dlg-wide" data-ray-start-workflow>
            <span class="ms">play_arrow</span>${done ? `Continue from step ${done + 1}`
                                                     : 'Start the workflow'}</button>`;
-    global.rayDlg('Working through a tender', `
+    global.rayDlg(activeWf ? activeWf.name : 'Working through a tender', `
       <p>Ray works through these in order and checks in at each one. You can
          start anywhere, and skip anything that does not apply to this bid.</p>
+      ${activeWorkflows().length > 1
+        ? `<button class="dlg-again" onclick="rayPickWorkflow()">
+             <span class="ms">chevron_left</span>Choose a different workflow</button>` : ''}
       <div class="dlg-steps">${STEPS.map((st, i) => `
         <div class="dlg-step ${i < done ? 'done' : i === done ? 'now' : ''}">
           <span class="ms">${i < done ? 'check_circle' : i === done ? 'play_circle' : 'radio_button_unchecked'}</span>
