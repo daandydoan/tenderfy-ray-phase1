@@ -684,10 +684,10 @@ html.ray-light .ray-panel{
    Ray's answer to the end and stop there. Anything docked below that is
    furniture they must learn to look at.                                  */
 .ray-offerline{margin-top:-8px;padding:0 0 2px}
-/* Where you are, before what is next — the chat form has no chrome of its
-   own to carry it, and the 2px hairline under the header says "some" rather
-   than "three of eight". */
-.ray-offerprog{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+/* Between the sentence and the buttons, tight against both — the chat form
+   has no chrome of its own to carry progress, and the 2px hairline under the
+   header says "some" rather than "three of eight". */
+.ray-offerprog{display:flex;align-items:center;gap:9px;margin:7px 0 0}
 .ray-offerprog span{flex:none;font-size:11px;font-weight:600;color:var(--light);
                     text-transform:uppercase;letter-spacing:.05em}
 .ray-offermeter{flex:1;height:3px;border-radius:99px;background:var(--n-200);overflow:hidden;
@@ -696,7 +696,7 @@ html.ray-light .ray-panel{
                   transition:width .3s ease}
 .ray-offerline p{margin:0;font-size:13.5px;line-height:1.6;color:var(--gray)}
 .ray-offerline p b{color:var(--ink);font-weight:600}
-.ray-offeracts{display:flex;align-items:center;gap:4px;margin-top:9px;flex-wrap:wrap}
+.ray-offeracts{display:flex;align-items:center;gap:4px;margin-top:7px;flex-wrap:wrap}
 .ray-offergo{border:none;background:var(--cta);color:#fff;border-radius:9px;padding:7px 14px;
              font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
 .ray-offergo:hover{background:var(--cta-dark)}

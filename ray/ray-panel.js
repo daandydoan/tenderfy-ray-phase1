@@ -1214,11 +1214,11 @@
       const line = esc(st.say || st.d.toLowerCase());
       const pct = Math.round(done / steps.length * 100);
       return `<div class="ray-offerline">
+          <p>${first ? `Let me ${line}.` : `Next, let me ${line}.`}</p>
           <div class="ray-offerprog">
             <span>Step ${done + 1} of ${steps.length}</span>
             <div class="ray-offermeter"><i style="width:${pct}%"></i></div>
           </div>
-          <p>${first ? `Let me ${line}.` : `Next, let me ${line}.`}</p>
           <div class="ray-offeracts">
             <button class="ray-offergo" data-ray-step="${done}"${this.busy ? ' disabled' : ''}>
               Go ahead</button>
