@@ -305,6 +305,7 @@ h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center
   --r-halo:rgba(255,188,74,.20);       /* the disc behind the full mark */
   --r-guide-bd:rgba(106,221,181,.45);  /* the guide strip's outline          */
   --r-scroll:rgba(255,255,255,.20);    /* scrollbar thumb                    */
+  --r-hover:rgba(255,255,255,.07);     /* ghost-button hover tint            */
   --r-grey-bg:rgba(255,255,255,.08);   --r-grey-tx:#A8B2B6;
   --r-clay-tx:#D8A88F;
   --r-deny-bg:rgba(249,82,70,.12);     --r-deny-bd:rgba(249,82,70,.35);
@@ -335,6 +336,7 @@ html.ray-light .ray-panel{
   --r-halo:#FCEBCF;
   --r-guide-bd:#6ADDB5;
   --r-scroll:rgba(0,0,0,.18);
+  --r-hover:rgba(0,0,0,.05);
   --r-grey-bg:#EFEFEF;  --r-grey-tx:#5F5E5A;
   --r-clay-tx:#6D4C41;
   --r-deny-bg:#FCEBEB;  --r-deny-bd:#F6DCD9; --r-deny-tx:#A32D2D;
@@ -640,14 +642,19 @@ html.ray-light .ray-panel{
 .ray-nextmeter{height:3px;margin:7px -10px 0;background:var(--n-200)}
 .ray-nextmeter i{display:block;height:100%;background:var(--teal);transition:width .3s ease}
 .ray-nextmore .then{margin:8px 0 0;font-size:11px;opacity:.75}
-.ray-nextlinks{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
-.ray-nextlink.off{margin-left:auto;opacity:.6}
+.ray-nextlinks{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
+.ray-nextlink.off{margin-left:auto;opacity:.7}
 .ray-nextgo:disabled{opacity:.5;cursor:default}
 /* The way back in, in the header. */
 .ray-hbtn[data-ray-guide-on]{color:var(--teal)}
-.ray-nextlink{border:none;background:none;font:inherit;font-size:11.5px;font-weight:700;
-              color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;padding:0;flex:none}
-.ray-nextlink:hover{opacity:1}
+/* Secondary actions are buttons with no outline, not underlined text. A row
+   of underlines reads as a footnote and gives nothing to aim at; a padded
+   button has a hit area and says it is pressable without drawing a box
+   around every option and competing with the one filled action. */
+.ray-nextlink{border:none;background:none;font:inherit;font-size:11.5px;font-weight:600;
+              color:inherit;opacity:.8;cursor:pointer;padding:5px 9px;border-radius:7px;
+              flex:none;line-height:1.3}
+.ray-nextlink:hover{opacity:1;background:var(--r-hover,rgba(0,0,0,.06))}
 .ray-nextgo{border:none;background:var(--cta);color:#fff;border-radius:7px;padding:4px 11px;
             font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
 .ray-nextgo:hover{background:var(--cta-dark)}
@@ -679,16 +686,16 @@ html.ray-light .ray-panel{
 .ray-offerline{margin-top:-8px;padding:0 0 2px}
 .ray-offerline p{margin:0;font-size:13.5px;line-height:1.6;color:var(--gray)}
 .ray-offerline p b{color:var(--ink);font-weight:600}
-.ray-offeracts{display:flex;align-items:center;gap:12px;margin-top:9px;flex-wrap:wrap}
+.ray-offeracts{display:flex;align-items:center;gap:4px;margin-top:9px;flex-wrap:wrap}
 .ray-offergo{border:none;background:var(--cta);color:#fff;border-radius:9px;padding:7px 14px;
              font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
 .ray-offergo:hover{background:var(--cta-dark)}
 .ray-offergo:disabled{opacity:.5;cursor:default}
 .ray-offerlink{border:none;background:none;font:inherit;font-size:12.5px;font-weight:600;
-               color:var(--gray);cursor:pointer;padding:0;flex:none;text-decoration:underline;
-               text-underline-offset:3px;opacity:.8}
-.ray-offerlink:hover{opacity:1;color:var(--teal)}
-.ray-offerlink.off{margin-left:auto;opacity:.55;font-weight:400}
+               color:var(--gray);cursor:pointer;padding:6px 10px;border-radius:8px;flex:none;
+               opacity:.9;line-height:1.3}
+.ray-offerlink:hover{opacity:1;color:var(--teal);background:var(--r-hover,rgba(0,0,0,.05))}
+.ray-offerlink.off{margin-left:auto;opacity:.6;font-weight:500}
 
 /* ── Guidance as a stepper ─────────────────────────────────────────────
    Pinned under the header, so it cannot scroll away and never competes
@@ -703,9 +710,9 @@ html.ray-light .ray-panel{
 .ray-seg:hover{transform:scaleY(1.8)}
 /* The one being looked at, which is not necessarily the one that is next. */
 .ray-seg.at{box-shadow:0 0 0 2px var(--n-100),0 0 0 3.5px var(--teal)}
-.ray-stepnow{display:flex;align-items:center;gap:10px;margin-top:9px;font-size:12px}
+.ray-stepnow{display:flex;align-items:center;gap:3px;margin-top:9px;font-size:12px}
 .ray-stepnow .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-                color:var(--ink)}
+                color:var(--ink);margin-right:6px}
 .ray-stepnow .t b{display:inline-flex;align-items:center;justify-content:center;width:17px;
                   height:17px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;
                   margin-right:6px;vertical-align:-3px}

@@ -382,10 +382,18 @@ was never the problem. So the ground goes neutral, the outline stays to mark it
 as Ray's, and **only Start carries colour**: one active thing, and it is the one
 you press. 6.1:1 body text, 11.2:1 on the step name.
 
-> The outline is `--r-guide-bd`, not a literal. The rail-surface block at the
-> foot of the stylesheet styles **both** themes — the tokens flip, the block
-> does not — so a hardcoded colour there leaks the dark value into light. It
-> did exactly that once before this was tokenised.
+Secondary actions are **buttons with no outline**, not underlined text. A row
+of underlines reads as a footnote and gives nothing to aim at; a padded button
+has a hit area and says it is pressable without drawing a box around every
+option and competing with the one filled action. Applied identically in all
+three forms.
+
+> Two things in the rail are tokens, not literals: the guide outline
+> (`--r-guide-bd`) and the ghost-button hover tint (`--r-hover`). The
+> rail-surface block at the foot of the stylesheet styles **both** themes —
+> the tokens flip, the block does not — so a hardcoded colour there leaks one
+> theme's value into the other. Both of these did exactly that before being
+> tokenised; the hover tint would have painted white-on-white in light mode.
 
 **Three depths, each earning its place.** Shut, it is one line saying what is
 next: enough to act on, small enough to ignore. Pressed, it adds why this step
