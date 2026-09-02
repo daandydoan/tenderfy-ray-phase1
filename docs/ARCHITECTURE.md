@@ -258,6 +258,24 @@ wins over documents, and on that surface with nothing ticked the band hides
 rather than falling through to "every document in the business", which is true
 and useless.
 
+## The first step, and the empty panel
+
+The greeting is **bottom-aligned**, not centred. An empty panel is mostly empty
+space, and the greeting belongs beside the thing you type into — which also
+puts it directly above whichever guidance form is showing, so the two read as
+one block rather than two unrelated things at opposite ends.
+
+Ray's mark on its warm disc, *How can Ray help?*, a line saying what this
+tender is and how many steps there are, then three starter questions. Those are
+deliberately **not** the eight: the guide already offers the method, so these
+are the "or just ask me something" half. Repeating a step here would make the
+panel look like it is offering the same thing twice.
+
+All three guidance forms share it. In **chat** the offer appends after the
+greeting inside the body, so the pair is bottom-aligned together; in **strip**
+and **steps** the greeting is last in the body and the guide sits in its own
+slot.
+
 ## Three ways to guide, switchable
 
 Three presentations of the same eight steps, cycled from one header switch so

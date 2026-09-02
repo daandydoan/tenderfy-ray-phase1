@@ -879,9 +879,12 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-older .ms{font-size:14px;margin-right:4px;vertical-align:-2px}
 
 /* ── Ray: blank conversation ───────────────────────────────────────────── */
-.ray-empty{margin:auto 0;padding:0 2px 20px;text-align:left}
-.ray-empty h3{font-size:17px;font-weight:600;margin:12px 0 6px}
-.ray-empty p{font-size:13.5px;line-height:1.6;color:var(--gray);margin:0 0 18px}
+/* Pushed to the bottom of the conversation column: an empty panel is mostly
+   empty space, and the greeting belongs beside what you type into, directly
+   above whichever guidance form is showing. */
+.ray-empty{margin-top:auto;padding:0 2px 4px;text-align:left}
+.ray-empty h3{font-size:19px;font-weight:600;margin:14px 0 8px}
+.ray-empty p{font-size:14px;line-height:1.6;color:var(--gray);margin:0 0 18px}
 .ray-empty .ray-scope{font-size:11.5px;color:var(--light);margin:16px 0 0}
 .ray-starters{display:flex;flex-direction:column;gap:8px}
 .ray-starter{text-align:left;border:1px solid var(--border);background:#fff;border-radius:10px;
