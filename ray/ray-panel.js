@@ -944,7 +944,23 @@
 
       box.innerHTML = chips + add
         || '<span class="ray-ctxnone">No documents on this tender you can read.</span>';
+      if (!box._ovBound) {
+        box.addEventListener('scroll', () => this.markCtxOverflow(), { passive: true });
+        box._ovBound = true;
+      }
+      this.markCtxOverflow();
       this.paintRefPick();
+    }
+
+    /* A hidden scrollbar still has to say there is more. The fade is driven
+       from the actual scroll position, so it appears only on the end that
+       genuinely has something behind it and disappears when you reach it. */
+    markCtxOverflow() {
+      const box = this.$('ctx');
+      if (!box) return;
+      const more = box.scrollWidth - box.clientWidth;
+      box.classList.toggle('more-l', box.scrollLeft > 2);
+      box.classList.toggle('more-r', more > 2 && box.scrollLeft < more - 2);
     }
 
     paintRefPick() {

@@ -482,6 +482,18 @@ readable here" and the band is correct before anyone has touched it. Changing
 tender resets it, because a hand-picked list belongs to the tender it was
 picked from.
 
+The band's scrollbar is **hidden**, and the overflow is shown by fading the
+edge instead — only the end that genuinely has something behind it, driven from
+the scroll position, so the fade is a readout rather than decoration.
+
+> `scrollbar-width` and `::-webkit-scrollbar` are **mutually exclusive in
+> Chrome**: setting the standard property makes every pseudo-element rule inert.
+> An earlier `scrollbar-width: thin` here silently disabled the 4px styling
+> written directly beneath it, and macOS drew its full-size bar with stepper
+> arrows instead. Elsewhere in the panel — the conversation, the project list,
+> the pickers, dialog bodies — only the `::-webkit-*` rules are used, giving a
+> 9px round low-contrast thumb with the arrow buttons removed.
+
 The band is **one row that scrolls sideways**. A tender can carry a dozen
 documents: wrapped, they ate the conversation; capped at two rows and wrapped,
 the overflow hid behind a vertical scrollbar nobody thinks to look for on a row

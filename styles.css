@@ -304,6 +304,7 @@ h1{font-size:22px;font-weight:600;margin:0 0 4px;display:flex;align-items:center
   --r-amber-bg:rgba(255,188,74,.14);   --r-amber-tx:#F5C879;
   --r-halo:rgba(255,188,74,.20);       /* the disc behind the full mark */
   --r-guide-bd:rgba(106,221,181,.45);  /* the guide strip's outline          */
+  --r-scroll:rgba(255,255,255,.20);    /* scrollbar thumb                    */
   --r-grey-bg:rgba(255,255,255,.08);   --r-grey-tx:#A8B2B6;
   --r-clay-tx:#D8A88F;
   --r-deny-bg:rgba(249,82,70,.12);     --r-deny-bd:rgba(249,82,70,.35);
@@ -333,6 +334,7 @@ html.ray-light .ray-panel{
   --r-amber-bg:#FAEEDA; --r-amber-tx:#633806;
   --r-halo:#FCEBCF;
   --r-guide-bd:#6ADDB5;
+  --r-scroll:rgba(0,0,0,.18);
   --r-grey-bg:#EFEFEF;  --r-grey-tx:#5F5E5A;
   --r-clay-tx:#6D4C41;
   --r-deny-bg:#FCEBEB;  --r-deny-bd:#F6DCD9; --r-deny-tx:#A32D2D;
@@ -713,6 +715,33 @@ html.ray-light .ray-panel{
 .ray-progline{height:2px;background:var(--n-200)}
 .ray-progline i{display:block;height:100%;background:var(--teal);transition:width .3s ease}
 
+/* ── Scrollbars ────────────────────────────────────────────────────────
+   The system draws these full-size with stepper arrows when "always show
+   scroll bars" is on, which is a heavy piece of furniture inside a 420px
+   panel. Slim, round, low-contrast, no buttons.
+
+   Only the ::-webkit-* pseudo-elements are used, never `scrollbar-width`:
+   in Chrome the two are mutually exclusive, and setting the standard
+   property makes every rule below it inert.                              */
+.ray-panel [data-ray="body"]::-webkit-scrollbar,
+.ray-panel [data-ray="list"]::-webkit-scrollbar,
+.ray-attpick::-webkit-scrollbar,
+.dlg-body::-webkit-scrollbar{width:9px;height:9px}
+.ray-panel [data-ray="body"]::-webkit-scrollbar-track,
+.ray-panel [data-ray="list"]::-webkit-scrollbar-track,
+.ray-attpick::-webkit-scrollbar-track,
+.dlg-body::-webkit-scrollbar-track{background:transparent}
+.ray-panel [data-ray="body"]::-webkit-scrollbar-thumb,
+.ray-panel [data-ray="list"]::-webkit-scrollbar-thumb,
+.ray-attpick::-webkit-scrollbar-thumb,
+.dlg-body::-webkit-scrollbar-thumb{background:var(--r-scroll,rgba(0,0,0,.18));
+                                   border-radius:99px;border:2.5px solid transparent;
+                                   background-clip:content-box}
+/* The arrows are the ugly part; there is nothing they do that dragging or a
+   wheel does not do better in a panel this size. */
+.ray-panel ::-webkit-scrollbar-button,
+.dlg-body::-webkit-scrollbar-button{display:none;width:0;height:0}
+
 /* ── Dialogs ───────────────────────────────────────────────────────────
    Setup lives here rather than in the rail: Ray's session is a record of a
    conversation, and a control that was only true once does not belong in
@@ -837,7 +866,9 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .s-paged{background:rgba(92,107,192,.14);color:#414C90}
 .s-ocr{background:var(--st-amber-bg);color:var(--st-amber-tx)}
 .s-lazy{background:var(--st-grey-bg);color:var(--st-grey2-tx)}
-.ray-scrollx{overflow-x:auto;margin:8px -20px 10px;padding:0 20px}
+.ray-scrollx{overflow-x:auto;margin:8px -20px 10px;padding:0 20px;
+             scrollbar-width:none;-ms-overflow-style:none}
+.ray-scrollx::-webkit-scrollbar{display:none}
 .ray-tbl{width:100%;min-width:330px;border-collapse:collapse;font-size:12.5px;margin:0}
 .ray-tbl th{text-align:left;color:var(--light);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;
             padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-weight:600}
@@ -934,12 +965,20 @@ html.ray-rail-open .rvw-float{bottom:22px}
    Sideways keeps the band one line tall and the overflow on the axis people
    already drag on a chip row. */
 .ray-ctx{padding:0 0 7px;display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
-         overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
-         /* room for the scrollbar so it never sits on top of the chips */
-         padding-bottom:9px}
-.ray-ctx::-webkit-scrollbar{height:4px}
-.ray-ctx::-webkit-scrollbar-thumb{background:var(--r-line-2);border-radius:99px}
-.ray-ctx::-webkit-scrollbar-track{background:transparent}
+         overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
+/* No scrollbar. `scrollbar-width` and ::-webkit-scrollbar are mutually
+   exclusive in Chrome — setting the standard property makes the pseudo-element
+   rules inert — so an earlier `thin` silently disabled the 4px styling below
+   it and left macOS to draw its full-size bar, arrows and all. Both are set
+   to hide, and the overflow is signalled by fading the edge instead. */
+.ray-ctx{scrollbar-width:none;-ms-overflow-style:none}
+.ray-ctx::-webkit-scrollbar{display:none}
+/* Only the ends that actually have more behind them fade, so the mask is a
+   readout rather than decoration. Classes are set from the scroll position. */
+.ray-ctx.more-r{mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)}
+.ray-ctx.more-l{mask-image:linear-gradient(90deg,transparent,#000 34px)}
+.ray-ctx.more-l.more-r{mask-image:linear-gradient(90deg,transparent,#000 34px,
+                                  #000 calc(100% - 34px),transparent)}
 .ray-ctxnone{font-size:11.5px;color:var(--light)}
 .ray-ctx:empty{display:none}
 /* flex:none or a long filename would squeeze every other chip to nothing;
