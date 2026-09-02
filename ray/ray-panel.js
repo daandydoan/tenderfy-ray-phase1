@@ -89,6 +89,8 @@
       this.refPickOpen = false;
       this.stepOpen = false;      // the guide strip, shut until asked
       this.stepAt = null;         // stepper: which segment is being looked at
+      this.openProject = null;
+      this.shutProject = null;    // which project is expanded in the list
       this.guideOff = false;      // dismissed outright — only from expanded
       this.menuFor = null;           // session id whose actions are open
       this.renaming = null;          // session id being renamed
@@ -146,9 +148,15 @@
 
     /** A new session records the tender it was started from, for provenance —
      *  nothing groups on it. */
-    newSession() {
+    /** A chat belongs to a project when one is named, or to whatever tender
+     *  Ray is currently pointed at. 'free' starts one deliberately outside
+     *  any project — asking Ray something that is not about a bid. */
+    newSession(tenderId) {
       if (global.rayEmptyDemo && global.rayToggleEmpty) global.rayToggleEmpty();
-      const t = service.newThread(this.context.tenderId);
+      const into = tenderId === 'free' ? null
+        : tenderId != null ? tenderId : this.context.tenderId;
+      if (into) { this.openProject = into; this.shutProject = null; }
+      const t = service.newThread(into);
       this.openThread(t.id);
     }
 
@@ -374,8 +382,20 @@
           this.paintAttachments(); this.paintPrompts(); this.paintRefPick();
           return;
         }
+        const proj = e.target.closest('[data-ray-proj]');
+        if (proj) {
+          const id = proj.getAttribute('data-ray-proj');
+          const wasOpen = proj.parentElement.classList.contains('open');
+          this.shutProject = wasOpen ? id : null;
+          this.openProject = wasOpen ? null : id;
+          this.paintList();
+          return;
+        }
+        const nin = e.target.closest('[data-ray-new-in]');
+        if (nin) { this.newSession(nin.getAttribute('data-ray-new-in')); return; }
         if (e.target.closest('[data-ray-list]')) { this.setView('list'); return; }
-        if (e.target.closest('[data-ray-new]')) { this.newSession(); return; }
+        const nw = e.target.closest('[data-ray-new]');
+        if (nw) { this.newSession(nw.getAttribute('data-ray-new') || undefined); return; }
 
         /* ── Session CRUD ─────────────────────────────────────────────── */
         const menu = e.target.closest('[data-ray-menu]');
@@ -508,7 +528,7 @@
           : `<span class="ray-halo"><img class="ray-mark" src="${this.mark}" alt=""></span>
              <div class="ray-title">Projects</div>
              ${this.betaTag}`)
-          + `<span class="ms ray-hbtn" data-ray-new title="New project">add</span>`
+          + `<span class="ms ray-hbtn" data-ray-new="free" title="New chat">add</span>`
           + this.formBtns()
           + `<span class="ms ray-hbtn" data-ray="close" title="Close Ray">close</span>`;
         return;
@@ -591,8 +611,6 @@
 
     paintList() {
       const box = this.$('list');
-      /* The header's demo switch hides the rows without touching them, so the
-         first-run screen can be shown to a room and flipped straight back. */
       let rows = global.rayEmptyDemo ? [] : service.allThreads();
       if (this.query) {
         const q = this.query.toLowerCase();
@@ -602,45 +620,97 @@
       let out = `
         <div class="ray-search">
           <span class="ms">search</span>
-          <input type="text" placeholder="Search projects" data-ray="q" value="${esc(this.query)}">
+          <input type="text" placeholder="Search projects and chats" data-ray="q" value="${esc(this.query)}">
         </div>`;
 
       if (!rows.length) {
-        /* Centred in what is left of the list, not stranded under the search
-           box. A first-run panel is mostly empty space; the one thing to do
-           belongs in the middle of it. */
         out += `<div class="ray-listempty">
             <span class="ray-halo lg"><img class="ray-mark lg" src="${this.mark}" alt=""></span>
-            <p class="ray-emptyhead">${this.query ? 'Nothing matches that' : 'No projects yet'}</p>
+            <p class="ray-emptyhead">${this.query ? 'Nothing matches that' : 'Nothing here yet'}</p>
             <p class="ray-emptysub">${this.query
-              ? 'Try a different word, or start a project for it.'
-              : 'Every question you ask Ray lives in a project. They are kept, so you can pick one up later.'}</p>
+              ? 'Try a different word, or start a chat for it.'
+              : 'Pick a tender to start a project, or just start chatting.'}</p>
             <button class="ray-act go" data-ray-new>
-              <span class="ms">add</span>Start a project</button></div>`;
-      } else {
-        let last = null;
-        rows.forEach((t) => {
-          const b = Panel.bucket(t.at);
-          if (b !== last) { out += `<div class="ray-group">${b}</div>`; last = b; }
-          const open = this.menuFor === t.id;
+              <span class="ms">add</span>New chat</button></div>`;
+        box.innerHTML = out;
+        return;
+      }
+
+      /* Two levels. A project is a tender and holds the chats about it; a
+         chat with no tender is free chat and sits on its own. The grouping
+         key was already there — ThreadIndex has recorded `tenderId` on every
+         thread since the start — so this is a query, not a migration. */
+      const NONE = global.RayContext.NO_TENDER;
+      const byTender = {};
+      const free = [];
+      rows.forEach((t) => {
+        if (!t.tenderId || t.tenderId === NONE) { free.push(t); return; }
+        (byTender[t.tenderId] = byTender[t.tenderId] || []).push(t);
+      });
+
+      const ids = Object.keys(byTender).sort((a, b) =>
+        (byTender[b][0].at || 0) - (byTender[a][0].at || 0));
+
+      if (ids.length) {
+        out += `<div class="ray-group">Projects</div>`;
+        ids.forEach((tid) => {
+          let tender = null;
+          try { tender = global.RayPermissions.Repositories.tenders.get(service.guard, tid); }
+          catch (e) { /* out of scope now — its chats stay reachable below */ }
+          const chats = byTender[tid];
+          /* Open when it holds the chat you are in, or when searching: a
+             collapsed match is the same as no match. */
+          /* A deliberate collapse outranks every reason to open: the click
+             must always do something visible, even on the project you are
+             currently chatting in. */
+          const open = this.shutProject === tid ? false
+            : (this.openProject === tid || this.query
+               || chats.some((c) => c.id === this.threadId));
+          const steps = global.rayStepList;
+          const done = steps ? global.rayStepsDone(tid) : 0;
           out += `
-            <div class="ray-rowwrap${open ? ' open' : ''}">
-              <button class="ray-row${t.id === this.threadId ? ' on' : ''}" data-ray-thread="${t.id}">
-                ${Panel.tile(t)}
+            <div class="ray-proj${open ? ' open' : ''}">
+              <button class="ray-projrow" data-ray-proj="${tid}">
+                <span class="ms car">expand_more</span>
+                ${Panel.tile({ tenderId: tid, title: tender ? tender.name : 'Tender' })}
                 <span class="ray-rowtx">
-                  <span class="ray-rowt">${esc(t.untitled ? 'New project' : t.title)}</span>
-                  <span class="ray-rows">${esc(t.snippet || 'No messages yet')}</span>
+                  <span class="ray-rowt">${esc(tender ? tender.name : 'A tender you can no longer read')}</span>
+                  <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${
+                    steps ? ` · ${done} of ${steps.length} steps` : ''}</span>
                 </span>
-                <span class="ray-rowage">${t.at ? Panel.ago(t.at) : ''}</span>
               </button>
-              <button class="ms ray-rowmenu" data-ray-menu="${t.id}" title="Project options">more_horiz</button>
-              ${open ? Panel.actions(t.id, this.renaming === t.id,
-                                     this.confirmDelete === t.id,
-                                     t.untitled ? '' : t.title) : ''}
+              ${open ? chats.map((t) => this.chatRow(t, true)).join('')
+                     + `<button class="ray-projnew" data-ray-new-in="${tid}">
+                          <span class="ms">add</span>New chat in this project</button>` : ''}
             </div>`;
         });
       }
+
+      if (free.length) {
+        out += `<div class="ray-group">Free chat</div>`
+             + free.map((t) => this.chatRow(t, false)).join('');
+      }
       box.innerHTML = out;
+    }
+
+    /* One chat row, used inside a project and in free chat alike. */
+    chatRow(t, nested) {
+      const open = this.menuFor === t.id;
+      return `
+        <div class="ray-rowwrap${open ? ' open' : ''}${nested ? ' nested' : ''}">
+          <button class="ray-row${t.id === this.threadId ? ' on' : ''}" data-ray-thread="${t.id}">
+            ${nested ? '<span class="ray-rowdot"></span>' : Panel.tile(t)}
+            <span class="ray-rowtx">
+              <span class="ray-rowt">${esc(t.untitled ? 'New chat' : t.title)}</span>
+              <span class="ray-rows">${esc(t.snippet || 'No messages yet')}</span>
+            </span>
+            <span class="ray-rowage">${t.at ? Panel.ago(t.at) : ''}</span>
+          </button>
+          <button class="ms ray-rowmenu" data-ray-menu="${t.id}" title="Chat options">more_horiz</button>
+          ${open ? Panel.actions(t.id, this.renaming === t.id,
+                                 this.confirmDelete === t.id,
+                                 t.untitled ? '' : t.title) : ''}
+        </div>`;
     }
 
     /** Kept as the single repaint entry point the rest of the class calls. */

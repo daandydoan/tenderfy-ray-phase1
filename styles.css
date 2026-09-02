@@ -516,6 +516,30 @@ html.ray-light .ray-panel{
 .ray-rows{display:block;font-size:12.5px;color:var(--gray);line-height:1.4;margin-top:2px;
           display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ray-rowage{font-size:11.5px;color:var(--light);flex:none;padding-top:2px}
+/* ── Projects hold chats ───────────────────────────────────────────────
+   A project is a tender; the chats about it live inside. A chat with no
+   tender is free chat and sits on its own below.                         */
+.ray-proj{border-bottom:1px solid var(--row)}
+.ray-projrow{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;
+             border:none;font:inherit;padding:10px 14px;cursor:pointer;color:var(--ink)}
+.ray-projrow:hover{background:var(--row)}
+.ray-projrow .car{font-size:20px;color:var(--light);transition:transform .15s ease;flex:none;
+                  transform:rotate(-90deg)}
+.ray-proj.open .ray-projrow .car{transform:none}
+.ray-proj:not(.open) .ray-rowwrap.nested,
+.ray-proj:not(.open) .ray-projnew{display:none}
+.ray-projnew{display:flex;align-items:center;gap:7px;width:100%;text-align:left;background:none;
+             border:none;font:inherit;font-size:12.5px;font-weight:600;color:var(--teal);
+             cursor:pointer;padding:8px 14px 12px 46px}
+.ray-projnew:hover{background:var(--row)}
+.ray-projnew .ms{font-size:16px}
+/* Nested chats are indented and take a dot rather than the tender's tile —
+   the tile says which tender, and inside a project that is already known. */
+.ray-rowwrap.nested .ray-row{padding-left:46px}
+.ray-rowdot{width:6px;height:6px;border-radius:50%;background:var(--lighter);flex:none;
+            margin-left:2px}
+.ray-rowwrap.nested .ray-row.on .ray-rowdot{background:var(--teal)}
+
 .ray-listempty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;
                justify-content:center;gap:2px;padding:24px 28px;text-align:center}
 .ray-listempty .ray-halo{margin-bottom:14px}
@@ -784,6 +808,36 @@ html.ray-light .ray-panel{
    wheel does not do better in a panel this size. */
 .ray-panel ::-webkit-scrollbar-button,
 .dlg-body::-webkit-scrollbar-button{display:none;width:0;height:0}
+
+/* ── The mockup controls ───────────────────────────────────────────────
+   A tab on the edge of the page, outside the app. These exist to drive a
+   demo and had no business in Tenderfy's own header — five pills there
+   squeezed the page crumb to a lone home icon and made the chrome look
+   like something the product ships.                                      */
+.mock{position:fixed;left:0;bottom:22px;z-index:210;display:flex;align-items:flex-end}
+.mock-tab{display:flex;align-items:center;gap:6px;border:none;border-radius:0 10px 10px 0;
+          background:var(--nav);color:#fff;padding:9px 12px 9px 10px;font:inherit;font-size:12px;
+          font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.mock-tab:hover{background:var(--header)}
+.mock-tab .ms{font-size:17px}
+.mock.open .mock-tab{display:none}
+.mock-panel{width:min(340px,calc(100vw - 24px));background:#fff;border-radius:0 14px 14px 0;
+            box-shadow:0 14px 44px rgba(0,0,0,.28);overflow:hidden}
+.mock-panel[hidden]{display:none}
+.mock-head{display:flex;align-items:center;justify-content:space-between;background:var(--nav);
+           color:#fff;padding:12px 14px;font-size:14px;font-weight:600}
+.mock-x{border:none;background:none;color:#fff;cursor:pointer;padding:2px;display:flex;
+        border-radius:6px;opacity:.9}
+.mock-x:hover{background:rgba(255,255,255,.18)}
+.mock-body{padding:6px 14px 14px;max-height:min(70vh,520px);overflow:auto}
+.mock-row{display:flex;align-items:center;gap:12px;padding:11px 0;
+          border-bottom:1px solid var(--row)}
+.mock-row:last-child{border-bottom:none}
+.mock-t{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);line-height:1.35}
+.mock-t span{display:block;font-size:11.5px;font-weight:400;color:var(--light);margin-top:2px;
+             line-height:1.45}
+.mock-row .btn{flex:none;gap:5px}
+.mock-row .btn .ms{font-size:16px}
 
 /* ── Dialogs ───────────────────────────────────────────────────────────
    Setup lives here rather than in the rail: Ray's session is a record of a
@@ -1310,6 +1364,14 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-rowwrap.open{background:var(--r-raise)}
 .ray-rowmenu{color:var(--r-tx-3)}
 .ray-rowmenu:hover{background:var(--r-sunk);color:var(--r-tx)}
+.ray-proj{border-bottom-color:var(--r-line)}
+.ray-projrow{color:var(--r-tx)}
+.ray-projrow:hover{background:var(--r-raise)}
+.ray-projrow .car{color:var(--r-tx-3)}
+.ray-projnew{color:var(--r-accent)}
+.ray-projnew:hover{background:var(--r-raise)}
+.ray-rowdot{background:var(--r-line-2)}
+.ray-rowwrap.nested .ray-row.on .ray-rowdot{background:var(--r-accent)}
 .ray-listempty{color:var(--r-tx-3)}
 .ray-emptyhead{color:var(--r-tx)}
 .ray-emptysub{color:var(--r-tx-3)}

@@ -47,7 +47,7 @@
     const btn = document.querySelector('[data-ray-theme]');
     if (btn) {
       btn.innerHTML = `<span class="ms">${light ? 'dark_mode' : 'light_mode'}</span>`
-        + (light ? 'Dark' : 'Light');
+        + (light ? 'Light' : 'Dark');
       btn.title = light ? 'Switch Ray to dark' : 'Switch Ray to light';
     }
   }
@@ -223,6 +223,58 @@
     };
   };
 
+  /* ── The mockup controls ─────────────────────────────────────────────
+     Everything that exists only to drive a demo lives here, on a tab outside
+     the app rather than in its header. Five pills in the product chrome had
+     squeezed the page crumb to a lone home icon and, worse, made the header
+     look like something Tenderfy ships. A panel also gives each switch a
+     label and a line of explanation, which icon-only pills could not.       */
+  function mockEl() {
+    let el = document.getElementById('rayMock');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'rayMock';
+    el.className = 'mock';
+    el.innerHTML = `
+      <button class="mock-tab" data-mock-toggle title="Mockup controls">
+        <span class="ms">tune</span><span class="l">Mockup</span></button>
+      <div class="mock-panel" hidden>
+        <div class="mock-head">Mockup controls
+          <button class="mock-x" data-mock-toggle aria-label="Close"><span class="ms">close</span></button></div>
+        <div class="mock-body">
+          <div class="mock-row">
+            <div class="mock-t">Guided demo<span>Runs the eight Phase 1 requirements, one per click</span></div>
+            <button class="btn sm" data-ray-demo onclick="rayDemoStep()"></button>
+          </div>
+          <div class="mock-row">
+            <div class="mock-t">Rail theme<span>Dark by default; light for rooms where dark does not project</span></div>
+            <button class="btn sm" data-ray-theme onclick="rayToggleTheme()"></button>
+          </div>
+          <div class="mock-row">
+            <div class="mock-t">Guidance style<span>Three ways to show the eight steps</span></div>
+            <button class="btn sm" data-ray-guide onclick="rayToggleGuide()"></button>
+          </div>
+          <div class="mock-row">
+            <div class="mock-t">Empty state<span>The first-run project list, unreachable once you have projects</span></div>
+            <button class="btn sm" data-ray-empty onclick="rayToggleEmpty()"></button>
+          </div>
+          <div class="mock-row">
+            <div class="mock-t">Credit warning<span>Off by default — a permanent orange bar is the loudest thing in the panel</span></div>
+            <button class="btn sm" data-ray-credits onclick="rayToggleCredits()"></button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-mock-toggle]')) {
+        const p = el.querySelector('.mock-panel');
+        p.hidden = !p.hidden;
+        el.classList.toggle('open', !p.hidden);
+      }
+    });
+    return el;
+  }
+
   /* ── Dialogs ─────────────────────────────────────────────────────────
      Ray owns a persistent session, so one-shot setup does not belong inside
      it — a conversation you scroll back through should not be littered with
@@ -353,7 +405,8 @@
       /* Icon only. Demo and Light get pressed during a demo and earn their
          labels; these two are set once beforehand, and four labelled pills
          squeezed the page crumb down to a lone home icon. */
-      btn.innerHTML = `<span class="ms">${on ? 'inventory_2' : 'inbox'}</span>`;
+      btn.innerHTML = `<span class="ms">${on ? 'inventory_2' : 'inbox'}</span>`
+        + (on ? 'Showing' : 'Show');
       btn.title = on
         ? 'Showing the empty projects state — click to show your projects again'
         : 'Show the empty projects state';
@@ -375,7 +428,8 @@
     global.rayCreditsDemo = !!on;
     const btn = document.querySelector('[data-ray-credits]');
     if (btn) {
-      btn.innerHTML = `<span class="ms">${on ? 'bolt' : 'battery_full'}</span>`;
+      btn.innerHTML = `<span class="ms">${on ? 'bolt' : 'battery_full'}</span>`
+        + (on ? 'Showing' : 'Show');
       btn.title = on ? 'Hide the credit warning' : 'Show the credit warning';
       btn.classList.toggle('on', !!on);
     }
@@ -397,9 +451,9 @@
                scrolls away with the conversation and has no fixed home.  */
   const GUIDE_STYLES = ['strip', 'chat', 'steps'];
   const GUIDE_META = {
-    strip: { ic: 'dock_to_bottom', say: 'a docked strip' },
-    chat:  { ic: 'forum',          say: 'Ray asking in the conversation' },
-    steps: { ic: 'linear_scale',   say: 'a stepper under the header' },
+    strip: { ic: 'dock_to_bottom', name: 'Docked strip',  say: 'a docked strip' },
+    chat:  { ic: 'forum',          name: 'Ray asks',      say: 'Ray asking in the conversation' },
+    steps: { ic: 'linear_scale',   name: 'Stepper',       say: 'a stepper under the header' },
   };
   function applyGuide(style) {
     global.rayGuideStyle = GUIDE_STYLES.indexOf(style) >= 0 ? style : 'strip';
@@ -407,7 +461,7 @@
     if (btn) {
       const cur = global.rayGuideStyle;
       const nxt = GUIDE_STYLES[(GUIDE_STYLES.indexOf(cur) + 1) % GUIDE_STYLES.length];
-      btn.innerHTML = `<span class="ms">${GUIDE_META[cur].ic}</span>`;
+      btn.innerHTML = `<span class="ms">${GUIDE_META[cur].ic}</span>` + GUIDE_META[cur].name;
       btn.title = `Guidance: ${GUIDE_META[cur].say} — click for ${GUIDE_META[nxt].say}`;
       btn.classList.toggle('on', cur !== 'strip');
     }
@@ -503,11 +557,7 @@
             <span>${cfg.crumb || 'Dashboard'}</span></div>
           <div class="r">
             ${identity}
-            <span class="hthemes" data-ray-demo onclick="rayDemoStep()"></span>
-            <span class="hthemes" data-ray-theme onclick="rayToggleTheme()"></span>
-            <span class="hthemes" data-ray-empty onclick="rayToggleEmpty()"></span>
-            <span class="hthemes" data-ray-credits onclick="rayToggleCredits()"></span>
-            <span class="hthemes" data-ray-guide onclick="rayToggleGuide()"></span>
+
             <span class="ms fill" title="Notifications">notifications</span>
             <span class="hray" onclick="RayPanel.toggle()" title="Ray — Tenderfy Co-Pilot">
               <img src="${asset('assets/ray.svg')}" alt="Ray"> Ray</span>
@@ -548,6 +598,7 @@
       console.error('Ray failed to mount:', err);
     }
 
+    mockEl();
     applyTheme(themeIsLight());
     /* Deliberately not persisted: this is a demo switch, and coming back to a
        panel that claims you have no projects would read as data loss. */
