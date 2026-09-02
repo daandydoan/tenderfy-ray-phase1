@@ -609,15 +609,19 @@
      *  preview, so a row gets a mark tinted by the tender the session was
      *  started from — deterministic, so the same tender is always the same
      *  colour and a long list becomes scannable. */
-    static tile(thread, icon) {
+    /** `icon` and `kind` are what separate a project's tile from a chat's.
+     *  Both take the tender's hue; a project wears it as a tint and a chat
+     *  as a fill, so the two never read as the same kind of thing. */
+    static tile(thread, icon, kind) {
       const ic = icon || 'chat_bubble';
+      const k = kind ? ` ${kind}` : '';
       const key = (thread && thread.tenderId) || '';
       if (!key || key === global.RayContext.NO_TENDER || !global.rayTenderColour) {
-        return `<span class="ray-tile"><span class="ms">${ic}</span></span>`;
+        return `<span class="ray-tile${k}"><span class="ms">${ic}</span></span>`;
       }
       /* Shared with the page chrome, so a tender is the same colour in Ray's
          list as it is on its own page. */
-      return `<span class="ray-tile ${global.rayTenderColour(key)}">`
+      return `<span class="ray-tile${k} ${global.rayTenderColour(key)}">`
         + `<span class="ms">${ic}</span></span>`;
     }
 
@@ -721,7 +725,7 @@
           const done = steps ? global.rayStepsDone(tid) : 0;
           out += `
             <button class="ray-projrow" data-ray-proj="${tid}">
-              ${Panel.tile({ tenderId: tid }, 'folder')}
+              ${Panel.tile({ tenderId: tid }, 'folder', 'proj')}
               <span class="ray-rowtx">
                 <span class="ray-rowt">${esc(this.tenderName(tid))}</span>
                 <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${
@@ -761,7 +765,7 @@
       const done = steps ? global.rayStepsDone(tid) : 0;
       box.innerHTML = `
         <div class="ray-projhead">
-          ${Panel.tile({ tenderId: tid }, 'folder')}
+          ${Panel.tile({ tenderId: tid }, 'folder', 'proj')}
           <span class="ray-rowtx">
             <span class="ray-rowt">${esc(this.tenderName(tid))}</span>
             <span class="ray-rows">${chats.length} chat${chats.length === 1 ? '' : 's'}${

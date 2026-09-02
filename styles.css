@@ -509,6 +509,15 @@ html.ray-light .ray-panel{
 .ray-tile.c-orange{background:var(--e-orange);color:#fff}
 .ray-tile.c-brown{background:var(--e-brown);color:#fff}
 .ray-tile.c-cyan{background:var(--e-cyan);color:#fff}
+/* A project takes its tender's hue but not its weight: tinted, with the
+   icon in colour, where a chat is a solid fill with a white icon. A folder
+   and a bubble should not read as two of the same thing. */
+.ray-tile.proj{background:color-mix(in srgb, currentColor 18%, transparent)}
+.ray-tile.proj.c-teal{color:var(--e-teal)}
+.ray-tile.proj.c-indigo{color:var(--e-indigo)}
+.ray-tile.proj.c-orange{color:var(--e-orange)}
+.ray-tile.proj.c-brown{color:var(--e-brown)}
+.ray-tile.proj.c-cyan{color:var(--e-cyan)}
 .ray-row.on{background:var(--n-50)}
 .ray-rowtx{flex:1;min-width:0}
 .ray-rowt{display:block;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35;
