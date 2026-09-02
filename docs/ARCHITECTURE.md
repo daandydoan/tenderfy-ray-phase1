@@ -295,6 +295,14 @@ learn to look at, while a sentence in the flow is just the next thing he said.
 Orientation moves to a **2px hairline under the header** — the one thing worth
 knowing at a glance, needing no words and no height.
 
+He **offers to do the work** rather than asking whether he may — *"Let me
+assess this against your Go / No-Go criteria and give you a recommendation"*,
+answered with **Go ahead**. An earlier draft asked *"Would you like me to…?"*,
+which put the work back on the person the whole thing exists to take it off.
+The approval has not gone anywhere; it moved to the button, which is where a
+human in the loop actually belongs, and it matches the brief's own model of Ray
+completing the majority while the human guides, reviews and approves.
+
 The chat form needs its copy to actually be dialogue. Each step carries a
 `say` clause written in Ray's voice — *"check those against your Response
 Library and see what you have already written"* — because the `d` subtitle,

@@ -1186,13 +1186,20 @@
       const st = steps[done];
       const first = done === 0;
       /* `say` is a clause, not a label: this is Ray speaking, and a subtitle
-         dropped into a sentence reads as a fragment. */
+         dropped into a sentence reads as a fragment.
+
+         He offers to do the work rather than asking whether he may. That is
+         the brief's model — Ray completes the majority of it, the human
+         guides, reviews and approves — and "Would you like me to…?" put the
+         work back on the person the whole thing exists to take it off. The
+         approval has not gone anywhere: it moved to the button, which is
+         where a human in the loop actually belongs. */
       const line = esc(st.say || st.d.toLowerCase());
       return `<div class="ray-offerline">
-          <p>${first ? `Would you like me to ${line}?` : `Next I can ${line}.`}</p>
+          <p>${first ? `Let me ${line}.` : `Next, let me ${line}.`}</p>
           <div class="ray-offeracts">
             <button class="ray-offergo" data-ray-step="${done}"${this.busy ? ' disabled' : ''}>
-              ${first ? 'Yes, start' : 'Do that'}</button>
+              Go ahead</button>
             <button class="ray-offerlink" data-ray-skip="${done}">Not this one</button>
             <button class="ray-offerlink" data-ray-steps>See all ${steps.length} steps</button>
             <button class="ray-offerlink off" data-ray-guide-off>Stop suggesting</button>
