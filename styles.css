@@ -658,8 +658,12 @@ html.ray-light .ray-panel{
 .ray-nextgo{border:none;background:var(--cta);color:#fff;border-radius:7px;padding:4px 11px;
             font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
 .ray-nextgo:hover{background:var(--cta-dark)}
-.ray-nextbar.done{border-color:var(--teal-bright);background:var(--n-100);color:var(--gray)}
+.ray-nextbar.done{border-color:var(--teal-bright);background:var(--n-100);color:var(--gray);
+                  padding-bottom:7px}
+.ray-nextbar.done .ray-nextrow{cursor:default}
 .ray-nextbar.done .ms{color:var(--teal)}
+.ray-nextbar.done .ray-wintick .ms{color:#fff}
+.ray-nextbar .t strong,.ray-stepnow .t strong{font-weight:700;color:var(--ink)}
 
 /* The whole list, when someone wants to see where this is going. */
 .dlg-steps{display:flex;flex-direction:column;gap:2px;margin-top:4px}
@@ -720,7 +724,7 @@ html.ray-light .ray-panel{
 .ray-wintick .ms{font-size:17px}
 .ray-wintick.sm{width:19px;height:19px}
 .ray-wintick.sm .ms{font-size:13px}
-.ray-nextbar.done .t b{font-weight:700}
+
 .ray-stepper.done .ray-seg{background:var(--teal)}
 
 /* ── Guidance as a stepper ─────────────────────────────────────────────
@@ -739,7 +743,7 @@ html.ray-light .ray-panel{
 .ray-stepnow{display:flex;align-items:center;gap:3px;margin-top:9px;font-size:12px}
 .ray-stepnow .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
                 color:var(--ink);margin-right:6px}
-.ray-stepnow .t b{display:inline-flex;align-items:center;justify-content:center;width:17px;
+.ray-stepper:not(.done) .ray-stepnow .t b{display:inline-flex;align-items:center;justify-content:center;width:17px;
                   height:17px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;
                   margin-right:6px;vertical-align:-3px}
 .ray-stepnow .tick{font-size:14px;color:var(--teal);vertical-align:-3px;margin-left:3px}
@@ -1216,7 +1220,7 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-seg.now{background:var(--r-guide-bd)}
 .ray-seg.at{box-shadow:0 0 0 2px var(--r-sunk),0 0 0 3.5px var(--r-accent)}
 .ray-stepnow .t{color:var(--r-tx)}
-.ray-stepnow .t b{background:var(--r-accent);color:var(--r-sunk)}
+.ray-stepper:not(.done) .ray-stepnow .t b{background:var(--r-accent);color:var(--r-sunk)}
 .ray-stepnow .tick{color:var(--r-accent)}
 .ray-progline{background:var(--r-raise)}
 .ray-progline i{background:var(--r-accent)}
@@ -1227,6 +1231,7 @@ html.ray-rail-open .rvw-float{bottom:22px}
 .ray-nextbar{border-color:var(--r-guide-bd);background:var(--r-sunk);color:var(--r-tx-2)}
 .ray-nextbar .ms:first-child{color:var(--r-tx-3)}
 .ray-nextbar .t b{color:var(--r-tx)}
+.ray-nextbar .t strong,.ray-stepnow .t strong{color:var(--r-tx)}
 .ray-nextmore{border-top-color:var(--r-line)}
 .ray-nextmeter{background:var(--r-raise)}
 .ray-nextmeter i{background:var(--r-accent)}

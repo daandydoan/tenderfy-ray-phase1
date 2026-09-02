@@ -1120,11 +1120,15 @@
       if (!id || !steps) return '';
       const done = global.rayStepsDone(id);
       if (done >= steps.length) {
+        /* Same .ray-nextrow as the live state: .ray-nextbar itself is a block
+           that expects a row inside it, so bare children stack. */
         return `<div class="ray-nextbar done">
-            <span class="ray-wintick sm"><span class="ms">check</span></span>
-            <span class="t"><b>All ${steps.length} stages complete</b> — ready for approval</span>
-            <button class="ray-nextlink" data-ray-steps>See what we did</button>
-            <button class="ray-nextgo" data-ray-go-responses>Review</button>
+            <div class="ray-nextrow">
+              <span class="ray-wintick sm"><span class="ms">check</span></span>
+              <span class="t"><strong>All ${steps.length} stages complete</strong></span>
+              <button class="ray-nextlink" data-ray-steps>See what we did</button>
+              <button class="ray-nextgo" data-ray-go-responses>Review</button>
+            </div>
           </div>`;
       }
       const st = steps[done];
@@ -1248,9 +1252,13 @@
       const done = global.rayStepsDone(id);
       const at = Math.min(this.stepAt == null ? done : this.stepAt, steps.length - 1);
       const st = steps[at];
+      const finished = done >= steps.length;
       const segs = steps.map((x, i) => {
         const state = i < done ? 'done' : i === done ? 'now' : 'next';
-        return `<button class="ray-seg ${state}${i === at ? ' at' : ''}"
+        /* The ring marks what you are browsing, which is meaningless once
+           every stage is done and nothing is "next". */
+        const ring = !finished && i === at ? ' at' : '';
+        return `<button class="ray-seg ${state}${ring}"
                         data-ray-seg="${i}" title="${esc((i + 1) + '. ' + x.n)}"></button>`;
       }).join('');
       const isNext = at === done;
@@ -1259,7 +1267,7 @@
             <div class="ray-segs">${segs}</div>
             <div class="ray-stepnow">
               <span class="ray-wintick sm"><span class="ms">check</span></span>
-              <span class="t"><b>All ${steps.length} stages complete</b></span>
+              <span class="t"><strong>All ${steps.length} stages complete</strong></span>
               <button class="ray-nextlink" data-ray-steps>See what we did</button>
               <button class="ray-nextgo" data-ray-go-responses>Review</button>
             </div>
